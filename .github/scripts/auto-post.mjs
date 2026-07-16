@@ -236,7 +236,7 @@ async function createPost(title, htmlContent, tags, webpImageUrl) {
     .replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
 
   const shortTitle = cleanTitle.substring(0, 15);
-  const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
+  const uniqueId = Math.floor(10000000 + Math.random() * 90000000).toString();
   const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
   const officialUrl = `${OFFICIAL_BASE_URL}/${finalSlug}`;
 
