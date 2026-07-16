@@ -1,12 +1,9 @@
-"use client"
-
 import Image from "next/image"
-import Link from "next/link"
 import { LineConsultButton } from "@/components/line-consult-button"
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden px-6">
+    <section className="relative overflow-hidden px-6 py-12 md:py-20">
       {/* 背景裝飾 */}
       <div className="absolute left-1/2 top-0 -z-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary/10 blur-[110px]" />
 
@@ -16,21 +13,20 @@ export function HeroSection() {
         {/* 左側內容 */}
         <div className="text-center md:text-left">
           <p className="mb-5 inline-flex rounded-full border border-primary/20 bg-white/90 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
-            社會住宅｜包租代管｜房東安心出租
+            建案設計提案｜空間風格規劃｜裝潢需求諮詢
           </p>
 
           <h1 className="text-4xl font-black leading-tight tracking-tight text-foreground md:text-6xl">
-            社會住宅
+            找到適合你家的
             <span className="block text-primary">
-              包租代管服務
+              室內設計與裝潢提案
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-muted-foreground md:mx-0 md:text-lg">
-            協助房東了解政府包租代管方案，
-            提供房屋出租管理、租客媒合、
-            租務協調與租屋補助相關諮詢，
-            讓出租更穩定、更省時、更安心。
+            收錄全台住宅建案、室內設計風格與空間規劃提案，
+            從客廳、臥室、廚房到完整居家裝潢，
+            幫助屋主快速找到符合坪數、格局與生活需求的設計方向。
           </p>
 
           {/* CTA */}
@@ -41,47 +37,46 @@ export function HeroSection() {
                 bg-[#06C755]
                 px-7 py-3.5
                 text-sm font-semibold
-                text-primary-foreground
-                shadow-[0_14px_36px_rgba(31,78,121,0.28)]
+                text-white
+                shadow-[0_14px_36px_rgba(53,51,46,0.22)]
                 transition-all
                 hover:-translate-y-0.5
-                hover:shadow-[0_18px_44px_rgba(31,78,121,0.38)]
+                hover:shadow-[0_18px_44px_rgba(53,51,46,0.32)]
               "
             >
               LINE 免費諮詢
             </LineConsultButton>
-
           </div>
 
           {/* 資訊卡 */}
           <div className="mt-10 grid grid-cols-3 gap-3 rounded-3xl border border-border/70 bg-white/80 p-4 shadow-sm backdrop-blur">
             <div>
               <p className="text-xl font-black text-foreground">
-                專人
+                建案
               </p>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                一對一諮詢
+                設計提案
               </p>
             </div>
 
             <div>
               <p className="text-xl font-black text-foreground">
-                穩定
+                風格
               </p>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                出租管理
+                多元選擇
               </p>
             </div>
 
             <div>
               <p className="text-xl font-black text-foreground">
-                安心
+                空間
               </p>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                租務協助
+                格局規劃
               </p>
             </div>
           </div>
@@ -91,26 +86,26 @@ export function HeroSection() {
         <div className="relative">
           <div className="absolute -inset-6 -z-10 rounded-[3rem] bg-gradient-to-br from-primary/20 via-white to-accent/20 blur-2xl" />
 
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white bg-white p-3 shadow-[0_24px_80px_rgba(31,78,121,0.16)]">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white bg-white p-3 shadow-[0_24px_80px_rgba(53,51,46,0.16)]">
             <Image
               src="/images/hero.png"
-              alt="社會住宅包租代管服務"
+              alt="現代住宅室內設計與居家裝潢提案"
               width={720}
               height={860}
               className="h-[420px] w-full rounded-[2rem] object-cover md:h-[560px]"
               priority
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
 
             {/* 浮動資訊卡 */}
             <div className="absolute bottom-8 left-8 right-8 rounded-3xl border border-white/70 bg-white/90 p-5 shadow-lg backdrop-blur-xl">
               <p className="text-sm font-bold text-foreground">
-                社會住宅包租代管
+                從建案開始找設計靈感
               </p>
 
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                協助房東更有效率地出租房屋，
-                降低空租風險，
-                提升租務管理效率與居住品質。
+                依照建案、坪數、格局與喜愛風格，
+                查看適合不同住宅空間的室內設計與裝潢規劃方向。
               </p>
             </div>
           </div>

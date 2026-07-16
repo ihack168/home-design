@@ -1,209 +1,256 @@
-"use client";
+import Link from "next/link"
+import { client } from "@/lib/sanity"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { client } from "@/lib/sanity";
+interface SanityPost {
+  id: string
+  title?: string
+  slug?: string
+  description?: string
+  imageUrl?: string
+  mainImage?: string
+  videoId?: string
+  tags?: string[]
+  publishedAt?: string
+  htmlContent?: string
+}
 
 interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  thumbnail: string;
-  videoId?: string;
-  tags: string[];
-  publishedAt: string;
-  htmlContent?: string;
+  id: string
+  title: string
+  slug: string
+  description: string
+  thumbnail: string
+  videoId?: string
+  tags: string[]
+  publishedAt: string
 }
 
 function optimizeSanityImageUrl(url?: string) {
-  if (!url) return "";
+  if (!url) return ""
 
-  if (!url.includes("cdn.sanity.io/images")) return url;
+  if (!url.includes("cdn.sanity.io/images")) {
+    return url
+  }
 
-  if (url.includes("auto=format")) return url;
+  const separator = url.includes("?") ? "&" : "?"
 
-  return `${url}${url.includes("?") ? "&" : "?"}auto=format`;
+  let optimizedUrl = url
+
+  if (!optimizedUrl.includes("auto=format")) {
+    optimizedUrl += `${separator}auto=format`
+  }
+
+  if (!optimizedUrl.includes("w=")) {
+    optimizedUrl += `${optimizedUrl.includes("?") ? "&" : "?"}w=900`
+  }
+
+  if (!optimizedUrl.includes("q=")) {
+    optimizedUrl += `${optimizedUrl.includes("?") ? "&" : "?"}q=82`
+  }
+
+  return optimizedUrl
 }
 
-export function LatestPostsSection() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+function extractFirstImage(htmlContent?: string) {
+  if (!htmlContent) return ""
 
-  useEffect(() => {
-    async function fetchLatestPosts() {
-      setLoadingPosts(true);
+  const imgMatch = htmlContent.match(
+    /<img[^>]+src=["']([^"']+)["']/i
+  )
 
-      try {
-        const result = await client.fetch(
-          `*[_type == "post"] | order(_createdAt desc) [0...6] {
-            "id": _id,
-            title,
-            "slug": slug.current,
-            description,
-            "imageUrl": imageUrl,
-            "mainImage": mainImage.asset->url,
-            htmlContent,
-            "videoId": youtubeVideoId,
-            "tags": tags,
-            "publishedAt": coalesce(publishedAt, _createdAt)
-          }`,
-          {},
-          { cache: "no-store" }
-        );
+  return imgMatch?.[1]
+    ? optimizeSanityImageUrl(imgMatch[1])
+    : ""
+}
 
-        const processedPosts = result.map((post: any) => {
-          let extractedImg = "";
-          let extractedDesc = post.description || "";
+function extractDescription(htmlContent?: string) {
+  if (!htmlContent) return ""
 
-          if (post.htmlContent) {
-            const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
+  const pureText = htmlContent
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim()
 
-            if (imgMatch && imgMatch[1]) {
-              extractedImg = optimizeSanityImageUrl(imgMatch[1]);
-            }
+  if (!pureText) return ""
 
-            if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
-              const pureText = post.htmlContent
-                .replace(/<[^>]*>?/gm, "")
-                .trim();
+  return pureText.length > 110
+    ? `${pureText.substring(0, 110)}...`
+    : pureText
+}
 
-              extractedDesc =
-                pureText.substring(0, 100) +
-                (pureText.length > 100 ? "..." : "");
-            }
-          }
+function processPost(post: SanityPost): Post | null {
+  if (!post.id || !post.title || !post.slug) {
+    return null
+  }
 
-          if (!extractedDesc) extractedDesc = "點擊閱讀詳情...";
+  const extractedImage = extractFirstImage(post.htmlContent)
 
-          const youtubeThumb = post.videoId
-            ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg`
-            : "";
+  const extractedDescription =
+    !post.description ||
+    post.description.trim() === "" ||
+    post.description === "點擊閱讀詳情..."
+      ? extractDescription(post.htmlContent)
+      : post.description.trim()
 
-          return {
-            ...post,
-            thumbnail:
-              extractedImg ||
-              youtubeThumb ||
-              optimizeSanityImageUrl(post.imageUrl) ||
-              optimizeSanityImageUrl(post.mainImage) ||
-              "",
-            description: extractedDesc,
-            tags: Array.isArray(post.tags) ? post.tags : [],
-          };
-        });
+  const youtubeThumbnail = post.videoId
+    ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg`
+    : ""
 
-        setPosts(processedPosts);
-      } catch (err) {
-        console.error("首頁文章抓取失敗:", err);
-      } finally {
-        setLoadingPosts(false);
+  return {
+    id: post.id,
+    title: post.title,
+    slug: post.slug,
+    description:
+      extractedDescription ||
+      "查看完整室內設計、住宅裝潢與空間規劃內容。",
+    thumbnail:
+      extractedImage ||
+      optimizeSanityImageUrl(post.imageUrl) ||
+      optimizeSanityImageUrl(post.mainImage) ||
+      youtubeThumbnail,
+    videoId: post.videoId,
+    tags: Array.isArray(post.tags) ? post.tags : [],
+    publishedAt: post.publishedAt || "",
+  }
+}
+
+async function getLatestPosts(): Promise<Post[]> {
+  try {
+    const result = await client.fetch<SanityPost[]>(
+      `*[
+        _type == "post" &&
+        defined(slug.current) &&
+        defined(title)
+      ] | order(coalesce(publishedAt, _createdAt) desc) [0...6] {
+        "id": _id,
+        title,
+        "slug": slug.current,
+        description,
+        imageUrl,
+        "mainImage": mainImage.asset->url,
+        htmlContent,
+        "videoId": youtubeVideoId,
+        tags,
+        "publishedAt": coalesce(publishedAt, _createdAt)
+      }`,
+      {},
+      {
+        next: {
+          revalidate: 3600,
+        },
       }
-    }
+    )
 
-    fetchLatestPosts();
-  }, []);
+    return result
+      .map(processPost)
+      .filter((post): post is Post => post !== null)
+  } catch (error) {
+    console.error("首頁文章抓取失敗:", error)
+
+    return []
+  }
+}
+
+export async function LatestPostsSection() {
+  const posts = await getLatestPosts()
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16">
+    <section
+      aria-labelledby="latest-posts-heading"
+      className="mx-auto max-w-6xl px-6 py-16"
+    >
       <div className="mb-10 flex flex-col gap-4 text-center md:flex-row md:items-end md:justify-between md:text-left">
         <div>
-          <p className="text-sm font-semibold tracking-[0.2em] text-primary">
-            LATEST ARTICLES
+          <p className="text-sm font-semibold tracking-[0.2em] text-accent">
+            LATEST DESIGN ARTICLES
           </p>
 
-          <h2 className="mt-3 text-2xl font-black text-foreground md:text-4xl">
-            最新文章
+          <h2
+            id="latest-posts-heading"
+            className="mt-3 text-2xl font-black text-foreground md:text-4xl"
+          >
+            最新室內設計與裝潢文章
           </h2>
 
           <p className="mt-4 max-w-2xl text-base leading-8 text-muted-foreground">
-            整理社會住宅包租代管、房東出租、租屋補助與租務管理相關資訊。
+            整理住宅建案、室內設計風格、格局規劃、空間收納與居家裝潢相關資訊，
+            幫助你找到適合自己房子的設計方向。
           </p>
         </div>
 
         <Link
           href="/blog"
-          className="inline-flex justify-center rounded-full border border-border bg-white/70 px-6 py-3 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:border-primary/40 hover:text-primary"
+          className="inline-flex justify-center rounded-full border border-border bg-white/70 px-6 py-3 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:border-accent/50 hover:text-accent"
         >
           查看全部文章 →
         </Link>
       </div>
 
-      {loadingPosts ? (
-        <div className="flex justify-center py-24">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-        </div>
-      ) : posts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      {posts.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
             <article
               key={post.id}
-              className="group overflow-hidden rounded-[2rem] border border-border/70 bg-white/80 shadow-[0_10px_40px_rgba(120,80,70,0.08)] backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_20px_60px_rgba(217,143,143,0.14)]"
+              className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/70 bg-white/80 shadow-[0_10px_40px_rgba(53,51,46,0.08)] backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-accent/40 hover:shadow-[0_20px_60px_rgba(53,51,46,0.14)]"
             >
-              <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                {activeVideo === post.id && post.videoId ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`}
-                    className="h-full w-full border-none"
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
+              <Link
+                href={`/blog/${post.slug}`}
+                aria-label={`閱讀文章：${post.title}`}
+                className="relative block aspect-video w-full overflow-hidden bg-muted"
+              >
+                {post.thumbnail ? (
+                  <img
+                    src={post.thumbnail}
+                    alt={post.title}
+                    width={900}
+                    height={506}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="relative h-full w-full">
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="block h-full w-full overflow-hidden"
-                    >
-                      {post.thumbnail ? (
-                        <img
-                          src={post.thumbnail}
-                          alt={post.title}
-                          className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-secondary text-sm text-muted-foreground">
-                          暫無圖片
-                        </div>
-                      )}
-                    </Link>
-
-                    {post.videoId && (
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <div
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setActiveVideo(post.id);
-                          }}
-                          className="pointer-events-auto flex h-12 w-16 cursor-pointer items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition-transform duration-300 group-hover:scale-110"
-                        >
-                          <div className="ml-1 border-y-[10px] border-l-[16px] border-y-transparent border-l-primary" />
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex h-full w-full items-center justify-center bg-secondary px-6 text-center text-sm text-muted-foreground">
+                    室內設計與住宅裝潢提案
                   </div>
                 )}
-              </div>
 
-              <div className="flex min-h-[260px] flex-col p-6">
-                <div className="mb-4 flex flex-wrap gap-2">
-                  {post.tags?.map((tag) => (
-                    <Link
-                      key={tag}
-                      href={`/blog?tag=${encodeURIComponent(tag)}`}
-                      className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary transition-all hover:bg-primary hover:text-primary-foreground"
-                    >
-                      #{tag}
-                    </Link>
-                  ))}
-                </div>
+                {post.videoId && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 flex items-center justify-center bg-black/5"
+                  >
+                    <span className="flex h-12 w-16 items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition-transform duration-300 group-hover:scale-110">
+                      <span className="ml-1 border-y-[10px] border-l-[16px] border-y-transparent border-l-primary" />
+                    </span>
+                  </span>
+                )}
+              </Link>
+
+              <div className="flex flex-1 flex-col p-6">
+                {post.tags.length > 0 && (
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {post.tags.slice(0, 3).map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/blog?tag=${encodeURIComponent(tag)}`}
+                        className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-accent transition-all hover:bg-accent hover:text-accent-foreground"
+                      >
+                        #{tag}
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
                 <Link href={`/blog/${post.slug}`}>
-                  <h2 className="line-clamp-2 text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+                  <h3 className="line-clamp-2 text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-accent">
                     {post.title}
-                  </h2>
+                  </h3>
                 </Link>
 
                 <p className="mt-4 line-clamp-3 text-sm leading-7 text-muted-foreground">
@@ -215,7 +262,8 @@ export function LatestPostsSection() {
                     href={`/blog/${post.slug}`}
                     className="inline-flex items-center text-sm font-semibold text-primary"
                   >
-                    閱讀文章
+                    閱讀完整文章
+
                     <span className="ml-2 transition-transform group-hover:translate-x-1">
                       →
                     </span>
@@ -228,14 +276,14 @@ export function LatestPostsSection() {
       ) : (
         <div className="rounded-[2rem] border border-dashed border-border bg-white/60 py-24 text-center shadow-sm backdrop-blur">
           <p className="text-xl font-bold text-foreground">
-            暫時沒有最新文章
+            室內設計文章正在準備中
           </p>
 
-          <p className="mt-3 text-sm text-muted-foreground">
-            之後會陸續分享社會住宅、包租代管與租屋補助相關內容。
+          <p className="mt-3 px-6 text-sm leading-7 text-muted-foreground">
+            之後會陸續整理建案室內設計、住宅裝潢、格局規劃與空間風格相關內容。
           </p>
         </div>
       )}
     </section>
-  );
+  )
 }

@@ -1,118 +1,134 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
 
-import { LineConsultButton } from "@/components/line-consult-button";
+import { LineConsultButton } from "@/components/line-consult-button"
 
 const navLinks = [
   { label: "首頁", href: "/" },
-  { label: "房東補助", href: "/landlord-subsidies" },
-  { label: "公益出租人", href: "/public-landlord" },
-  { label: "房東節稅", href: "/landlord-tax" },
-  { label: "包租代管", href: "/property-management" },
+  { label: "建案設計", href: "/projects" },
+  { label: "設計風格", href: "/styles" },
+  { label: "空間設計", href: "/spaces" },
+  { label: "格局坪數", href: "/layouts" },
+  { label: "裝潢知識", href: "/renovation" },
   { label: "最新文章", href: "/blog" },
-];
+]
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") {
-    return pathname === "/";
+    return pathname === "/"
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === href || pathname.startsWith(`${href}/`)
 }
 
 export function Navbar() {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+    setMobileOpen(false)
+  }, [pathname])
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow = mobileOpen ? "hidden" : ""
 
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen]);
+      document.body.style.overflow = ""
+    }
+  }, [mobileOpen])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMobileOpen(false);
+        setMobileOpen(false)
       }
-    };
+    }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown)
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
 
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
+          {/* 品牌 */}
           <Link
             href="/"
-            aria-label="台灣社會住宅包租代管資訊站首頁"
+            aria-label="台灣室內設計資訊網首頁"
             className="flex min-w-0 items-center gap-3"
           >
-            <img
+            <Image
               src="/images/logo.png"
               alt=""
               width={40}
               height={40}
               className="h-10 w-10 shrink-0 rounded-full object-cover"
+              priority
             />
 
             <span className="min-w-0">
               <span className="block truncate text-base font-black tracking-tight text-foreground md:text-lg">
-                台灣社會住宅包租代管資訊站
+                台灣室內設計資訊網
               </span>
 
               <span className="hidden text-xs text-muted-foreground lg:block">
-                凌群不動產建立並經營
+                建案設計提案與居家裝潢靈感
               </span>
             </span>
           </Link>
 
-          <nav aria-label="主要導覽" className="hidden items-center gap-6 lg:flex">
+          {/* 桌面版導覽 */}
+          <nav
+            aria-label="主要導覽"
+            className="hidden items-center gap-5 xl:flex"
+          >
             {navLinks.map((link) => {
-              const active = isActivePath(pathname, link.href);
+              const active = isActivePath(pathname, link.href)
 
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`text-sm font-semibold transition-colors ${
+                  className={`relative whitespace-nowrap py-2 text-sm font-semibold transition-colors ${
                     active
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {link.label}
+
+                  {active && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-0 -bottom-0.5 mx-auto h-0.5 rounded-full bg-accent"
+                    />
+                  )}
                 </Link>
-              );
+              )
             })}
 
-            <LineConsultButton className="rounded-full bg-[#06C755] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+            <LineConsultButton className="whitespace-nowrap rounded-full bg-[#06C755] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-md">
               LINE 免費諮詢
             </LineConsultButton>
           </nav>
 
+          {/* 手機版按鈕 */}
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
             aria-label={mobileOpen ? "關閉選單" : "開啟選單"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/70 text-foreground transition-colors hover:bg-secondary xl:hidden"
           >
             <span className="sr-only">
               {mobileOpen ? "關閉選單" : "開啟選單"}
@@ -141,10 +157,11 @@ export function Navbar() {
         </div>
       </header>
 
+      {/* 手機版選單 */}
       {mobileOpen && (
         <div
           id="mobile-navigation"
-          className="fixed inset-0 z-40 bg-background pt-20 lg:hidden"
+          className="fixed inset-0 z-40 bg-background pt-20 xl:hidden"
         >
           <nav
             aria-label="手機版主要導覽"
@@ -152,7 +169,7 @@ export function Navbar() {
           >
             <div className="divide-y divide-border/70 border-t border-border/70">
               {navLinks.map((link) => {
-                const active = isActivePath(pathname, link.href);
+                const active = isActivePath(pathname, link.href)
 
                 return (
                   <Link
@@ -162,29 +179,38 @@ export function Navbar() {
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center justify-between py-5 text-lg font-bold transition-colors ${
                       active
-                        ? "text-primary"
+                        ? "text-accent"
                         : "text-foreground active:text-primary"
                     }`}
                   >
-                    {link.label}
-                    <span aria-hidden="true">→</span>
+                    <span>{link.label}</span>
+
+                    <span
+                      aria-hidden="true"
+                      className={`transition-transform ${
+                        active ? "translate-x-1 text-accent" : ""
+                      }`}
+                    >
+                      →
+                    </span>
                   </Link>
-                );
+                )
               })}
             </div>
 
             <div className="mt-auto border-t border-border/70 pt-6">
-              <LineConsultButton className="flex w-full items-center justify-center rounded-full bg-[#06C755] px-6 py-4 text-base font-semibold text-white">
+              <LineConsultButton className="flex w-full items-center justify-center rounded-full bg-[#06C755] px-6 py-4 text-base font-semibold text-white shadow-sm">
                 加入 LINE 免費諮詢
               </LineConsultButton>
 
               <p className="mt-5 text-center text-xs leading-6 text-muted-foreground">
-                本站由凌群不動產建立並經營，非政府官方網站。
+                提供住宅建案、室內設計風格與居家裝潢提案資訊。
+                實際設計、施工與報價內容以合作服務單位說明為準。
               </p>
             </div>
           </nav>
         </div>
       )}
     </>
-  );
+  )
 }

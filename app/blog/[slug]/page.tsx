@@ -1,25 +1,31 @@
-import { client } from "@/lib/sanity"
-import { createImageUrlBuilder } from "@sanity/image-url"
-import { PortableText } from "@portabletext/react"
-import { Footer } from "@/components/footer"
-import { notFound } from "next/navigation"
-import { ShareBar } from "@/components/share-bar"
-import Link from "next/link"
 import type { Metadata } from "next"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { PortableText } from "@portabletext/react"
+import { createImageUrlBuilder } from "@sanity/image-url"
+
+import { ShareBar } from "@/components/share-bar"
 import { sanitizePostHtml } from "@/lib/content-cleanup"
+import { client } from "@/lib/sanity"
 
 export const revalidate = 0
 export const dynamic = "force-dynamic"
 
-const siteName = "台灣社會住宅包租代管資訊站"
-const shortSiteName = "社會住宅包租代管資訊站"
-const siteUrl = "https://home.line88.tw"
-const defaultAuthorName = "凌群不動產"
+const siteName = "台灣室內設計資訊網"
+const shortSiteName = "室內設計資訊網"
+const siteUrl = "https://homedesign.line88.tw"
+const defaultAuthorName = "台灣室內設計資訊網編輯部"
+const defaultArticleCategory = "室內設計與居家裝潢"
 
 const builder = createImageUrlBuilder(client)
 
 function urlFor(source: unknown) {
-  if (!source) return { url: () => "" }
+  if (!source) {
+    return {
+      url: () => "",
+    }
+  }
+
   return builder.image(source)
 }
 
@@ -29,8 +35,21 @@ function optimizeSanityImages(html?: string) {
   return html.replace(
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
-      if (url.includes("auto=format")) return url
-      return `${url}${url.includes("?") ? "&" : "?"}auto=format`
+      let optimizedUrl = url
+
+      if (!optimizedUrl.includes("auto=format")) {
+        optimizedUrl += `${
+          optimizedUrl.includes("?") ? "&" : "?"
+        }auto=format`
+      }
+
+      if (!optimizedUrl.includes("q=")) {
+        optimizedUrl += `${
+          optimizedUrl.includes("?") ? "&" : "?"
+        }q=85`
+      }
+
+      return optimizedUrl
     }
   )
 }
@@ -38,7 +57,7 @@ function optimizeSanityImages(html?: string) {
 function decodeHtmlEntities(value: string) {
   return value
     .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
+    .replace(/&quot;/gi, "\"")
     .replace(/&#39;/gi, "'")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
@@ -65,7 +84,7 @@ function buildSocialImageUrl(imageUrl: string) {
 
   const separator = imageUrl.includes("?") ? "&" : "?"
 
-  return `${imageUrl}${separator}w=1200&h=630&fit=crop&auto=format`
+  return `${imageUrl}${separator}w=1200&h=630&fit=crop&auto=format&q=85`
 }
 
 function stripHtml(value?: string) {
@@ -77,8 +96,10 @@ function stripHtml(value?: string) {
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
+    .replace(/&quot;/gi, "\"")
     .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
     .replace(/\s+/g, " ")
     .trim()
 }
@@ -87,23 +108,30 @@ function removeRepeatedTitle(text: string, title: string) {
   const normalizedText = text.trim()
   const normalizedTitle = title.trim()
 
-  if (!normalizedText || !normalizedTitle) return normalizedText
+  if (!normalizedText || !normalizedTitle) {
+    return normalizedText
+  }
 
   if (normalizedText.startsWith(normalizedTitle)) {
-    return normalizedText.slice(normalizedTitle.length).replace(/^[\s：:｜|\-–—]+/, "")
+    return normalizedText
+      .slice(normalizedTitle.length)
+      .replace(/^[\s：:｜|\-–—]+/, "")
   }
 
   return normalizedText
 }
 
-function removeLeadingDuplicateHeading(htmlContent: string, title: string) {
+function removeLeadingDuplicateHeading(
+  htmlContent: string,
+  title: string
+) {
   if (!htmlContent || !title) return htmlContent
 
   const normalizedTitle = title
     .replace(/<[^>]+>/g, "")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
+    .replace(/&quot;/gi, "\"")
     .replace(/&#39;/gi, "'")
     .replace(/\s+/g, " ")
     .trim()
@@ -119,7 +147,7 @@ function removeLeadingDuplicateHeading(htmlContent: string, title: string) {
         .replace(/<[^>]+>/g, "")
         .replace(/&nbsp;/gi, " ")
         .replace(/&amp;/gi, "&")
-        .replace(/&quot;/gi, '"')
+        .replace(/&quot;/gi, "\"")
         .replace(/&#39;/gi, "'")
         .replace(/\s+/g, " ")
         .trim()
@@ -139,16 +167,29 @@ function buildDescription(
   htmlContent: string | undefined,
   title: string
 ) {
-  const supplied = removeRepeatedTitle(stripHtml(description), title)
+  const supplied = removeRepeatedTitle(
+    stripHtml(description),
+    title
+  )
 
-  if (supplied && supplied !== "點擊閱讀詳情...") {
-    return `${supplied.slice(0, 137)}${supplied.length > 137 ? "..." : ""}`
+  if (
+    supplied &&
+    supplied !== "點擊閱讀詳情..."
+  ) {
+    return `${supplied.slice(0, 150)}${
+      supplied.length > 150 ? "…" : ""
+    }`
   }
 
-  const fromHtml = removeRepeatedTitle(stripHtml(htmlContent), title)
+  const fromHtml = removeRepeatedTitle(
+    stripHtml(htmlContent),
+    title
+  )
 
   if (fromHtml) {
-    return `${fromHtml.slice(0, 137)}${fromHtml.length > 137 ? "..." : ""}`
+    return `${fromHtml.slice(0, 150)}${
+      fromHtml.length > 150 ? "…" : ""
+    }`
   }
 
   return `${title}｜${shortSiteName}`
@@ -158,12 +199,16 @@ function formatDate(date?: string) {
   if (!date) return null
 
   const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return null
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
 
   return parsed.toLocaleDateString("zh-TW", {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Taipei",
   })
 }
 
@@ -171,9 +216,16 @@ function toIsoDate(date?: string) {
   if (!date) return undefined
 
   const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return undefined
+
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined
+  }
 
   return parsed.toISOString()
+}
+
+function serializeJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c")
 }
 
 interface PostMetadataResult {
@@ -216,14 +268,14 @@ const ptComponents = {
         <figure className="my-10 flex flex-col items-center">
           <img
             src={imageUrl}
-            alt={value.alt || "文章圖片"}
-            className="h-auto w-full rounded-[2rem] border border-border shadow-[0_16px_50px_rgba(120,80,70,0.12)]"
+            alt={value.alt || "住宅室內設計文章圖片"}
+            className="h-auto w-full rounded-[2rem] border border-border shadow-[0_16px_50px_rgba(53,51,46,0.12)]"
             loading="lazy"
             decoding="async"
           />
 
           {value.caption && (
-            <figcaption className="mt-3 text-center text-sm text-muted-foreground">
+            <figcaption className="mt-3 text-center text-sm leading-6 text-muted-foreground">
               {value.caption}
             </figcaption>
           )}
@@ -240,21 +292,29 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
 
-  const post = await client.fetch<PostMetadataResult | null>(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      description,
-      htmlContent,
-      publishedAt,
-      _updatedAt,
-      mainImage,
-      "authorName": author->name,
-      "authorSlug": author->slug.current,
-      "tags": coalesce(categories[]->title, tags)
-    }`,
-    { slug },
-    { cache: "no-store" }
-  )
+  const post =
+    await client.fetch<PostMetadataResult | null>(
+      `*[
+        _type == "post" &&
+        slug.current == $slug
+      ][0] {
+        title,
+        description,
+        htmlContent,
+        publishedAt,
+        _updatedAt,
+        mainImage,
+        "authorName": author->name,
+        "authorSlug": author->slug.current,
+        "tags": coalesce(categories[]->title, tags)
+      }`,
+      {
+        slug,
+      },
+      {
+        cache: "no-store",
+      }
+    )
 
   if (!post?.title) {
     return {
@@ -273,8 +333,9 @@ export async function generateMetadata({
   )
 
   const canonicalUrl = `${siteUrl}/blog/${slug}`
-
-  const firstHtmlImage = extractFirstImageFromHtml(post.htmlContent)
+  const firstHtmlImage = extractFirstImageFromHtml(
+    post.htmlContent
+  )
 
   const ogImage = firstHtmlImage
     ? buildSocialImageUrl(firstHtmlImage)
@@ -285,19 +346,27 @@ export async function generateMetadata({
           .fit("crop")
           .auto("format")
           .url()
-      : ""
+      : `${siteUrl}/images/og-home.jpg`
 
   const publishedTime = toIsoDate(post.publishedAt)
-  const rawModifiedTime = toIsoDate(post._updatedAt || post.publishedAt)
+  const rawModifiedTime = toIsoDate(
+    post._updatedAt || post.publishedAt
+  )
+
   const modifiedTime =
     publishedTime &&
     rawModifiedTime &&
-    new Date(rawModifiedTime).getTime() < new Date(publishedTime).getTime()
+    new Date(rawModifiedTime).getTime() <
+      new Date(publishedTime).getTime()
       ? publishedTime
       : rawModifiedTime
 
-  const authorName = post.authorName || defaultAuthorName
-  const tags = Array.isArray(post.tags) ? post.tags.filter(Boolean) : []
+  const authorName =
+    post.authorName || defaultAuthorName
+
+  const tags = Array.isArray(post.tags)
+    ? post.tags.filter(Boolean)
+    : []
 
   return {
     title: post.title,
@@ -316,7 +385,8 @@ export async function generateMetadata({
       },
     ],
 
-    category: tags[0] || "社會住宅包租代管",
+    category:
+      tags[0] || defaultArticleCategory,
 
     keywords: tags,
 
@@ -342,25 +412,24 @@ export async function generateMetadata({
       publishedTime,
       modifiedTime,
       authors: [authorName],
-      section: tags[0] || "社會住宅包租代管",
+      section:
+        tags[0] || defaultArticleCategory,
       tags,
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
 
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description,
-      images: ogImage ? [ogImage] : [],
+      images: [ogImage],
     },
   }
 }
@@ -372,30 +441,46 @@ export default async function PostPage({
 }) {
   const { slug } = await params
 
-  const post = await client.fetch<PostResult | null>(
-    `*[_type == "post" && slug.current == $slug][0]{
-      _id,
-      title,
-      description,
-      "slug": slug.current,
-      publishedAt,
-      _updatedAt,
-      mainImage,
-      body,
-      htmlContent,
-      "authorName": author->name,
-      "authorSlug": author->slug.current,
-      "tags": coalesce(categories[]->title, tags)
-    }`,
-    { slug },
-    { cache: "no-store" }
-  )
+  const post =
+    await client.fetch<PostResult | null>(
+      `*[
+        _type == "post" &&
+        slug.current == $slug
+      ][0] {
+        _id,
+        title,
+        description,
+        "slug": slug.current,
+        publishedAt,
+        _updatedAt,
+        mainImage,
+        body,
+        htmlContent,
+        "authorName": author->name,
+        "authorSlug": author->slug.current,
+        "tags": coalesce(categories[]->title, tags)
+      }`,
+      {
+        slug,
+      },
+      {
+        cache: "no-store",
+      }
+    )
 
-  if (!post?.title) notFound()
+  if (!post?.title) {
+    notFound()
+  }
 
-  const tags = Array.isArray(post.tags) ? post.tags.filter(Boolean) : []
-  const displayedTags = tags.slice(0, 2)
-  const authorName = post.authorName || defaultAuthorName
+  const tags = Array.isArray(post.tags)
+    ? post.tags.filter(Boolean)
+    : []
+
+  const displayedTags = tags.slice(0, 3)
+
+  const authorName =
+    post.authorName || defaultAuthorName
+
   const authorUrl = post.authorSlug
     ? `/authors/${post.authorSlug}`
     : "/"
@@ -406,19 +491,30 @@ export default async function PostPage({
     post.title
   )
 
-  const publishedIso = toIsoDate(post.publishedAt)
+  const publishedIso = toIsoDate(
+    post.publishedAt
+  )
 
-  const rawModifiedIso = toIsoDate(post._updatedAt || post.publishedAt)
+  const rawModifiedIso = toIsoDate(
+    post._updatedAt || post.publishedAt
+  )
+
   const modifiedIso =
     publishedIso &&
     rawModifiedIso &&
-    new Date(rawModifiedIso).getTime() < new Date(publishedIso).getTime()
+    new Date(rawModifiedIso).getTime() <
+      new Date(publishedIso).getTime()
       ? publishedIso
       : rawModifiedIso
 
-  const publishedDate = formatDate(publishedIso)
-  const modifiedDate = formatDate(modifiedIso)
-  const canonicalUrl = `${siteUrl}/blog/${slug}`
+  const publishedDate =
+    formatDate(publishedIso)
+
+  const modifiedDate =
+    formatDate(modifiedIso)
+
+  const canonicalUrl =
+    `${siteUrl}/blog/${slug}`
 
   const mainImageUrl = post.mainImage
     ? urlFor(post.mainImage)
@@ -428,7 +524,10 @@ export default async function PostPage({
         .url()
     : undefined
 
-  const firstHtmlImage = extractFirstImageFromHtml(post.htmlContent)
+  const firstHtmlImage =
+    extractFirstImageFromHtml(
+      post.htmlContent
+    )
 
   const structuredImageUrl = firstHtmlImage
     ? buildSocialImageUrl(firstHtmlImage)
@@ -439,39 +538,75 @@ export default async function PostPage({
           .fit("crop")
           .auto("format")
           .url()
-      : ""
+      : `${siteUrl}/images/og-home.jpg`
 
-  const optimizedHtml = optimizeSanityImages(post.htmlContent)
+  /*
+   * HTML Pipeline：
+   * 圖片最佳化
+   * → sanitizePostHtml 移除重複 H1、首圖及異常內容
+   * → 移除與文章主標題重複的第一個 H2
+   * → Render
+   */
+  const optimizedHtml =
+    optimizeSanityImages(post.htmlContent)
+
   const sanitizedHtml = optimizedHtml
-    ? sanitizePostHtml(optimizedHtml, post.title, Boolean(post.mainImage))
+    ? sanitizePostHtml(
+        optimizedHtml,
+        post.title,
+        Boolean(post.mainImage)
+      )
     : ""
 
   const cleanedHtml = sanitizedHtml
-    ? removeLeadingDuplicateHeading(sanitizedHtml, post.title)
+    ? removeLeadingDuplicateHeading(
+        sanitizedHtml,
+        post.title
+      )
     : ""
 
-  const relatedPosts = await client.fetch<RelatedPost[]>(
-    `*[
-      _type == "post"
-      && _id != $postId
-      && defined(slug.current)
-      && count(coalesce(categories[]->title, tags)[@ in $tags]) > 0
-    ]
-    | order(
-        count(coalesce(categories[]->title, tags)[@ in $tags]) desc,
-        coalesce(publishedAt, _createdAt) desc
-      )[0...3]{
-        _id,
-        title,
-        "slug": slug.current,
-        "publishedAt": coalesce(publishedAt, _createdAt)
-      }`,
-    {
-      postId: post._id,
-      tags,
-    },
-    { cache: "no-store" }
-  )
+  const relatedPosts =
+    await client.fetch<RelatedPost[]>(
+      `*[
+        _type == "post" &&
+        _id != $postId &&
+        defined(slug.current) &&
+        defined(title) &&
+        count(
+          coalesce(
+            categories[]->title,
+            tags
+          )[@ in $tags]
+        ) > 0
+      ]
+      | order(
+          count(
+            coalesce(
+              categories[]->title,
+              tags
+            )[@ in $tags]
+          ) desc,
+          coalesce(
+            publishedAt,
+            _createdAt
+          ) desc
+        )[0...3] {
+          _id,
+          title,
+          "slug": slug.current,
+          "publishedAt": coalesce(
+            publishedAt,
+            _createdAt
+          )
+        }`,
+      {
+        postId: post._id,
+        tags,
+      },
+      {
+        cache: "no-store",
+      }
+    )
 
   const blogPostingJsonLd = {
     "@context": "https://schema.org",
@@ -481,13 +616,16 @@ export default async function PostPage({
     headline: post.title,
     description,
     inLanguage: "zh-Hant-TW",
+
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonicalUrl,
     },
+
     isPartOf: {
       "@id": `${siteUrl}/#website`,
     },
+
     author: post.authorSlug
       ? {
           "@type": "Person",
@@ -501,33 +639,53 @@ export default async function PostPage({
           name: defaultAuthorName,
           url: siteUrl,
         },
+
     publisher: {
       "@id": `${siteUrl}/#organization`,
     },
+
     datePublished: publishedIso,
     dateModified: modifiedIso,
-    ...(structuredImageUrl
-      ? {
-          image: {
-            "@type": "ImageObject",
-            url: structuredImageUrl,
-            width: 1200,
-            height: 630,
-          },
-        }
-      : {}),
-    articleSection: tags[0] || "社會住宅包租代管",
+
+    image: {
+      "@type": "ImageObject",
+      url: structuredImageUrl,
+      width: 1200,
+      height: 630,
+    },
+
+    articleSection:
+      tags[0] || defaultArticleCategory,
+
     keywords: tags,
-    about: tags.map((tag) => ({
-      "@type": "Thing",
-      name: tag,
-    })),
+
+    about:
+      tags.length > 0
+        ? tags.map((tag) => ({
+            "@type": "Thing",
+            name: tag,
+          }))
+        : [
+            {
+              "@type": "Thing",
+              name: "室內設計",
+            },
+            {
+              "@type": "Thing",
+              name: "居家裝潢",
+            },
+            {
+              "@type": "Thing",
+              name: "住宅空間規劃",
+            },
+          ],
   }
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "@id": `${canonicalUrl}#breadcrumb`,
+
     itemListElement: [
       {
         "@type": "ListItem",
@@ -538,7 +696,7 @@ export default async function PostPage({
       {
         "@type": "ListItem",
         position: 2,
-        name: "最新文章",
+        name: "室內設計文章",
         item: `${siteUrl}/blog`,
       },
       {
@@ -555,34 +713,51 @@ export default async function PostPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogPostingJsonLd),
+          __html:
+            serializeJsonLd(
+              blogPostingJsonLd
+            ),
         }}
       />
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbJsonLd),
+          __html:
+            serializeJsonLd(
+              breadcrumbJsonLd
+            ),
         }}
       />
 
-      <main className="px-5 pb-20 pt-28 md:px-6 md:pt-32">
-        <div className="mx-auto max-w-3xl">
+      <div className="px-5 pb-24 pt-12 md:px-6 md:pt-20">
+        <div className="mx-auto max-w-4xl">
+          {/* 麵包屑 */}
           <nav
             aria-label="麵包屑導覽"
             className="mb-7 flex items-center gap-2 overflow-hidden text-xs text-muted-foreground"
           >
-            <Link href="/" className="transition-colors hover:text-primary">
+            <Link
+              href="/"
+              className="shrink-0 transition-colors hover:text-accent"
+            >
               首頁
             </Link>
 
-            <span aria-hidden="true">/</span>
+            <span aria-hidden="true">
+              /
+            </span>
 
-            <Link href="/blog" className="transition-colors hover:text-primary">
-              最新文章
+            <Link
+              href="/blog"
+              className="shrink-0 transition-colors hover:text-accent"
+            >
+              室內設計文章
             </Link>
 
-            <span aria-hidden="true">/</span>
+            <span aria-hidden="true">
+              /
+            </span>
 
             <span
               aria-current="page"
@@ -592,13 +767,16 @@ export default async function PostPage({
             </span>
           </nav>
 
+          {/* 文章標籤 */}
           {displayedTags.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-5 flex flex-wrap gap-2">
               {displayedTags.map((tag) => (
                 <Link
                   key={tag}
-                  href={`/blog?tag=${encodeURIComponent(tag)}`}
-                  className="rounded-full bg-primary/8 px-3 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
+                  href={`/blog?tag=${encodeURIComponent(
+                    tag
+                  )}`}
+                  className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   #{tag}
                 </Link>
@@ -606,49 +784,76 @@ export default async function PostPage({
             </div>
           )}
 
-          <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
-            {post.title}
-          </h1>
+          {/* 文章標題 */}
+          <header>
+            <h1 className="text-4xl font-black leading-tight tracking-tight text-foreground md:text-5xl md:leading-[1.15]">
+              {post.title}
+            </h1>
 
-          <div className="mb-10 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border pb-6 text-sm text-muted-foreground">
-            <span>
-              撰文者：
-              <Link
-                href={authorUrl}
-                rel="author"
-                className="font-medium text-foreground transition-colors hover:text-primary"
-              >
-                {authorName}
-              </Link>
-            </span>
-
-            {publishedDate && (
-              <>
-                <span className="text-border" aria-hidden="true">
-                  |
-                </span>
-                <time dateTime={publishedIso}>發布於 {publishedDate}</time>
-              </>
+            {description && (
+              <p className="mt-5 text-base leading-8 text-muted-foreground md:text-lg">
+                {description}
+              </p>
             )}
 
-            {modifiedDate &&
-              modifiedIso &&
-              publishedIso &&
-              modifiedIso !== publishedIso && (
+            <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border pb-7 text-sm text-muted-foreground">
+              <span>
+                撰文者：
+                <Link
+                  href={authorUrl}
+                  rel="author"
+                  className="font-semibold text-foreground transition-colors hover:text-accent"
+                >
+                  {authorName}
+                </Link>
+              </span>
+
+              {publishedDate && (
                 <>
-                  <span className="text-border" aria-hidden="true">
+                  <span
+                    className="text-border"
+                    aria-hidden="true"
+                  >
                     |
                   </span>
-                  <time dateTime={modifiedIso}>更新於 {modifiedDate}</time>
+
+                  <time
+                    dateTime={publishedIso}
+                  >
+                    發布於 {publishedDate}
+                  </time>
                 </>
               )}
-          </div>
 
+              {modifiedDate &&
+                modifiedIso &&
+                publishedIso &&
+                modifiedIso !==
+                  publishedIso && (
+                  <>
+                    <span
+                      className="text-border"
+                      aria-hidden="true"
+                    >
+                      |
+                    </span>
+
+                    <time
+                      dateTime={modifiedIso}
+                    >
+                      更新於 {modifiedDate}
+                    </time>
+                  </>
+                )}
+            </div>
+          </header>
+
+          {/* 文章首圖 */}
           {mainImageUrl && (
-            <figure className="mb-16 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(120,80,70,0.12)]">
+            <figure className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
               <img
                 src={mainImageUrl}
-                alt={post.title}
+                alt={`${post.title}室內設計與空間提案`}
                 className="h-auto w-full object-cover"
                 fetchPriority="high"
                 decoding="async"
@@ -656,23 +861,64 @@ export default async function PostPage({
             </figure>
           )}
 
+          {/* 文章內容 */}
           <article
             className="
               prose max-w-none
               prose-lg
-              prose-p:mb-5 prose-p:leading-[1.9] prose-p:text-muted-foreground
-              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground
-              prose-h2:mt-10 prose-h2:mb-5 prose-h2:border-l-4 prose-h2:border-primary prose-h2:pl-4 prose-h2:text-2xl
-              prose-h3:mt-7 prose-h3:text-xl
-              prose-strong:font-bold prose-strong:text-foreground
-              prose-a:text-primary prose-a:no-underline hover:prose-a:opacity-70
-              prose-ul:rounded-2xl prose-ul:border prose-ul:border-border prose-ul:bg-white/60 prose-ul:p-6
-              prose-li:text-muted-foreground prose-li:marker:text-primary
-              prose-table:my-10 prose-table:block prose-table:overflow-x-auto prose-table:border-collapse
-              prose-thead:bg-primary/10 prose-th:border prose-th:border-border prose-th:p-4 prose-th:text-primary
-              prose-td:border prose-td:border-border prose-td:p-4 prose-td:text-muted-foreground
-              prose-img:rounded-[2rem] prose-img:border prose-img:border-border
-              prose-blockquote:rounded-r-2xl prose-blockquote:border-l-primary prose-blockquote:bg-white/70 prose-blockquote:px-6 prose-blockquote:py-3 prose-blockquote:text-muted-foreground
+              prose-p:mb-5
+              prose-p:leading-[1.9]
+              prose-p:text-muted-foreground
+              prose-headings:font-black
+              prose-headings:tracking-tight
+              prose-headings:text-foreground
+              prose-h2:mb-5
+              prose-h2:mt-12
+              prose-h2:border-l-4
+              prose-h2:border-accent
+              prose-h2:pl-4
+              prose-h2:text-2xl
+              prose-h3:mt-8
+              prose-h3:text-xl
+              prose-strong:font-bold
+              prose-strong:text-foreground
+              prose-a:text-accent
+              prose-a:no-underline
+              hover:prose-a:opacity-75
+              prose-ul:rounded-2xl
+              prose-ul:border
+              prose-ul:border-border
+              prose-ul:bg-white/70
+              prose-ul:p-6
+              prose-ol:rounded-2xl
+              prose-ol:border
+              prose-ol:border-border
+              prose-ol:bg-white/70
+              prose-ol:p-6
+              prose-li:text-muted-foreground
+              prose-li:marker:text-accent
+              prose-table:my-10
+              prose-table:block
+              prose-table:overflow-x-auto
+              prose-table:border-collapse
+              prose-thead:bg-secondary
+              prose-th:border
+              prose-th:border-border
+              prose-th:p-4
+              prose-th:text-primary
+              prose-td:border
+              prose-td:border-border
+              prose-td:p-4
+              prose-td:text-muted-foreground
+              prose-img:rounded-[2rem]
+              prose-img:border
+              prose-img:border-border
+              prose-blockquote:rounded-r-2xl
+              prose-blockquote:border-l-accent
+              prose-blockquote:bg-secondary/60
+              prose-blockquote:px-6
+              prose-blockquote:py-3
+              prose-blockquote:text-muted-foreground
             "
           >
             {cleanedHtml ? (
@@ -685,7 +931,7 @@ export default async function PostPage({
                   [&_table]:!rounded-2xl
                   [&_th]:!border
                   [&_th]:!border-border
-                  [&_th]:!bg-primary/10
+                  [&_th]:!bg-secondary
                   [&_th]:!p-4
                   [&_th]:!text-primary
                   [&_td]:!border
@@ -694,98 +940,141 @@ export default async function PostPage({
                   [&_td]:!text-muted-foreground
                   [&_tr]:!bg-transparent
                   [&_img]:mx-auto
-                  [&_img]:my-8
+                  [&_img]:my-9
                   [&_img]:block
+                  [&_img]:h-auto
+                  [&_img]:max-w-full
                   [&_img]:rounded-[2rem]
                   [&_img]:border
                   [&_img]:border-border
-                  [&_img]:shadow-[0_16px_50px_rgba(120,80,70,0.12)]
+                  [&_img]:shadow-[0_16px_50px_rgba(53,51,46,0.12)]
                   [&_p]:mb-5
                   [&_p]:leading-[1.9]
                   [&_p]:text-muted-foreground
-                  [&_h2]:mt-10
                   [&_h2]:mb-5
+                  [&_h2]:mt-12
                   [&_h2]:border-l-4
-                  [&_h2]:border-primary
+                  [&_h2]:border-accent
                   [&_h2]:pl-4
                   [&_h2]:text-2xl
-                  [&_h2]:font-bold
+                  [&_h2]:font-black
                   [&_h2]:text-foreground
-                  [&_h3]:mt-7
+                  [&_h3]:mt-8
                   [&_h3]:text-xl
                   [&_h3]:font-bold
                   [&_h3]:text-foreground
-                  [&_li]:mb-1
+                  [&_li]:mb-2
+                  [&_li]:leading-7
                   [&_li]:text-muted-foreground
                   [&_strong]:text-foreground
+                  [&_a]:text-accent
                 "
-                dangerouslySetInnerHTML={{ __html: cleanedHtml }}
+                dangerouslySetInnerHTML={{
+                  __html: cleanedHtml,
+                }}
               />
             ) : (
               post.body && (
-                <PortableText value={post.body as any} components={ptComponents} />
+                <PortableText
+                  value={post.body as any}
+                  components={ptComponents}
+                />
               )
             )}
           </article>
 
+          {/* 資訊聲明 */}
           <aside
-            aria-label="網站資訊聲明"
-            className="mt-12 border-t border-border pt-5 text-sm leading-7 text-muted-foreground"
+            aria-label="網站內容聲明"
+            className="mt-14 rounded-[2rem] border border-border/70 bg-secondary/60 px-6 py-6 text-sm leading-7 text-muted-foreground"
           >
-            本站由凌群不動產建立並經營，屬民間資訊網站，並非政府官方網站。
-            社會住宅包租代管、租屋補助、公益出租人與相關政策資格，請以中央及地方政府最新公告為準。
+            本站內容包含住宅室內設計資訊、空間規劃概念、
+            裝潢風格提案與設計模擬圖片，主要供屋主尋找設計方向與裝潢靈感。
+            部分圖片與內容不一定代表該建案之實際完工案例，也不等同正式施工圖。
+            實際尺寸、材質、預算、法規、設計與施工內容，
+            應由屋主與依法執業的設計、建築或室內裝修專業人員進一步確認。
           </aside>
 
           <ShareBar />
 
+          {/* 延伸閱讀 */}
           {relatedPosts.length > 0 && (
             <section
               aria-labelledby="related-articles"
-              className="mt-14 border-t border-border pt-8"
+              className="mt-14 border-t border-border pt-10"
             >
+              <p className="text-sm font-semibold tracking-[0.2em] text-accent">
+                RELATED ARTICLES
+              </p>
+
               <h2
                 id="related-articles"
-                className="text-2xl font-bold tracking-tight"
+                className="mt-2 text-2xl font-black tracking-tight text-foreground"
               >
                 延伸閱讀
               </h2>
 
-              <div className="mt-5 divide-y divide-border rounded-2xl border border-border bg-white/60">
-                {relatedPosts.map((relatedPost) => (
-                  <article key={relatedPost._id}>
-                    <Link
-                      href={`/blog/${relatedPost.slug}`}
-                      className="flex items-center justify-between gap-5 px-5 py-4 transition-colors hover:bg-primary/5"
+              <div className="mt-6 divide-y divide-border overflow-hidden rounded-[2rem] border border-border bg-white/70 shadow-sm">
+                {relatedPosts.map(
+                  (relatedPost) => (
+                    <article
+                      key={relatedPost._id}
                     >
-                      <h3 className="font-semibold leading-7 text-foreground">
-                        {relatedPost.title}
-                      </h3>
-
-                      <span
-                        aria-hidden="true"
-                        className="flex-shrink-0 text-primary"
+                      <Link
+                        href={`/blog/${relatedPost.slug}`}
+                        className="group flex items-center justify-between gap-5 px-6 py-5 transition-colors hover:bg-secondary/70"
                       >
-                        →
-                      </span>
-                    </Link>
-                  </article>
-                ))}
+                        <div>
+                          <h3 className="font-semibold leading-7 text-foreground transition-colors group-hover:text-accent">
+                            {relatedPost.title}
+                          </h3>
+
+                          {relatedPost.publishedAt && (
+                            <time
+                              dateTime={
+                                relatedPost.publishedAt
+                              }
+                              className="mt-1 block text-xs text-muted-foreground"
+                            >
+                              {formatDate(
+                                relatedPost.publishedAt
+                              )}
+                            </time>
+                          )}
+                        </div>
+
+                        <span
+                          aria-hidden="true"
+                          className="shrink-0 text-accent transition-transform group-hover:translate-x-1"
+                        >
+                          →
+                        </span>
+                      </Link>
+                    </article>
+                  )
+                )}
               </div>
             </section>
           )}
 
-          <div className="mt-12 border-t border-border pt-7">
+          {/* 返回文章列表 */}
+          <div className="mt-12 border-t border-border pt-8">
             <Link
               href="/blog"
-              className="text-sm font-semibold text-primary transition-opacity hover:opacity-70"
+              className="inline-flex items-center text-sm font-semibold text-primary transition-colors hover:text-accent"
             >
-              ← 返回文章列表
+              <span
+                aria-hidden="true"
+                className="mr-2"
+              >
+                ←
+              </span>
+
+              返回室內設計文章列表
             </Link>
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   )
 }

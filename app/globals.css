@@ -7,53 +7,91 @@
   --font-sans: 'Noto Sans TC', 'Geist', sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
 
-  --color-background: #f7f5ef;
-  --color-foreground: #1f2933;
+  /*
+   * 全站背景
+   * 使用偏暖的象牙白，避免室內設計網站過度冰冷。
+   */
+  --color-background: #f7f5f0;
+  --color-foreground: #292824;
 
+  /*
+   * 卡片與浮動元件
+   * 建案、風格、作品與文章卡片皆以白色為主。
+   */
   --color-card: #ffffff;
-  --color-card-foreground: #1f2933;
+  --color-card-foreground: #292824;
 
   --color-popover: #ffffff;
-  --color-popover-foreground: #1f2933;
+  --color-popover-foreground: #292824;
 
-  --color-primary: #1f4e79;
+  /*
+   * 主色
+   * 深炭棕色，適合標題、按鈕、導覽列與重要文字。
+   */
+  --color-primary: #35332e;
   --color-primary-foreground: #ffffff;
 
-  --color-secondary: #e8f1ed;
-  --color-secondary-foreground: #29463d;
+  /*
+   * 次要色
+   * 淺米灰，可用於建案分類、區域分類與內容區塊背景。
+   */
+  --color-secondary: #ebe7df;
+  --color-secondary-foreground: #45423b;
 
-  --color-muted: #eef1f3;
-  --color-muted-foreground: #6b7280;
+  /*
+   * 弱化內容
+   * 適合摘要、日期、補充資訊與次要文字。
+   */
+  --color-muted: #efede8;
+  --color-muted-foreground: #716f68;
 
-  --color-accent: #c59b4a;
+  /*
+   * 強調色
+   * 木質棕金色，呼應木作、家具與住宅空間質感。
+   */
+  --color-accent: #a67c52;
   --color-accent-foreground: #ffffff;
 
-  --color-destructive: #dc2626;
+  --color-destructive: #c2413b;
   --color-destructive-foreground: #ffffff;
 
-  --color-border: #d8ddd8;
-  --color-input: #d8ddd8;
-  --color-ring: #1f4e79;
+  /*
+   * 邊框、輸入框與焦點外框
+   */
+  --color-border: #dedad1;
+  --color-input: #dedad1;
+  --color-ring: #8c6846;
 
-  --color-chart-1: #1f4e79;
-  --color-chart-2: #2f7d5c;
-  --color-chart-3: #c59b4a;
-  --color-chart-4: #7aa6c2;
-  --color-chart-5: #8b7355;
+  /*
+   * 圖表與資料視覺化色彩
+   */
+  --color-chart-1: #35332e;
+  --color-chart-2: #7b8975;
+  --color-chart-3: #a67c52;
+  --color-chart-4: #aaa397;
+  --color-chart-5: #c1a789;
 
+  /*
+   * 圓角
+   * 不使用過度圓潤的科技產品風格，
+   * 保留住宅設計網站較穩重的視覺。
+   */
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
   --radius-lg: 0.875rem;
   --radius-xl: 1.25rem;
 
+  /*
+   * Sidebar
+   */
   --color-sidebar: #ffffff;
-  --color-sidebar-foreground: #1f2933;
-  --color-sidebar-primary: #1f4e79;
+  --color-sidebar-foreground: #292824;
+  --color-sidebar-primary: #35332e;
   --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #e8f1ed;
-  --color-sidebar-accent-foreground: #29463d;
-  --color-sidebar-border: #d8ddd8;
-  --color-sidebar-ring: #1f4e79;
+  --color-sidebar-accent: #ebe7df;
+  --color-sidebar-accent-foreground: #45423b;
+  --color-sidebar-border: #dedad1;
+  --color-sidebar-ring: #8c6846;
 }
 
 @layer base {
@@ -63,14 +101,45 @@
 
   html {
     scroll-behavior: smooth;
+    background: #f7f5f0;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * 避免圖片下方產生 inline 元素空隙，
+   * 後續作品圖、格局圖與建案圖片會更好排版。
+   */
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  /*
+   * 統一表單字型，避免 input 與 button 使用瀏覽器預設字體。
+   */
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  /*
+   * 保留清楚的鍵盤操作焦點，
+   * 對可用性與無障礙較友善。
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
   }
 
   ::selection {
-    background: #cfe3dc;
-    color: #1f2933;
+    background: #ddd0be;
+    color: #292824;
   }
 }

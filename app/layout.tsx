@@ -2,16 +2,20 @@ import type { Metadata } from "next"
 import { Geist_Mono, Noto_Sans_TC } from "next/font/google"
 import Script from "next/script"
 
+import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 
 import "./globals.css"
 
-const siteUrl = "https://home.line88.tw"
-const siteName = "台灣社會住宅包租代管資訊站"
-const shortSiteName = "社會住宅包租代管資訊站"
+const siteUrl = "https://homedesign.line88.tw"
+const siteName = "台灣室內設計資訊網"
+const shortSiteName = "台灣室內設計資訊網"
+
+const defaultTitle =
+  "台灣室內設計資訊網｜建案設計提案、居家裝潢與空間規劃"
 
 const siteDescription =
-  "台灣社會住宅包租代管資訊站整理社會住宅、包租代管、公益出租人、租屋補助、房東出租管理與租客權益相關資訊。本站由凌群不動產建立並經營，屬民間資訊網站，非政府機關或政府官方網站。"
+  "台灣室內設計資訊網整理全台住宅建案、室內設計風格、居家裝潢、格局坪數、空間規劃與收納設計相關資訊，提供屋主尋找住宅設計方向與裝潢靈感。"
 
 const notoSansTC = Noto_Sans_TC({
   subsets: ["latin"],
@@ -36,34 +40,46 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "台灣社會住宅包租代管資訊站｜房東出租與租屋政策資訊",
+    default: defaultTitle,
     template: `%s｜${shortSiteName}`,
   },
 
   description: siteDescription,
 
   keywords: [
-    "社會住宅包租代管",
-    "包租代管",
-    "社宅包租代管",
-    "公益出租人",
-    "租屋補助",
-    "房東出租",
-    "租屋代管",
-    "出租管理",
-    "房屋出租",
-    "租客權益",
+    "室內設計",
+    "室內裝潢",
+    "居家裝潢",
+    "住宅設計",
+    "建案室內設計",
+    "建案設計提案",
+    "新成屋裝潢",
+    "預售屋客變",
+    "老屋翻新",
+    "小坪數設計",
+    "格局規劃",
+    "空間設計",
+    "收納設計",
+    "客廳設計",
+    "臥室設計",
+    "廚房設計",
+    "現代風室內設計",
+    "北歐風室內設計",
   ],
 
-  creator: "台灣社會住宅包租代管資訊站",
+  creator: siteName,
   publisher: siteName,
 
-  category: "社會住宅與租屋資訊",
+  category: "室內設計與居家裝潢",
 
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
+  },
+
+  alternates: {
+    canonical: "/",
   },
 
   icons: {
@@ -91,7 +107,7 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: "台灣社會住宅包租代管資訊站｜房東出租與租屋政策資訊",
+    title: defaultTitle,
     description: siteDescription,
     url: siteUrl,
     siteName,
@@ -102,14 +118,14 @@ export const metadata: Metadata = {
         url: "/images/og-home.jpg",
         width: 1200,
         height: 630,
-        alt: "台灣社會住宅包租代管資訊站",
+        alt: "台灣室內設計資訊網－住宅建案設計與居家裝潢提案",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "台灣社會住宅包租代管資訊站｜房東出租與租屋政策資訊",
+    title: defaultTitle,
     description: siteDescription,
     images: ["/images/og-home.jpg"],
   },
@@ -143,19 +159,20 @@ export default function RootLayout({
       name: "Taiwan",
     },
     knowsAbout: [
-      "社會住宅",
-      "社會住宅包租代管",
-      "包租代管",
-      "公益出租人",
-      "租屋補助",
-      "房東出租管理",
-      "租客權益",
-      "住宅租賃",
+      "室內設計",
+      "住宅室內設計",
+      "室內裝潢",
+      "建案設計提案",
+      "新成屋裝潢",
+      "預售屋客變",
+      "老屋翻新",
+      "小坪數設計",
+      "住宅格局規劃",
+      "居家空間設計",
+      "室內設計風格",
+      "居家收納設計",
+      "裝潢預算規劃",
     ],
-    parentOrganization: {
-      "@type": "Organization",
-      name: "凌群不動產",
-    },
   }
 
   const websiteJsonLd = {
@@ -180,19 +197,17 @@ export default function RootLayout({
       <body className="bg-background font-sans text-foreground antialiased">
         <Navbar />
 
-        <Script
+        <script
           id="organization-jsonld"
           type="application/ld+json"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd),
           }}
         />
 
-        <Script
+        <script
           id="website-jsonld"
           type="application/ld+json"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteJsonLd),
           }}
@@ -205,7 +220,11 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        {children}
+        <main className="min-h-screen pt-20">
+          {children}
+        </main>
+
+        <Footer />
       </body>
     </html>
   )
