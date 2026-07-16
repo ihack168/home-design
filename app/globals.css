@@ -1,3 +1,4 @@
+```css
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -9,48 +10,50 @@
 
   /*
    * 全站背景
-   * 使用偏暖的象牙白，避免室內設計網站過度冰冷。
+   * 使用非常淺的霧藍色，保持明亮、乾淨與住宅空間感。
    */
-  --color-background: #f7f5f0;
-  --color-foreground: #292824;
+  --color-background: #f3fafb;
+  --color-foreground: #263a40;
 
   /*
    * 卡片與浮動元件
-   * 建案、風格、作品與文章卡片皆以白色為主。
+   * 建案、風格、作品與文章卡片仍以白色為主，
+   * 與淺藍背景形成清楚層次。
    */
   --color-card: #ffffff;
-  --color-card-foreground: #292824;
+  --color-card-foreground: #263a40;
 
   --color-popover: #ffffff;
-  --color-popover-foreground: #292824;
+  --color-popover-foreground: #263a40;
 
   /*
    * 主色
-   * 深炭棕色，適合標題、按鈕、導覽列與重要文字。
+   * 使用偏深的藍綠色，
+   * 適合標題、主要按鈕、導覽列與重要文字。
    */
-  --color-primary: #35332e;
+  --color-primary: #287f8c;
   --color-primary-foreground: #ffffff;
 
   /*
    * 次要色
-   * 淺米灰，可用於建案分類、區域分類與內容區塊背景。
+   * 淺霧藍，可用於建案分類、區域分類與內容區塊背景。
    */
-  --color-secondary: #ebe7df;
-  --color-secondary-foreground: #45423b;
+  --color-secondary: #e3f3f5;
+  --color-secondary-foreground: #315b63;
 
   /*
    * 弱化內容
    * 適合摘要、日期、補充資訊與次要文字。
    */
-  --color-muted: #efede8;
-  --color-muted-foreground: #716f68;
+  --color-muted: #eaf4f5;
+  --color-muted-foreground: #6d8186;
 
   /*
    * 強調色
-   * 木質棕金色，呼應木作、家具與住宅空間質感。
+   * Tiffany 藍，用於標籤、重點文字、Hover 與視覺亮點。
    */
-  --color-accent: #a67c52;
-  --color-accent-foreground: #ffffff;
+  --color-accent: #40c7c7;
+  --color-accent-foreground: #163d42;
 
   --color-destructive: #c2413b;
   --color-destructive-foreground: #ffffff;
@@ -58,23 +61,22 @@
   /*
    * 邊框、輸入框與焦點外框
    */
-  --color-border: #dedad1;
-  --color-input: #dedad1;
-  --color-ring: #8c6846;
+  --color-border: #cbe2e5;
+  --color-input: #cbe2e5;
+  --color-ring: #40c7c7;
 
   /*
    * 圖表與資料視覺化色彩
    */
-  --color-chart-1: #35332e;
-  --color-chart-2: #7b8975;
-  --color-chart-3: #a67c52;
-  --color-chart-4: #aaa397;
-  --color-chart-5: #c1a789;
+  --color-chart-1: #287f8c;
+  --color-chart-2: #40c7c7;
+  --color-chart-3: #75d7d8;
+  --color-chart-4: #7aaeb7;
+  --color-chart-5: #a3d7da;
 
   /*
    * 圓角
-   * 不使用過度圓潤的科技產品風格，
-   * 保留住宅設計網站較穩重的視覺。
+   * 維持住宅設計網站穩重但柔和的視覺。
    */
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
@@ -85,13 +87,13 @@
    * Sidebar
    */
   --color-sidebar: #ffffff;
-  --color-sidebar-foreground: #292824;
-  --color-sidebar-primary: #35332e;
+  --color-sidebar-foreground: #263a40;
+  --color-sidebar-primary: #287f8c;
   --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #ebe7df;
-  --color-sidebar-accent-foreground: #45423b;
-  --color-sidebar-border: #dedad1;
-  --color-sidebar-ring: #8c6846;
+  --color-sidebar-accent: #e3f3f5;
+  --color-sidebar-accent-foreground: #315b63;
+  --color-sidebar-border: #cbe2e5;
+  --color-sidebar-ring: #40c7c7;
 }
 
 @layer base {
@@ -101,7 +103,7 @@
 
   html {
     scroll-behavior: smooth;
-    background: #f7f5f0;
+    background: #f3fafb;
   }
 
   body {
@@ -139,7 +141,8 @@
   }
 
   ::selection {
-    background: #ddd0be;
-    color: #292824;
+    background: #bfeaea;
+    color: #263a40;
   }
 }
+```
