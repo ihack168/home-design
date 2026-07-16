@@ -88,7 +88,7 @@ export function HeroSection() {
 
           <div className="relative overflow-hidden rounded-[2.5rem] border border-white bg-white p-3 shadow-[0_24px_80px_rgba(53,51,46,0.16)]">
             <Image
-              src="/images/hero.png"
+              src="https://cdn.sanity.io/images/gq4nr57o/production/3178f26ac20422ee0cce1d5837a3cab26028fb2c-1122x1402.png?auto=format"
               alt="現代住宅室內設計與居家裝潢提案"
               width={720}
               height={860}
