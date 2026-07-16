@@ -20,6 +20,6 @@ jobs:
         run: cd sanity && npm install
       - name: Deploy Sanity Studio
         # 在這裡加上 --url 參數，讓自動化部署可以自動命名網址
-        run: cd sanity && npx sanity deploy -y --url linkrich-line88
+        run: cd sanity && npx sanity deploy -y --url home-design
         env:
           SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}

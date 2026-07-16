@@ -6,9 +6,9 @@ import {schemaTypes} from './schemaTypes'
 
 export default defineConfig({
   name: 'default',
-  title: 'linkrich-line88',
+  title: 'home-design',
 
-  projectId: 'no0ub4vm',
+  projectId: 'gq4nr57o',
   dataset: 'production',
 
   plugins: [structureTool(), visionTool(), media()],
