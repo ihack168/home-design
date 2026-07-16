@@ -7,7 +7,7 @@ import { LineConsultButton } from "@/components/line-consult-button"
 import { ServicesSection } from "@/components/services-section"
 import { client } from "@/lib/sanity"
 
-export const revalidate = 300
+export const revalidate = 60
 
 const SITE_URL = "https://home-design.line88.tw"
 const SITE_NAME = "台灣室內設計資訊網"
@@ -147,9 +147,14 @@ function extractFirstImage(htmlContent?: string) {
 
   if (!match?.[1]) return ""
 
-  return optimizeSanityImageUrl(
-    decodeHtmlEntities(match[1].trim())
-  )
+  const imageUrl = decodeHtmlEntities(match[1].trim())
+
+  /*
+   * HTML 第一張圖片直接作為首頁封面。
+   * 不在這裡重複追加 Sanity 圖片參數，
+   * 避免原網址已有 query string 時產生異常網址。
+   */
+  return imageUrl
 }
 
 function extractPlainText(htmlContent?: string) {

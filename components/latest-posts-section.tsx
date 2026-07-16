@@ -51,16 +51,29 @@ function optimizeSanityImageUrl(url?: string) {
   return optimizedUrl
 }
 
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+}
+
 function extractFirstImage(htmlContent?: string) {
   if (!htmlContent) return ""
 
   const imgMatch = htmlContent.match(
-    /<img[^>]+src=["']([^"']+)["']/i
+    /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/i
   )
 
-  return imgMatch?.[1]
-    ? optimizeSanityImageUrl(imgMatch[1])
-    : ""
+  if (!imgMatch?.[1]) return ""
+
+  const imageUrl = decodeHtmlEntities(
+    imgMatch[1].trim()
+  )
+
+  return optimizeSanityImageUrl(imageUrl)
 }
 
 function extractDescription(htmlContent?: string) {
@@ -142,7 +155,7 @@ async function getLatestPosts(): Promise<Post[]> {
       {},
       {
         next: {
-          revalidate: 3600,
+          revalidate: 60,
         },
       }
     )
