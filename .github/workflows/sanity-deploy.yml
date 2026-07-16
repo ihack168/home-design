@@ -1,0 +1,25 @@
+name: Deploy Sanity Studio
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sanity/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: cd sanity && npm install
+      - name: Deploy Sanity Studio
+        # 在這裡加上 --url 參數，讓自動化部署可以自動命名網址
+        run: cd sanity && npx sanity deploy -y --url linkrich-line88
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
