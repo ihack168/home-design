@@ -1,12 +1,12 @@
 import https from 'https';
 
-const SANITY_PROJECT_ID = 'no0ub4vm';
+const SANITY_PROJECT_ID = 'gq4nr57o';
 const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
 
-const SHEET_NAME = 'linkrich';
+const SHEET_NAME = 'home-design';
 
-const OFFICIAL_BASE_URL = 'https://home.line88.tw/blog';
+const OFFICIAL_BASE_URL = 'https://home-design.line88.tw/blog';
 
 const GOOGLE_SCRIPT_BASE_URL =
   'https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec';
