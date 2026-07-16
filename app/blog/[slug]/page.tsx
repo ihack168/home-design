@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic"
 
 const siteName = "台灣室內設計資訊網"
 const shortSiteName = "室內設計資訊網"
-const siteUrl = "https://homedesign.line88.tw"
+const siteUrl = "https://home-design.line88.tw"
 const defaultAuthorName = "台灣室內設計資訊網編輯部"
 const defaultArticleCategory = "室內設計與居家裝潢"
 

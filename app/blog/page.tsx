@@ -7,7 +7,7 @@ import { client } from "@/lib/sanity"
 
 export const revalidate = 300
 
-const SITE_URL = "https://homedesign.line88.tw"
+const SITE_URL = "https://home-design.line88.tw"
 const SITE_NAME = "台灣室內設計資訊網"
 const ORGANIZATION_ID = `${SITE_URL}/#organization`
 const WEBSITE_ID = `${SITE_URL}/#website`

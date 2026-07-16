@@ -7,7 +7,7 @@ import { Navbar } from "@/components/navbar"
 
 import "./globals.css"
 
-const siteUrl = "https://homedesign.line88.tw"
+const siteUrl = "https://home-design.line88.tw"
 const siteName = "台灣室內設計資訊網"
 const shortSiteName = "台灣室內設計資訊網"
 
