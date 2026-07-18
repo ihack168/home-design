@@ -227,12 +227,32 @@ export default defineType({
     }),
 
     defineField({
+      name: 'youtubeVideoId',
+      title: 'YouTube 影片 ID',
+      type: 'string',
+
+      description:
+        '只填 YouTube 影片 ID，不要貼完整網址或 iframe。例如影片網址為 https://www.youtube.com/watch?v=abcDEF12345，這裡只填 abcDEF12345。',
+
+      validation: (Rule) =>
+        Rule.regex(
+          /^[a-zA-Z0-9_-]{11}$/,
+          {
+            name: 'YouTube 影片 ID',
+            invert: false,
+          }
+        ).warning(
+          'YouTube 影片 ID 通常是 11 碼英文字母、數字、底線或連字號'
+        ),
+    }),
+
+    defineField({
       name: 'mainImage',
       title: '文章封面圖',
       type: 'image',
 
       description:
-        '可作為文章列表、首頁作品卡片或社群分享封面。若第一張圖片已直接寫入 HTML，此欄位可暫時留空。',
+        '可作為文章列表、首頁作品卡片或社群分享封面。即使有 YouTube 影片，仍建議保留封面圖供 SEO、社群分享與影片載入前使用。',
 
       options: {
         hotspot: true,
