@@ -251,6 +251,7 @@ interface PostResult extends PostMetadataResult {
   _id: string
   slug: string
   body?: unknown
+  youtubeVideoId?: string
 }
 
 const ptComponents = {
@@ -454,6 +455,7 @@ export default async function PostPage({
         publishedAt,
         _updatedAt,
         mainImage,
+        youtubeVideoId,
         body,
         htmlContent,
         "authorName": author->name,
@@ -515,6 +517,14 @@ export default async function PostPage({
 
   const canonicalUrl =
     `${siteUrl}/blog/${slug}`
+
+  const youtubeVideoId =
+    typeof post.youtubeVideoId === "string" &&
+    /^[a-zA-Z0-9_-]{11}$/.test(
+      post.youtubeVideoId.trim()
+    )
+      ? post.youtubeVideoId.trim()
+      : undefined
 
   const mainImageUrl = post.mainImage
     ? urlFor(post.mainImage)
@@ -842,17 +852,36 @@ export default async function PostPage({
             </div>
           </header>
 
-          {/* 文章首圖 */}
-          {mainImageUrl && (
-            <figure className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
-              <img
-                src={mainImageUrl}
-                alt={`${post.title}室內設計與空間提案`}
-                className="h-auto w-full object-cover"
-                fetchPriority="high"
-                decoding="async"
-              />
-            </figure>
+          {/* 文章展示影片：有 YouTube 影片時優先顯示，否則顯示 mainImage */}
+          {youtubeVideoId ? (
+            <section
+              aria-label={`${post.title}室內設計展示影片`}
+              className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-black shadow-[0_20px_70px_rgba(53,51,46,0.12)]"
+            >
+              <div className="relative aspect-video w-full">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&playsinline=1&controls=1&rel=0`}
+                  title={`${post.title}室內設計展示影片`}
+                  className="absolute inset-0 h-full w-full"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  loading="eager"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              </div>
+            </section>
+          ) : (
+            mainImageUrl && (
+              <figure className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
+                <img
+                  src={mainImageUrl}
+                  alt={`${post.title}室內設計與空間提案`}
+                  className="h-auto w-full object-cover"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </figure>
+            )
           )}
 
           {/* 文章內容 */}
