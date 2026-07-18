@@ -5,6 +5,7 @@ import { PortableText } from "@portabletext/react"
 import { createImageUrlBuilder } from "@sanity/image-url"
 
 import { ShareBar } from "@/components/share-bar"
+import { YouTubeCoverPlayer } from "@/components/youtube-cover-player"
 import { sanitizePostHtml } from "@/lib/content-cleanup"
 import { client } from "@/lib/sanity"
 
@@ -539,6 +540,9 @@ export default async function PostPage({
       post.htmlContent
     )
 
+  const videoPosterImage =
+    firstHtmlImage || mainImageUrl
+
   const structuredImageUrl = firstHtmlImage
     ? buildSocialImageUrl(firstHtmlImage)
     : post.mainImage
@@ -564,7 +568,10 @@ export default async function PostPage({
     ? sanitizePostHtml(
         optimizedHtml,
         post.title,
-        Boolean(post.mainImage)
+        Boolean(
+          post.mainImage ||
+          (youtubeVideoId && firstHtmlImage)
+        )
       )
     : ""
 
@@ -852,24 +859,13 @@ export default async function PostPage({
             </div>
           </header>
 
-          {/* 文章展示影片：有 YouTube 影片時優先顯示，否則顯示 mainImage */}
+          {/* 文章主視覺：先顯示高畫質首圖，點擊後原位置播放 YouTube */}
           {youtubeVideoId ? (
-            <section
-              aria-label={`${post.title}室內設計展示影片`}
-              className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-black shadow-[0_20px_70px_rgba(53,51,46,0.12)]"
-            >
-              <div className="relative aspect-video w-full">
-                <iframe
-                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&playsinline=1&controls=1&rel=0`}
-                  title={`${post.title}室內設計展示影片`}
-                  className="absolute inset-0 h-full w-full"
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  allowFullScreen
-                  loading="eager"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              </div>
-            </section>
+            <YouTubeCoverPlayer
+              videoId={youtubeVideoId}
+              posterImage={videoPosterImage}
+              title={post.title}
+            />
           ) : (
             mainImageUrl && (
               <figure className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
