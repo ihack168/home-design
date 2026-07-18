@@ -4,7 +4,7 @@ import { client } from "@/lib/sanity"
 
 export const revalidate = 3600
 
-const baseUrl = "https://home.line88.tw"
+const baseUrl = "https://home-design.line88.tw"
 
 type SanityPost = {
   slug: string
