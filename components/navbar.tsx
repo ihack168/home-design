@@ -1,20 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { LineConsultButton } from "@/components/line-consult-button"
 
 const navLinks = [
   { label: "首頁", href: "/" },
-  { label: "建案設計", href: "/projects" },
+  { label: "建案作品", href: "/projects" },
   { label: "設計風格", href: "/styles" },
-  { label: "空間設計", href: "/spaces" },
-  { label: "格局坪數", href: "/layouts" },
-  { label: "裝潢知識", href: "/renovation" },
-  { label: "最新文章", href: "/blog" },
+  { label: "裝潢知識", href: "/blog" },
 ]
 
 function isActivePath(pathname: string, href: string) {
@@ -88,7 +85,7 @@ export function Navbar() {
           {/* 桌面版導覽 */}
           <nav
             aria-label="主要導覽"
-            className="hidden items-center gap-5 xl:flex"
+            className="hidden items-center gap-5 lg:flex"
           >
             {navLinks.map((link) => {
               const active = isActivePath(pathname, link.href)
@@ -121,20 +118,23 @@ export function Navbar() {
             </LineConsultButton>
           </nav>
 
-          {/* 手機版按鈕 */}
+          {/* 手機版選單按鈕 */}
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
             aria-label={mobileOpen ? "關閉選單" : "開啟選單"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/70 text-foreground transition-colors hover:bg-secondary xl:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/70 text-foreground transition-colors hover:bg-secondary lg:hidden"
           >
             <span className="sr-only">
               {mobileOpen ? "關閉選單" : "開啟選單"}
             </span>
 
-            <span className="relative block h-5 w-6" aria-hidden="true">
+            <span
+              className="relative block h-5 w-6"
+              aria-hidden="true"
+            >
               <span
                 className={`absolute left-0 top-0.5 h-0.5 w-6 bg-current transition-transform ${
                   mobileOpen ? "translate-y-2 rotate-45" : ""
@@ -161,7 +161,7 @@ export function Navbar() {
       {mobileOpen && (
         <div
           id="mobile-navigation"
-          className="fixed inset-0 z-40 bg-background pt-20 xl:hidden"
+          className="fixed inset-0 z-40 bg-background pt-20 lg:hidden"
         >
           <nav
             aria-label="手機版主要導覽"
@@ -202,11 +202,6 @@ export function Navbar() {
               <LineConsultButton className="flex w-full items-center justify-center rounded-full bg-[#06C755] px-6 py-4 text-base font-semibold text-white shadow-sm">
                 加入 LINE 免費諮詢
               </LineConsultButton>
-
-              <p className="mt-5 text-center text-xs leading-6 text-muted-foreground">
-                提供住宅建案、室內設計風格與居家裝潢提案資訊。
-                實際設計、施工與報價內容以合作服務單位說明為準。
-              </p>
             </div>
           </nav>
         </div>
