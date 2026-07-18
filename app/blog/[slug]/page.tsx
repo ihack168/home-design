@@ -285,6 +285,7 @@ interface PostMetadataResult {
   publishedAt?: string
   _updatedAt?: string
   mainImage?: unknown
+  livingRoomImage?: any
   diningRoomImage?: any
   masterBedroomImage?: any
   secondBedroomImage?: any
@@ -508,6 +509,7 @@ export default async function PostPage({
         publishedAt,
         _updatedAt,
         mainImage,
+        livingRoomImage,
         diningRoomImage,
         masterBedroomImage,
         secondBedroomImage,
@@ -590,6 +592,15 @@ export default async function PostPage({
         .url()
     : undefined
 
+  const livingRoomImageUrl =
+    post.livingRoomImage
+      ? urlFor(post.livingRoomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
   const diningRoomImageUrl =
     post.diningRoomImage
       ? urlFor(post.diningRoomImage)
@@ -663,6 +674,14 @@ export default async function PostPage({
         post.title
       )
     : ""
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "客廳設計",
+    livingRoomImageUrl,
+    post.livingRoomImage?.alt ||
+      `${post.title}－客廳設計`
+  )
 
   cleanedHtml = insertImageAfterHeading(
     cleanedHtml,
