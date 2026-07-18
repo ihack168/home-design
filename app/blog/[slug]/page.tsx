@@ -229,6 +229,55 @@ function serializeJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, "\\u003c")
 }
 
+function escapeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+}
+
+function insertImageAfterHeading(
+  html: string,
+  headingText: string,
+  imageUrl?: string,
+  alt?: string
+) {
+  if (!html || !imageUrl) return html
+
+  const escapedHeading = headingText.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  )
+
+  const headingRegex = new RegExp(
+    `(<h2\\b[^>]*>\\s*${escapedHeading}\\s*<\\/h2>)`,
+    "i"
+  )
+
+  if (!headingRegex.test(html)) {
+    return html
+  }
+
+  const safeUrl = escapeHtmlAttribute(imageUrl)
+  const safeAlt = escapeHtmlAttribute(
+    alt || headingText
+  )
+
+  return html.replace(
+    headingRegex,
+    `$1
+<figure class="article-space-image">
+  <img
+    src="${safeUrl}"
+    alt="${safeAlt}"
+    loading="lazy"
+    decoding="async"
+  />
+</figure>`
+  )
+}
+
 interface PostMetadataResult {
   title?: string
   description?: string
@@ -236,6 +285,9 @@ interface PostMetadataResult {
   publishedAt?: string
   _updatedAt?: string
   mainImage?: unknown
+  diningRoomImage?: any
+  masterBedroomImage?: any
+  secondBedroomImage?: any
   authorName?: string
   authorSlug?: string
   tags?: string[]
@@ -456,6 +508,9 @@ export default async function PostPage({
         publishedAt,
         _updatedAt,
         mainImage,
+        diningRoomImage,
+        masterBedroomImage,
+        secondBedroomImage,
         youtubeVideoId,
         body,
         htmlContent,
@@ -535,6 +590,33 @@ export default async function PostPage({
         .url()
     : undefined
 
+  const diningRoomImageUrl =
+    post.diningRoomImage
+      ? urlFor(post.diningRoomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const masterBedroomImageUrl =
+    post.masterBedroomImage
+      ? urlFor(post.masterBedroomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const secondBedroomImageUrl =
+    post.secondBedroomImage
+      ? urlFor(post.secondBedroomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
   const firstHtmlImage =
     extractFirstImageFromHtml(
       post.htmlContent
@@ -575,12 +657,36 @@ export default async function PostPage({
       )
     : ""
 
-  const cleanedHtml = sanitizedHtml
+  let cleanedHtml = sanitizedHtml
     ? removeLeadingDuplicateHeading(
         sanitizedHtml,
         post.title
       )
     : ""
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "餐廳設計",
+    diningRoomImageUrl,
+    post.diningRoomImage?.alt ||
+      `${post.title}－餐廳設計`
+  )
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "主臥設計",
+    masterBedroomImageUrl,
+    post.masterBedroomImage?.alt ||
+      `${post.title}－主臥設計`
+  )
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "次臥設計",
+    secondBedroomImageUrl,
+    post.secondBedroomImage?.alt ||
+      `${post.title}－次臥設計`
+  )
 
   const relatedPosts =
     await client.fetch<RelatedPost[]>(

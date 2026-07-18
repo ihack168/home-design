@@ -26,7 +26,7 @@ export function YouTubeCoverPlayer({
       <div className="relative aspect-video overflow-hidden rounded-[2rem] border border-border bg-black shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
         {isPlaying ? (
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&playsinline=1&controls=1&rel=0`}
             title={`${title}室內設計展示影片`}
             className="absolute inset-0 h-full w-full"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
