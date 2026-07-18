@@ -188,6 +188,22 @@ export default defineType({
     }),
 
     defineField({
+      name: 'youtubeVideoId',
+      title: 'YouTube 影片 ID',
+      type: 'string',
+      description:
+        '只填 YouTube 網址中的 11 碼影片 ID，例如：https://www.youtube.com/watch?v=dQw4w9WgXcQ，請填 dQw4w9WgXcQ。留空則不顯示影片。',
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          if (!value) return true
+
+          return /^[a-zA-Z0-9_-]{11}$/.test(value.trim())
+            ? true
+            : '請輸入正確的 11 碼 YouTube 影片 ID'
+        }),
+    }),
+
+    defineField({
       name: 'livingRoomImage',
       title: '客廳圖片',
       type: 'image',
