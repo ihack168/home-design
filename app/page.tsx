@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { PostThumbnail } from "@/components/post-thumbnail"
 import { client } from "@/lib/sanity"
 
-export const revalidate = 300
+export const revalidate = 60
 
 const SITE_URL = "https://home-design.line88.tw"
 const SITE_NAME = "台灣室內設計資訊網"

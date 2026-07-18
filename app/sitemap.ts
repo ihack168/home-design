@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 
 import { client } from "@/lib/sanity"
 
-export const revalidate = 3600
+export const revalidate = 60
 
 const baseUrl = "https://home-design.line88.tw"
 
