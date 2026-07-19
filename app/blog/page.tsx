@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 import { PostThumbnail } from "@/components/post-thumbnail"
 import { client } from "@/lib/sanity"
@@ -10,8 +11,43 @@ const SITE_URL = "https://home-design.line88.tw"
 const SITE_NAME = "台灣室內設計資訊網"
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-home.jpg`
 
+/**
+ * 請確認這五個名稱與 Sanity 文章實際使用的 tags 完全一致。
+ * 例如 Sanity 用「現代風室內設計」，這裡也必須改成同樣名稱。
+ */
+const DESIGN_STYLES = [
+  "現代風室內設計",
+  "日式風室內設計",
+  "侘寂風室內設計",
+  "奶油風室內設計",
+  "北歐風室內設計",
+] as const
+
+/**
+ * 固定縣市名單。
+ * 「市」結尾不一定是縣市，因此不使用字尾判斷，而是直接比對這份清單。
+ */
+const CITIES = [
+  "台北市",
+  "新北市",
+  "桃園市",
+  "台中市",
+  "台南市",
+  "高雄市",
+  "基隆市",
+  "新竹市",
+  "嘉義市",
+  "新竹縣",
+  "苗栗縣",
+  "彰化縣",
+  "嘉義縣",
+  "宜蘭縣",
+] as const
+
 interface SearchParams {
   tag?: string | string[]
+  keyword?: string
+  city?: string
 }
 
 interface RawPost {
@@ -142,22 +178,56 @@ function normalizeSelectedTags(tag?: string | string[]) {
   )
 }
 
-function buildTagPath(selectedTags: string[], toggledTag?: string) {
-  if (!toggledTag) return "/blog"
+function isDesignStyle(tag: string) {
+  return DESIGN_STYLES.includes(tag as (typeof DESIGN_STYLES)[number])
+}
 
-  const nextTags = selectedTags.includes(toggledTag)
-    ? selectedTags.filter((tag) => tag !== toggledTag)
-    : [...selectedTags, toggledTag]
+function isCity(tag: string) {
+  return CITIES.includes(tag as (typeof CITIES)[number])
+}
 
-  if (nextTags.length === 0) return "/blog"
+function buildBlogPath(tags: string[]) {
+  if (tags.length === 0) return "/blog"
 
   const query = new URLSearchParams()
 
-  nextTags.forEach((tag) => {
+  tags.forEach((tag) => {
     query.append("tag", tag)
   })
 
   return `/blog?${query.toString()}`
+}
+
+function toggleTagPath(selectedTags: string[], tag: string) {
+  const nextTags = selectedTags.includes(tag)
+    ? selectedTags.filter((item) => item !== tag)
+    : [...selectedTags, tag]
+
+  return buildBlogPath(nextTags)
+}
+
+/**
+ * 風格採單選：
+ * 選擇新風格時，會移除原本五種風格中的任何一個，再加入新風格。
+ * 再點擊目前風格則取消風格篩選。
+ */
+function buildStylePath(selectedTags: string[], style: string) {
+  const otherTags = selectedTags.filter((tag) => !isDesignStyle(tag))
+  const currentStyle = selectedTags.find(isDesignStyle)
+
+  return currentStyle === style
+    ? buildBlogPath(otherTags)
+    : buildBlogPath([...otherTags, style])
+}
+
+/**
+ * 縣市採單選：
+ * 選擇新縣市時，會移除舊縣市，但保留風格、行政區與建案條件。
+ */
+function buildCityPath(selectedTags: string[], city: string) {
+  const otherTags = selectedTags.filter((tag) => !isCity(tag))
+
+  return city ? buildBlogPath([...otherTags, city]) : buildBlogPath(otherTags)
 }
 
 export default async function BlogPage({
@@ -167,6 +237,23 @@ export default async function BlogPage({
 }) {
   const params = await searchParams
   const selectedTags = normalizeSelectedTags(params.tag)
+  const keyword = String(params.keyword || "").trim()
+
+  /**
+   * 縣市下拉表單送出後，由 Server Action 重新導向，
+   * 不需要建立額外 Client Component。
+   */
+  async function changeCity(formData: FormData) {
+    "use server"
+
+    const city = String(formData.get("city") || "").trim()
+    const submittedTags = formData
+      .getAll("selectedTag")
+      .map((value) => String(value || "").trim())
+      .filter(Boolean)
+
+    redirect(buildCityPath(submittedTags, city))
+  }
 
   const posts = await client.fetch<RawPost[]>(
     `*[
@@ -206,7 +293,7 @@ export default async function BlogPage({
     })
   })
 
-  const tags: TagItem[] = Array.from(tagCountMap.entries())
+  const allTags: TagItem[] = Array.from(tagCountMap.entries())
     .map(([name, count]) => ({
       name,
       count,
@@ -217,6 +304,34 @@ export default async function BlogPage({
         a.name.localeCompare(b.name, "zh-Hant")
     )
 
+  const availableStyles = DESIGN_STYLES.map((name) => ({
+    name,
+    count: tagCountMap.get(name) || 0,
+  }))
+
+  const availableCities = CITIES.map((name) => ({
+    name,
+    count: tagCountMap.get(name) || 0,
+  })).filter((city) => city.count > 0)
+
+  /**
+   * 排除固定風格與縣市後，其餘 tags 視為「行政區／建案／其他搜尋標籤」。
+   * 不需要修改 Sanity Schema。
+   */
+  const searchableTags = allTags.filter(
+    (tag) => !isDesignStyle(tag.name) && !isCity(tag.name)
+  )
+
+  const matchedSearchTags = keyword
+    ? searchableTags
+        .filter((tag) =>
+          tag.name.toLocaleLowerCase("zh-TW").includes(
+            keyword.toLocaleLowerCase("zh-TW")
+          )
+        )
+        .slice(0, 30)
+    : []
+
   const filteredPosts =
     selectedTags.length > 0
       ? normalizedPosts.filter((post) =>
@@ -224,53 +339,277 @@ export default async function BlogPage({
         )
       : normalizedPosts
 
+  const selectedStyle =
+    selectedTags.find((tag) => isDesignStyle(tag)) || ""
+
+  const selectedCity =
+    selectedTags.find((tag) => isCity(tag)) || ""
+
   return (
     <main className="min-h-screen bg-background px-4 pb-24 pt-6 text-foreground sm:px-6 md:pt-10">
       <div className="mx-auto max-w-7xl">
-        {tags.length > 0 && (
-          <section className="rounded-[2rem] border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-7 sm:py-7">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-black tracking-tight md:text-3xl">
-                  室內設計與裝潢文章
-                </h1>
+        <section className="rounded-[2rem] border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-7 sm:py-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight md:text-3xl">
+                室內設計與裝潢文章
+              </h1>
 
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  可複選建案、縣市、行政區或設計風格；系統會顯示同時符合所有標籤的文章。
-                </p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                依設計風格、縣市、行政區或建案名稱篩選室內設計文章。
+              </p>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                  共 {normalizedPosts.length} 篇文章
-                  {selectedTags.length > 0 && (
-                    <>
-                      <span aria-hidden="true">・</span>
-                      已篩選 {filteredPosts.length} 篇
-                    </>
-                  )}
-                </p>
-              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                共 {normalizedPosts.length} 篇文章
+                {selectedTags.length > 0 && (
+                  <>
+                    <span aria-hidden="true">・</span>
+                    已篩選 {filteredPosts.length} 篇
+                  </>
+                )}
+              </p>
+            </div>
 
-              {selectedTags.length > 0 && (
+            {selectedTags.length > 0 && (
+              <Link
+                href="/blog"
+                className="inline-flex w-fit items-center rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                清除全部篩選
+              </Link>
+            )}
+          </div>
+
+          {/* 固定五種設計風格 */}
+          <div className="mt-7 border-t border-border/70 pt-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-black">設計風格</h2>
+
+              {selectedStyle && (
                 <Link
-                  href="/blog"
-                  className="inline-flex w-fit items-center rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:border-accent hover:text-accent"
+                  href={buildStylePath(selectedTags, selectedStyle)}
+                  className="text-sm font-semibold text-muted-foreground transition-colors hover:text-accent"
                 >
-                  清除全部篩選
+                  清除風格
                 </Link>
               )}
             </div>
 
-            {selectedTags.length > 0 && (
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
-                  已選條件：
-                </span>
+            <div className="mt-3 flex flex-wrap gap-2.5">
+              {availableStyles.map((style) => {
+                const isActive = selectedStyle === style.name
+                const isUnavailable = style.count === 0
 
+                if (isUnavailable) {
+                  return (
+                    <span
+                      key={style.name}
+                      className="inline-flex cursor-not-allowed items-center rounded-2xl border border-border bg-background/50 px-4 py-2.5 text-sm font-semibold text-muted-foreground/50"
+                      title="目前沒有使用此標籤的文章"
+                    >
+                      {style.name}
+                      <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs">
+                        0
+                      </span>
+                    </span>
+                  )
+                }
+
+                return (
+                  <Link
+                    key={style.name}
+                    href={buildStylePath(selectedTags, style.name)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={
+                      isActive
+                        ? "inline-flex items-center rounded-2xl border border-primary bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm"
+                        : "inline-flex items-center rounded-2xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
+                    }
+                  >
+                    {isActive && (
+                      <span className="mr-1.5" aria-hidden="true">
+                        ✓
+                      </span>
+                    )}
+                    {style.name}
+                    <span
+                      className={
+                        isActive
+                          ? "ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs"
+                          : "ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-muted-foreground"
+                      }
+                    >
+                      {style.count}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* 固定縣市下拉選單 */}
+          <div className="mt-7 border-t border-border/70 pt-6">
+            <h2 className="text-base font-black">縣市</h2>
+
+            <form
+              action={changeCity}
+              className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center"
+            >
+              {selectedTags.map((tag) => (
+                <input
+                  key={tag}
+                  type="hidden"
+                  name="selectedTag"
+                  value={tag}
+                />
+              ))}
+
+              <label htmlFor="city" className="sr-only">
+                選擇縣市
+              </label>
+
+              <select
+                id="city"
+                name="city"
+                defaultValue={selectedCity}
+                className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none transition focus:border-accent sm:max-w-xs"
+              >
+                <option value="">全部縣市</option>
+
+                {availableCities.map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}（{city.count}）
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                套用縣市
+              </button>
+            </form>
+          </div>
+
+          {/* 行政區／建案標籤搜尋 */}
+          <div className="mt-7 border-t border-border/70 pt-6">
+            <h2 className="text-base font-black">搜尋行政區或建案名稱</h2>
+
+            <form
+              action="/blog"
+              method="get"
+              className="mt-3 flex flex-col gap-3 sm:flex-row"
+            >
+              {selectedTags.map((tag) => (
+                <input
+                  key={tag}
+                  type="hidden"
+                  name="tag"
+                  value={tag}
+                />
+              ))}
+
+              <label htmlFor="keyword" className="sr-only">
+                搜尋行政區或建案名稱
+              </label>
+
+              <input
+                id="keyword"
+                name="keyword"
+                type="search"
+                defaultValue={keyword}
+                placeholder="例如：信義區、遠雄上林苑"
+                autoComplete="off"
+                className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-accent"
+              />
+
+              <button
+                type="submit"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                搜尋標籤
+              </button>
+            </form>
+
+            {keyword && (
+              <div className="mt-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-foreground">
+                    「{keyword}」的標籤搜尋結果
+                  </p>
+
+                  <Link
+                    href={buildBlogPath(selectedTags)}
+                    className="text-sm font-semibold text-muted-foreground transition-colors hover:text-accent"
+                  >
+                    清除搜尋文字
+                  </Link>
+                </div>
+
+                {matchedSearchTags.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2.5">
+                    {matchedSearchTags.map((tag) => {
+                      const isActive = selectedTags.includes(tag.name)
+
+                      return (
+                        <Link
+                          key={tag.name}
+                          href={toggleTagPath(selectedTags, tag.name)}
+                          className={
+                            isActive
+                              ? "inline-flex items-center rounded-full bg-primary px-3.5 py-2 text-sm font-bold text-primary-foreground"
+                              : "inline-flex items-center rounded-full border border-accent/20 bg-accent/5 px-3.5 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
+                          }
+                        >
+                          {isActive && (
+                            <span className="mr-1.5" aria-hidden="true">
+                              ✓
+                            </span>
+                          )}
+                          {tag.name}
+                          <span
+                            className={
+                              isActive
+                                ? "ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs"
+                                : "ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-muted-foreground"
+                            }
+                          >
+                            {tag.count}
+                          </span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-3 rounded-xl border border-dashed border-border bg-background px-4 py-5 text-sm text-muted-foreground">
+                    找不到包含「{keyword}」的行政區或建案標籤。
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 已選條件 */}
+          {selectedTags.length > 0 && (
+            <div className="mt-7 border-t border-border/70 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-base font-black">已選條件</h2>
+
+                <Link
+                  href="/blog"
+                  className="text-sm font-semibold text-muted-foreground transition-colors hover:text-accent"
+                >
+                  清除全部
+                </Link>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
                 {selectedTags.map((tag) => (
                   <Link
                     key={tag}
-                    href={buildTagPath(selectedTags, tag)}
-                    className="inline-flex items-center rounded-full bg-primary px-3 py-1.5 text-sm font-bold text-primary-foreground"
+                    href={toggleTagPath(selectedTags, tag)}
+                    className="inline-flex items-center rounded-full bg-primary px-3.5 py-2 text-sm font-bold text-primary-foreground"
                     aria-label={`移除 ${tag} 篩選`}
                   >
                     {tag}
@@ -280,72 +619,9 @@ export default async function BlogPage({
                   </Link>
                 ))}
               </div>
-            )}
-
-            <nav
-              aria-label="文章主題複選篩選"
-              className="mt-5"
-            >
-              <div className="flex flex-wrap gap-2.5">
-                <Link
-                  href="/blog"
-                  aria-current={
-                    selectedTags.length === 0 ? "page" : undefined
-                  }
-                  className={
-                    selectedTags.length === 0
-                      ? "inline-flex items-center rounded-2xl border border-primary bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm"
-                      : "inline-flex items-center rounded-2xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
-                  }
-                >
-                  全部文章
-                  <span
-                    className={
-                      selectedTags.length === 0
-                        ? "ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs"
-                        : "ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-muted-foreground"
-                    }
-                  >
-                    {normalizedPosts.length}
-                  </span>
-                </Link>
-
-                {tags.map((tag) => {
-                  const isActive = selectedTags.includes(tag.name)
-
-                  return (
-                    <Link
-                      key={tag.name}
-                      href={buildTagPath(selectedTags, tag.name)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={
-                        isActive
-                          ? "inline-flex items-center rounded-2xl border border-primary bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm"
-                          : "inline-flex items-center rounded-2xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
-                      }
-                    >
-                      {isActive && (
-                        <span className="mr-1.5" aria-hidden="true">
-                          ✓
-                        </span>
-                      )}
-                      {tag.name}
-                      <span
-                        className={
-                          isActive
-                            ? "ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs"
-                            : "ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-muted-foreground"
-                        }
-                      >
-                        {tag.count}
-                      </span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </nav>
-          </section>
-        )}
+            </div>
+          )}
+        </section>
 
         {selectedTags.length > 0 && (
           <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
@@ -431,7 +707,7 @@ export default async function BlogPage({
                           return (
                             <Link
                               key={tag}
-                              href={buildTagPath(selectedTags, tag)}
+                              href={toggleTagPath(selectedTags, tag)}
                               className={
                                 isActive
                                   ? "rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
