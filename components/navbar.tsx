@@ -65,14 +65,14 @@ export function Navbar() {
             <Image
               src="/images/logo.png"
               alt=""
-              width={60}
-              height={60}
-              className="h-14 w-14 shrink-0 rounded-full object-cover"
+              width={80}
+              height={80}
+              className="h-16 w-16 shrink-0 rounded-full object-cover"
               priority
             />
 
             <span className="min-w-0">
-              <span className="block truncate text-2xl font-black tracking-tight text-foreground md:text-2xl">
+              <span className="block truncate text-3xl font-black tracking-tight text-foreground md:text-2xl">
                 台灣室內設計資訊網
               </span>
 
