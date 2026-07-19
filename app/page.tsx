@@ -576,11 +576,6 @@ export default async function BlogPage({
                     ? "全台建案室內設計提案"
                     : `${selectedTag}室內設計提案`}
                 </h1>
-
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                  快速瀏覽住宅建案、格局規劃與裝潢風格靈感。
-                  部分內容為概念模擬，實際設計與施工請以現場條件為準。
-                </p>
               </div>
 
               <a
