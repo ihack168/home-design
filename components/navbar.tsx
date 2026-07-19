@@ -55,24 +55,24 @@ export function Navbar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
+        <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-5 md:px-8">
           {/* 品牌 */}
           <Link
             href="/"
             aria-label="台灣室內設計資訊網首頁"
-            className="flex min-w-0 items-center gap-3"
+            className="flex min-w-0 items-center gap-4"
           >
             <Image
               src="/images/logo.png"
               alt=""
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 rounded-full object-cover"
+              width={60}
+              height={60}
+              className="h-14 w-14 shrink-0 rounded-full object-cover"
               priority
             />
 
             <span className="min-w-0">
-              <span className="block truncate text-xl font-black tracking-tight text-foreground md:text-2xl">
+              <span className="block truncate text-2xl font-black tracking-tight text-foreground md:text-2xl">
                 台灣室內設計資訊網
               </span>
 
