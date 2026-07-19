@@ -635,7 +635,7 @@ export default async function BlogPage({
 
                     {post.tags.length > 0 && (
                       <div className="mt-2 flex min-w-0 gap-1.5 overflow-hidden">
-                        {post.tags.slice(0, 2).map((tag) => (
+                        {post.tags.slice.map((tag) => (
                           <Link
                             key={tag}
                             href={buildBlogPath(tag)}

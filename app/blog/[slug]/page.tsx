@@ -536,7 +536,7 @@ export default async function PostPage({
     ? post.tags.filter(Boolean)
     : []
 
-  const displayedTags = tags.slice(0, 3)
+  const displayedTags = tags
 
   const authorName =
     post.authorName || defaultAuthorName
