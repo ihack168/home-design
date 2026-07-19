@@ -72,11 +72,11 @@ export function Navbar() {
             />
 
             <span className="min-w-0">
-              <span className="block truncate text-lg font-black tracking-tight text-foreground md:text-xl">
+              <span className="block truncate text-xl font-black tracking-tight text-foreground md:text-2xl">
                 台灣室內設計資訊網
               </span>
 
-              <span className="hidden text-xs text-muted-foreground lg:block">
+              <span className="hidden text-sm text-muted-foreground lg:block">
                 建案設計提案與居家裝潢靈感
               </span>
             </span>
@@ -95,7 +95,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative whitespace-nowrap py-2 text-base font-semibold transition-colors ${
+                  className={`relative whitespace-nowrap py-2 text-lg font-semibold transition-colors ${
                     active
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -113,7 +113,7 @@ export function Navbar() {
               )
             })}
 
-            <LineConsultButton className="whitespace-nowrap rounded-full bg-[#06C755] px-5 py-2.5 text-base font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-md">
+            <LineConsultButton className="whitespace-nowrap rounded-full bg-[#06C755] px-6 py-3 text-lg font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-md">
               LINE 免費諮詢
             </LineConsultButton>
           </nav>
