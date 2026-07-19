@@ -45,6 +45,24 @@ interface TagItem {
   count: number
 }
 
+const DESIGN_STYLES = [
+  "現代風室內設計",
+  "日式風室內設計",
+  "侘寂風室內設計",
+  "奶油風室內設計",
+  "北歐風室內設計",
+] as const
+
+const CITIES = [
+  "台北市","新北市","桃園市","台中市","台南市","高雄市",
+  "基隆市","新竹市","嘉義市","新竹縣","苗栗縣","彰化縣","嘉義縣","宜蘭縣",
+] as const
+
+function isVisibleTag(tag:string){
+  return DESIGN_STYLES.includes(tag as any) || CITIES.includes(tag as any)
+}
+
+
 function normalizeTag(tag?: string) {
   return String(tag || "").trim() || "全部"
 }
@@ -369,6 +387,7 @@ export default async function BlogPage({
       name,
       count,
     }))
+    .filter((tag)=>isVisibleTag(tag.name))
     .sort(
       (a, b) =>
         b.count - a.count ||
