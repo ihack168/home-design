@@ -9,9 +9,9 @@ import { LineConsultButton } from "@/components/line-consult-button"
 
 const navLinks = [
   { label: "首頁", href: "/" },
-  { label: "建案作品", href: "/projects" },
-  { label: "設計風格", href: "/styles" },
-  { label: "裝潢知識", href: "/blog" },
+  { label: "建案作品", href: "/blog" },
+ // { label: "設計風格", href: "/styles" },
+ // { label: "裝潢知識", href: "/blog" },
 ]
 
 function isActivePath(pathname: string, href: string) {
@@ -65,8 +65,8 @@ export function Navbar() {
             <Image
               src="/images/logo.png"
               alt=""
-              width={80}
-              height={80}
+              width={100}
+              height={100}
               className="h-14 w-14 shrink-0 rounded-full object-cover sm:h-12 sm:w-12 md:h-14 md:w-14"
               priority
             />
