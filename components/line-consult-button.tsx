@@ -156,20 +156,12 @@ export function LineConsultButton({
         className="my-auto w-full max-w-md overflow-hidden rounded-[2rem] border border-white/20 bg-white shadow-2xl"
       >
         <div className="bg-gradient-to-br from-primary to-primary/80 px-6 py-7 text-primary-foreground">
-          <p className="text-xs font-bold tracking-[0.2em] opacity-75">
-            FREE CONSULTATION
-          </p>
-
           <h3
             id="line-consult-title"
             className="mt-2 text-2xl font-black tracking-tight"
           >
             預約室內設計諮詢
           </h3>
-
-          <p className="mt-2 text-sm leading-6 opacity-85">
-            留下簡單資料，送出後將自動開啟 LINE 加好友。
-          </p>
         </div>
 
         <div className="p-6">

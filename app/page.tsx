@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { LineConsultButton } from "@/components/line-consult-button"
 import { PostThumbnail } from "@/components/post-thumbnail"
 import { client } from "@/lib/sanity"
 
@@ -14,7 +15,6 @@ const WEBSITE_ID = `${SITE_URL}/#website`
 const POSTS_PER_PAGE = 18
 const TOP_TAG_LIMIT = 8
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-home.jpg`
-const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || "/contact"
 
 interface SearchParams {
   tag?: string
@@ -44,24 +44,6 @@ interface TagItem {
   name: string
   count: number
 }
-
-const DESIGN_STYLES = [
-  "現代風室內設計",
-  "日式風室內設計",
-  "侘寂風室內設計",
-  "奶油風室內設計",
-  "北歐風室內設計",
-] as const
-
-const CITIES = [
-  "台北市","新北市","桃園市","台中市","台南市","高雄市",
-  "基隆市","新竹市","嘉義市","新竹縣","苗栗縣","彰化縣","嘉義縣","宜蘭縣",
-] as const
-
-function isVisibleTag(tag:string){
-  return DESIGN_STYLES.includes(tag as any) || CITIES.includes(tag as any)
-}
-
 
 function normalizeTag(tag?: string) {
   return String(tag || "").trim() || "全部"
@@ -387,7 +369,6 @@ export default async function BlogPage({
       name,
       count,
     }))
-    .filter((tag)=>isVisibleTag(tag.name))
     .sort(
       (a, b) =>
         b.count - a.count ||
@@ -576,16 +557,12 @@ export default async function BlogPage({
                     ? "全台建案室內設計提案"
                     : `${selectedTag}室內設計提案`}
                 </h1>
+
               </div>
 
-              <a
-                href={LINE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-[#06C755] px-7 py-3 text-base font-black text-white shadow-sm transition hover:opacity-90"
-              >
+              <LineConsultButton className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-[#06C755] px-7 py-3 text-base font-black text-white shadow-sm transition hover:opacity-90">
                 LINE 免費諮詢
-              </a>
+              </LineConsultButton>
             </div>
           </header>
 
@@ -673,14 +650,9 @@ export default async function BlogPage({
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 opacity-80">
               將建案名稱、格局或喜歡的作品傳給我們，直接用 LINE 討論設計方向。
             </p>
-            <a
-              href={LINE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full bg-[#06C755] px-8 py-3 font-black text-white transition hover:opacity-90"
-            >
+            <LineConsultButton className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full bg-[#06C755] px-8 py-3 font-black text-white transition hover:opacity-90">
               加入 LINE 聯絡
-            </a>
+            </LineConsultButton>
           </section>
 
           {/* 分頁 */}
