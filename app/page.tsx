@@ -632,20 +632,6 @@ export default async function BlogPage({
                         {post.title}
                       </Link>
                     </h2>
-
-                    {post.tags.length > 0 && (
-                      <div className="mt-2 flex min-w-0 gap-1.5 overflow-hidden">
-                        {post.tags.map((tag) => (
-                          <Link
-                            key={tag}
-                            href={buildBlogPath(tag)}
-                            className="max-w-full truncate rounded-full bg-secondary px-2 py-1 text-[11px] font-medium text-primary"
-                          >
-                            {tag}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </article>
               ))}
