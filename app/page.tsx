@@ -144,7 +144,7 @@ function buildBlogPath(tag: string, page = 1) {
 
   const query = params.toString()
 
-  return query ? `/blog?${query}` : "/blog"
+  return query ? `/?${query}` : "/"
 }
 
 function buildBlogUrl(tag: string, page = 1) {
@@ -263,7 +263,7 @@ export default async function BlogPage({
 
   const tagFilter =
     selectedTag !== "全部"
-      ? "&& $selectedTag in tags"
+      ? "&& $selectedTag in coalesce(tags, categories[]->title, [])"
       : ""
 
   const start = (page - 1) * POSTS_PER_PAGE
@@ -276,7 +276,7 @@ export default async function BlogPage({
         defined(slug.current) &&
         defined(title)
       ] {
-        tags
+        "tags": coalesce(tags, categories[]->title, [])
       }`,
       {},
       {
@@ -320,7 +320,7 @@ export default async function BlogPage({
           "mainImage": mainImage.asset->url,
           htmlContent,
           "videoId": youtubeVideoId,
-          tags,
+          "tags": coalesce(tags, categories[]->title, []),
           "publishedAt": coalesce(publishedAt, _createdAt)
         }`,
       {
@@ -635,7 +635,7 @@ export default async function BlogPage({
 
                     {post.tags.length > 0 && (
                       <div className="mt-2 flex min-w-0 gap-1.5 overflow-hidden">
-                        {post.tags.map((tag) => (
+                        {post.tags.slice.map((tag) => (
                           <Link
                             key={tag}
                             href={buildBlogPath(tag)}
