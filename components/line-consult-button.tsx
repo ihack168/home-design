@@ -6,7 +6,7 @@ import { createPortal } from "react-dom"
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec"
 
-const LINE_ADD_URL = "https://line.me/R/ti/p/~0910933178"
+const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw"
 
 const VENDOR_ID = "home-design"
 const VENDOR_NAME = "台灣室內設計資訊網"
@@ -160,7 +160,7 @@ export function LineConsultButton({
             id="line-consult-title"
             className="mt-2 text-2xl font-black tracking-tight"
           >
-            預約室內設計諮詢
+            預約室內設計師諮詢
           </h3>
         </div>
 
