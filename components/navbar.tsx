@@ -55,7 +55,7 @@ export function Navbar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-5 md:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:h-24 lg:px-8">
           {/* 品牌 */}
           <Link
             href="/"
@@ -67,12 +67,12 @@ export function Navbar() {
               alt=""
               width={80}
               height={80}
-              className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-12 sm:w-12 md:h-14 md:w-14"
+              className="h-14 w-14 shrink-0 rounded-full object-cover sm:h-12 sm:w-12 md:h-14 md:w-14"
               priority
             />
 
             <span className="min-w-0">
-              <span className="block truncate text-xl font-black tracking-tight text-foreground sm:text-xl md:text-3xl">
+              <span className="block truncate text-2xl font-black tracking-tight text-foreground sm:text-xl md:text-3xl">
                 台灣室內設計資訊網
               </span>
 
@@ -161,7 +161,7 @@ export function Navbar() {
       {mobileOpen && (
         <div
           id="mobile-navigation"
-          className="fixed inset-0 z-40 bg-background pt-20 lg:hidden"
+          className="fixed inset-0 z-40 bg-background pt-16 lg:hidden"
         >
           <nav
             aria-label="手機版主要導覽"
