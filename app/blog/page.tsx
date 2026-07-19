@@ -11,7 +11,7 @@ const SITE_NAME = "台灣室內設計資訊網"
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-home.jpg`
 
 interface SearchParams {
-  tag?: string
+  tag?: string | string[]
 }
 
 interface RawPost {
@@ -130,10 +130,34 @@ function normalizeTags(tags?: string[]) {
   )
 }
 
-function buildTagPath(tag?: string) {
-  if (!tag) return "/blog"
+function normalizeSelectedTags(tag?: string | string[]) {
+  const values = Array.isArray(tag) ? tag : tag ? [tag] : []
 
-  return `/blog?tag=${encodeURIComponent(tag)}`
+  return Array.from(
+    new Set(
+      values
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  )
+}
+
+function buildTagPath(selectedTags: string[], toggledTag?: string) {
+  if (!toggledTag) return "/blog"
+
+  const nextTags = selectedTags.includes(toggledTag)
+    ? selectedTags.filter((tag) => tag !== toggledTag)
+    : [...selectedTags, toggledTag]
+
+  if (nextTags.length === 0) return "/blog"
+
+  const query = new URLSearchParams()
+
+  nextTags.forEach((tag) => {
+    query.append("tag", tag)
+  })
+
+  return `/blog?${query.toString()}`
 }
 
 export default async function BlogPage({
@@ -142,7 +166,7 @@ export default async function BlogPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const selectedTag = String(params.tag || "").trim()
+  const selectedTags = normalizeSelectedTags(params.tag)
 
   const posts = await client.fetch<RawPost[]>(
     `*[
@@ -193,92 +217,106 @@ export default async function BlogPage({
         a.name.localeCompare(b.name, "zh-Hant")
     )
 
-  const filteredPosts = selectedTag
-    ? normalizedPosts.filter((post) =>
-        post.tags.includes(selectedTag)
-      )
-    : normalizedPosts
+  const filteredPosts =
+    selectedTags.length > 0
+      ? normalizedPosts.filter((post) =>
+          selectedTags.every((tag) => post.tags.includes(tag))
+        )
+      : normalizedPosts
 
   return (
-    <main className="min-h-screen bg-background px-4 pb-24 pt-10 text-foreground sm:px-6 md:pt-16">
+    <main className="min-h-screen bg-background px-4 pb-24 pt-6 text-foreground sm:px-6 md:pt-10">
       <div className="mx-auto max-w-7xl">
-        <header className="rounded-[2rem] border border-border/70 bg-white px-5 py-8 shadow-sm sm:px-8 sm:py-10">
-          <p className="text-sm font-semibold tracking-[0.2em] text-accent">
-            INTERIOR DESIGN JOURNAL
-          </p>
-
-          <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">
-            室內設計與裝潢文章
-          </h1>
-
-          <p className="mt-4 max-w-2xl leading-8 text-muted-foreground">
-            探索住宅建案、設計風格、格局坪數、居家空間與室內裝潢相關內容。
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>共 {normalizedPosts.length} 篇文章</span>
-
-            {selectedTag && (
-              <>
-                <span aria-hidden="true">•</span>
-                <span>
-                  「{selectedTag}」共 {filteredPosts.length} 篇
-                </span>
-              </>
-            )}
-          </div>
-        </header>
-
         {tags.length > 0 && (
-          <section className="mt-6 rounded-[2rem] border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-7">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <section className="rounded-[2rem] border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-7 sm:py-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-xl font-black">
-                  依主題瀏覽
-                </h2>
+                <h1 className="text-2xl font-black tracking-tight md:text-3xl">
+                  室內設計與裝潢文章
+                </h1>
 
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  選擇建案、地區或設計風格，快速找到相關文章。
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  可複選建案、縣市、行政區或設計風格；系統會顯示同時符合所有標籤的文章。
+                </p>
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  共 {normalizedPosts.length} 篇文章
+                  {selectedTags.length > 0 && (
+                    <>
+                      <span aria-hidden="true">・</span>
+                      已篩選 {filteredPosts.length} 篇
+                    </>
+                  )}
                 </p>
               </div>
 
-              {selectedTag && (
+              {selectedTags.length > 0 && (
                 <Link
                   href="/blog"
                   className="inline-flex w-fit items-center rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:border-accent hover:text-accent"
                 >
-                  清除篩選
+                  清除全部篩選
                 </Link>
               )}
             </div>
 
+            {selectedTags.length > 0 && (
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">
+                  已選條件：
+                </span>
+
+                {selectedTags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={buildTagPath(selectedTags, tag)}
+                    className="inline-flex items-center rounded-full bg-primary px-3 py-1.5 text-sm font-bold text-primary-foreground"
+                    aria-label={`移除 ${tag} 篩選`}
+                  >
+                    {tag}
+                    <span className="ml-2" aria-hidden="true">
+                      ×
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <nav
-              aria-label="文章主題分類"
+              aria-label="文章主題複選篩選"
               className="mt-5"
             >
               <div className="flex flex-wrap gap-2.5">
                 <Link
                   href="/blog"
-                  aria-current={!selectedTag ? "page" : undefined}
+                  aria-current={
+                    selectedTags.length === 0 ? "page" : undefined
+                  }
                   className={
-                    !selectedTag
+                    selectedTags.length === 0
                       ? "inline-flex items-center rounded-2xl border border-primary bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm"
                       : "inline-flex items-center rounded-2xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
                   }
                 >
                   全部文章
-                  <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
+                  <span
+                    className={
+                      selectedTags.length === 0
+                        ? "ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs"
+                        : "ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-muted-foreground"
+                    }
+                  >
                     {normalizedPosts.length}
                   </span>
                 </Link>
 
                 {tags.map((tag) => {
-                  const isActive = selectedTag === tag.name
+                  const isActive = selectedTags.includes(tag.name)
 
                   return (
                     <Link
                       key={tag.name}
-                      href={buildTagPath(tag.name)}
+                      href={buildTagPath(selectedTags, tag.name)}
                       aria-current={isActive ? "page" : undefined}
                       className={
                         isActive
@@ -286,6 +324,11 @@ export default async function BlogPage({
                           : "inline-flex items-center rounded-2xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
                       }
                     >
+                      {isActive && (
+                        <span className="mr-1.5" aria-hidden="true">
+                          ✓
+                        </span>
+                      )}
                       {tag.name}
                       <span
                         className={
@@ -304,26 +347,29 @@ export default async function BlogPage({
           </section>
         )}
 
-        {selectedTag && (
-          <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+        {selectedTags.length > 0 && (
+          <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-bold tracking-[0.18em] text-accent">
-                CURRENT TOPIC
+                篩選結果
               </p>
 
-              <h2 className="mt-1 text-2xl font-black">
-                {selectedTag}
+              <h2 className="mt-1 text-xl font-black md:text-2xl">
+                {selectedTags.join(" ＋ ")}
               </h2>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              顯示 {filteredPosts.length} 篇相關文章
+              顯示 {filteredPosts.length} 篇同時符合條件的文章
             </p>
           </div>
         )}
 
         {filteredPosts.length > 0 ? (
-          <section className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <section
+            aria-label="室內設計文章列表"
+            className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
+          >
             {filteredPosts.map((post) => {
               const firstHtmlImage = extractFirstImage(post.htmlContent)
 
@@ -379,19 +425,23 @@ export default async function BlogPage({
 
                     {post.tags.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {post.tags.map((tag) => (
-                          <Link
-                            key={tag}
-                            href={buildTagPath(tag)}
-                            className={
-                              selectedTag === tag
-                                ? "rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-                                : "rounded-full border border-accent/15 bg-accent/5 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
-                            }
-                          >
-                            #{tag}
-                          </Link>
-                        ))}
+                        {post.tags.map((tag) => {
+                          const isActive = selectedTags.includes(tag)
+
+                          return (
+                            <Link
+                              key={tag}
+                              href={buildTagPath(selectedTags, tag)}
+                              className={
+                                isActive
+                                  ? "rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                                  : "rounded-full border border-accent/15 bg-accent/5 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
+                              }
+                            >
+                              #{tag}
+                            </Link>
+                          )
+                        })}
                       </div>
                     )}
 
@@ -415,18 +465,18 @@ export default async function BlogPage({
         ) : (
           <section className="mt-8 rounded-[2rem] border border-dashed border-border bg-white/60 px-6 py-20 text-center">
             <h2 className="text-xl font-black">
-              找不到相關文章
+              找不到同時符合條件的文章
             </h2>
 
             <p className="mt-3 text-sm text-muted-foreground">
-              目前沒有「{selectedTag}」標籤的文章。
+              目前沒有同時包含「{selectedTags.join("、")}」標籤的文章。
             </p>
 
             <Link
               href="/blog"
               className="mt-6 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              查看全部文章
+              清除篩選並查看全部文章
             </Link>
           </section>
         )}
