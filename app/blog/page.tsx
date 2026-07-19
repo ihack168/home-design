@@ -3,6 +3,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { PostThumbnail } from "@/components/post-thumbnail"
+import { ProjectTagSearch } from "@/components/project-tag-search"
 import { client } from "@/lib/sanity"
 
 export const revalidate = 60
@@ -46,7 +47,6 @@ const CITIES = [
 
 interface SearchParams {
   tag?: string | string[]
-  keyword?: string
   city?: string
 }
 
@@ -237,7 +237,6 @@ export default async function BlogPage({
 }) {
   const params = await searchParams
   const selectedTags = normalizeSelectedTags(params.tag)
-  const keyword = String(params.keyword || "").trim()
 
   /**
    * 縣市下拉表單送出後，由 Server Action 重新導向，
@@ -321,16 +320,6 @@ export default async function BlogPage({
   const searchableTags = allTags.filter(
     (tag) => !isDesignStyle(tag.name) && !isCity(tag.name)
   )
-
-  const matchedSearchTags = keyword
-    ? searchableTags
-        .filter((tag) =>
-          tag.name.toLocaleLowerCase("zh-TW").includes(
-            keyword.toLocaleLowerCase("zh-TW")
-          )
-        )
-        .slice(0, 30)
-    : []
 
   const filteredPosts =
     selectedTags.length > 0
@@ -433,89 +422,13 @@ export default async function BlogPage({
             </form>
           </div>
 
-          {/* 搜尋建案 */}
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <h2 className="shrink-0 text-sm font-black">搜尋建案</h2>
-
-            <form
-              action="/blog"
-              method="get"
-              className="flex w-full gap-2"
-            >
-              {selectedTags.map((tag) => (
-                <input
-                  key={tag}
-                  type="hidden"
-                  name="tag"
-                  value={tag}
-                />
-              ))}
-
-              <label htmlFor="keyword" className="sr-only">
-                搜尋行政區或建案名稱
-              </label>
-
-              <input
-                id="keyword"
-                name="keyword"
-                type="search"
-                defaultValue={keyword}
-                placeholder="輸入行政區或建案名稱"
-                autoComplete="off"
-                className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-accent"
-              />
-
-              <button
-                type="submit"
-                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                搜尋
-              </button>
-            </form>
+          {/* 搜尋建案：輸入第一個字即時顯示符合標籤 */}
+          <div className="mt-3">
+            <ProjectTagSearch
+              tags={searchableTags}
+              selectedTags={selectedTags}
+            />
           </div>
-
-          {keyword && (
-            <div className="mt-3 rounded-xl bg-background/70 p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold text-foreground">
-                  「{keyword}」搜尋結果
-                </p>
-
-                <Link
-                  href={buildBlogPath(selectedTags)}
-                  className="text-xs font-semibold text-muted-foreground transition-colors hover:text-accent"
-                >
-                  關閉
-                </Link>
-              </div>
-
-              {matchedSearchTags.length > 0 ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {matchedSearchTags.map((tag) => {
-                    const isActive = selectedTags.includes(tag.name)
-
-                    return (
-                      <Link
-                        key={tag.name}
-                        href={toggleTagPath(selectedTags, tag.name)}
-                        className={
-                          isActive
-                            ? "inline-flex items-center rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
-                            : "inline-flex items-center rounded-full border border-accent/20 bg-white px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
-                        }
-                      >
-                        {tag.name}
-                      </Link>
-                    )
-                  })}
-                </div>
-              ) : (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  找不到符合的行政區或建案標籤。
-                </p>
-              )}
-            </div>
-          )}
 
           {selectedTags.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
