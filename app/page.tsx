@@ -13,8 +13,40 @@ const SITE_NAME = "台灣室內設計資訊網"
 const ORGANIZATION_ID = `${SITE_URL}/#organization`
 const WEBSITE_ID = `${SITE_URL}/#website`
 const POSTS_PER_PAGE = 18
-const TOP_TAG_LIMIT = 8
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-home.jpg`
+
+const CITIES = [
+  "台北市",
+  "新北市",
+  "桃園市",
+  "台中市",
+  "台南市",
+  "高雄市",
+  "基隆市",
+  "新竹市",
+  "嘉義市",
+  "新竹縣",
+  "苗栗縣",
+  "彰化縣",
+  "南投縣",
+  "雲林縣",
+  "嘉義縣",
+  "屏東縣",
+  "宜蘭縣",
+  "花蓮縣",
+  "台東縣",
+  "澎湖縣",
+  "金門縣",
+  "連江縣",
+] as const
+
+const DESIGN_STYLES = [
+  "現代風室內設計",
+  "日式風室內設計",
+  "侘寂風室內設計",
+  "奶油風室內設計",
+  "北歐風室內設計",
+] as const
 
 interface SearchParams {
   tag?: string
@@ -362,35 +394,15 @@ export default async function BlogPage({
     })
   })
 
-  const sortedTags: TagItem[] = Array.from(
-    tagCountMap.entries()
-  )
-    .map(([name, count]) => ({
-      name,
-      count,
-    }))
-    .sort(
-      (a, b) =>
-        b.count - a.count ||
-        a.name.localeCompare(b.name, "zh-Hant")
-    )
+  const cityTags: TagItem[] = CITIES.map((name) => ({
+    name,
+    count: tagCountMap.get(name) || 0,
+  })).filter((tag) => tag.count > 0)
 
-  const topTags = sortedTags.slice(0, TOP_TAG_LIMIT)
-
-  const selectedTagItem =
-    selectedTag !== "全部" &&
-    !topTags.some((tag) => tag.name === selectedTag)
-      ? sortedTags.find((tag) => tag.name === selectedTag)
-      : undefined
-
-  const visibleTags: TagItem[] = [
-    {
-      name: "全部",
-      count: allTagsRaw.length,
-    },
-    ...topTags,
-    ...(selectedTagItem ? [selectedTagItem] : []),
-  ]
+  const designStyleTags: TagItem[] = DESIGN_STYLES.map((name) => ({
+    name,
+    count: tagCountMap.get(name) || 0,
+  })).filter((tag) => tag.count > 0)
 
   const posts = rawPosts.map(processPost)
   const pageNumbers = getVisiblePageNumbers(page, totalPages)
@@ -566,34 +578,82 @@ export default async function BlogPage({
             </div>
           </header>
 
-          {/* 精簡分類：只顯示熱門標籤 */}
+          {/* 分類只顯示「地區」與「設計風格」，不顯示行政區或建案名稱 */}
           <nav
             aria-label="作品分類"
-            className="mt-5 overflow-x-auto pb-1"
+            className="mt-5 rounded-2xl border border-border/70 bg-white px-4 py-4 shadow-sm sm:px-5"
           >
-            <div className="flex min-w-max gap-2">
-              {visibleTags.map((tagItem) => {
-                const isActive = selectedTag === tagItem.name
-
-                return (
-                  <Link
-                    key={tagItem.name}
-                    href={buildBlogPath(tagItem.name)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                      isActive
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-white text-muted-foreground hover:border-accent hover:text-accent"
-                    }`}
-                  >
-                    {tagItem.name}
-                    <span className="ml-1.5 opacity-60">
-                      {tagItem.count}
-                    </span>
-                  </Link>
-                )
-              })}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-sm font-black">全部</span>
+              <Link
+                href="/"
+                aria-current={selectedTag === "全部" ? "page" : undefined}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                  selectedTag === "全部"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                }`}
+              >
+                全部
+                <span className="ml-1.5 opacity-60">
+                  {allTagsRaw.length}
+                </span>
+              </Link>
             </div>
+
+            {cityTags.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-sm font-black">地區</span>
+                {cityTags.map((tagItem) => {
+                  const isActive = selectedTag === tagItem.name
+
+                  return (
+                    <Link
+                      key={tagItem.name}
+                      href={buildBlogPath(tagItem.name)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                        isActive
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                      }`}
+                    >
+                      {tagItem.name}
+                      <span className="ml-1.5 opacity-60">
+                        {tagItem.count}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+
+            {designStyleTags.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-sm font-black">設計風格</span>
+                {designStyleTags.map((tagItem) => {
+                  const isActive = selectedTag === tagItem.name
+
+                  return (
+                    <Link
+                      key={tagItem.name}
+                      href={buildBlogPath(tagItem.name)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                        isActive
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                      }`}
+                    >
+                      {tagItem.name}
+                      <span className="ml-1.5 opacity-60">
+                        {tagItem.count}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
           </nav>
 
           {/* 作品優先：手機兩欄、桌面四欄，快速看到大量內容 */}
@@ -713,13 +773,6 @@ export default async function BlogPage({
             </nav>
           )}
 
-          {/* 法律與案例性質說明：精簡但保留必要揭露 */}
-          <aside className="mt-10 border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
-            本站提供室內設計資訊與概念提案。部分圖片可能為 AI
-            生成或情境模擬，不代表實際完工作品；建案名稱僅用於辨識與資訊整理，
-            本站與建商、設計師或商標權利人無隸屬或代理關係。實際尺寸、材質、預算與施工內容，
-            應由屋主及合法專業人員依現場條件確認。
-          </aside>
         </div>
       </main>
     </div>
