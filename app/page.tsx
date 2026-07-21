@@ -563,8 +563,8 @@ export default async function BlogPage({
             <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <h1 className="text-3xl font-black tracking-tight md:text-5xl">
                 {selectedTag === "全部"
-                  ? "全台建案室內設計提案"
-                  : `${selectedTag}室內設計提案`}
+                  ? "全台建案室內設計、裝潢提案"
+                  : `${selectedTag}室內設計、裝潢提案`}
               </h1>
 
               <LineConsultButton className="inline-flex min-h-11 w-fit shrink-0 items-center justify-center rounded-full bg-[#06C755] px-6 py-2.5 text-sm font-black text-white shadow-sm transition hover:opacity-90 sm:text-base">
