@@ -210,15 +210,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-t border-black/5 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-10">
-          <p className="text-center text-xs leading-6 text-black/45">
-            本網站提供之推薦資訊係依使用者填寫內容與系統分析結果整理，
-            僅供室內設計需求洽詢與比較參考。實際服務內容、報價、合約與施工責任，
-            應由使用者與相關業者另行確認。
-          </p>
-        </div>
-      </section>
     </main>
   )
 }
