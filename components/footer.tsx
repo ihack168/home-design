@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 
 import { LineConsultButton } from "@/components/line-consult-button"
@@ -25,7 +26,6 @@ export function Footer() {
   return (
     <footer className="border-t border-border/70 bg-background px-5 py-8">
       <div className="mx-auto max-w-6xl">
-        {/* 品牌、導覽與 LINE */}
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <Link
@@ -61,12 +61,12 @@ export function Footer() {
           </LineConsultButton>
         </div>
 
-        {/* 簡短聲明 */}
         <div className="mt-7 border-t border-border/70 pt-5">
           <p className="max-w-5xl text-xs leading-6 text-muted-foreground">
-            本站內容與圖片包含室內設計資訊及概念提案，僅供裝潢靈感參考，
-            不代表實際完工案例、建案官方內容或合作關係。實際設計、尺寸、
-            材料、預算、施工及法規，應以現場條件與專業人員確認為準。
+            本站提供室內設計資訊、裝潢靈感及概念提案，部分圖片可能為 AI
+            生成或情境示意，僅供參考，不代表實際完工案例。本站與相關建案、
+            建商、設計公司及商標權利人無合作、代理或隸屬關係，相關名稱僅作資訊整理與識別用途。
+            實際設計、尺寸、材料、預算、施工及法規，應依現場條件及合法專業人員確認為準。
           </p>
 
           <p className="mt-3 text-xs text-muted-foreground">
