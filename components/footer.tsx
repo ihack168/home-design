@@ -13,8 +13,8 @@ const footerLinks = [
     href: "/styles",
   },
   {
-    label: "最新文章",
-    href: "/blog",
+    label: "關於我們",
+    href: "/about",
   },
   {
     label: "隱私權政策",
