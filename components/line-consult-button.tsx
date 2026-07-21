@@ -46,7 +46,6 @@ export function LineConsultButton({
   onClick,
 }: LineConsultButtonProps) {
   const modalTitleId = useId()
-  const modalDescriptionId = useId()
 
   const [mounted, setMounted] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -182,7 +181,6 @@ export function LineConsultButton({
         role="dialog"
         aria-modal="true"
         aria-labelledby={modalTitleId}
-        aria-describedby={modalDescriptionId}
         className="relative my-auto w-full max-w-lg overflow-hidden rounded-[28px] border border-black/5 bg-[#fbfaf7] shadow-[0_30px_90px_rgba(0,0,0,0.28)]"
       >
         <button
@@ -215,25 +213,6 @@ export function LineConsultButton({
                 預約室內設計諮詢
               </h3>
             </div>
-          </div>
-
-          <p
-            id={modalDescriptionId}
-            className="mt-4 max-w-md text-sm leading-7 text-muted-foreground"
-          >
-            填寫簡單資料後將帶您前往 LINE。加入好友後，請傳送您的建案名稱、格局或喜歡的設計圖片。
-          </p>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            <span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-              免費初步諮詢
-            </span>
-            <span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-              不需填寫完整電話
-            </span>
-            <span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-              LINE 直接討論
-            </span>
           </div>
         </div>
 
@@ -270,7 +249,7 @@ export function LineConsultButton({
                   }}
                   disabled={loading}
                   aria-invalid={Boolean(errors.district)}
-                  className={`min-h-13 w-full appearance-none rounded-2xl border bg-white px-4 py-3.5 pr-11 text-sm text-foreground outline-none transition ${
+                  className={`min-h-[52px] w-full appearance-none rounded-2xl border bg-white px-4 py-3.5 pr-11 text-sm text-foreground outline-none transition ${
                     errors.district
                       ? "border-red-400 ring-2 ring-red-100"
                       : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -328,7 +307,7 @@ export function LineConsultButton({
                   autoComplete="family-name"
                   disabled={loading}
                   aria-invalid={Boolean(errors.lastName)}
-                  className={`mt-2 min-h-13 w-full rounded-2xl border bg-white px-4 py-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 ${
+                  className={`mt-2 min-h-[52px] w-full rounded-2xl border bg-white px-4 py-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 ${
                     errors.lastName
                       ? "border-red-400 ring-2 ring-red-100"
                       : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -375,7 +354,7 @@ export function LineConsultButton({
                   maxLength={3}
                   disabled={loading}
                   aria-invalid={Boolean(errors.phoneLast3)}
-                  className={`mt-2 min-h-13 w-full rounded-2xl border bg-white px-4 py-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 ${
+                  className={`mt-2 min-h-[52px] w-full rounded-2xl border bg-white px-4 py-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 ${
                     errors.phoneLast3
                       ? "border-red-400 ring-2 ring-red-100"
                       : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -389,13 +368,6 @@ export function LineConsultButton({
                 )}
               </div>
             </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-black/5 bg-white/70 px-4 py-3.5">
-            <p className="text-xs leading-6 text-muted-foreground">
-              手機後 3 碼僅用於您加入 LINE
-              後，辨識本次諮詢資料，不需提供完整手機號碼。
-            </p>
           </div>
 
           {errors.submit && (
@@ -420,7 +392,7 @@ export function LineConsultButton({
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                送出資料並加入 LINE
+                送出並加入 LINE
                 <span aria-hidden="true">→</span>
               </span>
             )}
