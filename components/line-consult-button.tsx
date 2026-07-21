@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { ReactNode, useEffect, useId, useState } from "react"
-import { createPortal } from "react-dom"
+import { ReactNode, useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec"
+  "https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec";
 
-const LINE_ID = "@line88.tw"
-const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw"
-const STORE_NAME = "匠將室內裝修設計"
+const LINE_ID = "@line88.tw";
+const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw";
+const STORE_NAME = "匠將室內裝修設計";
 const STORE_LOGO_URL =
-  "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png"
+  "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png";
 
-const VENDOR_ID = "home-design"
-const VENDOR_NAME = "台灣室內設計資訊網"
+const VENDOR_ID = "home-design";
+const VENDOR_NAME = "台灣室內設計資訊網";
 
 const DESIGN_STYLES = [
   { id: "modern", name: "現代簡約", icon: "◻" },
@@ -21,7 +21,7 @@ const DESIGN_STYLES = [
   { id: "wabi-sabi", name: "侘寂風", icon: "◯" },
   { id: "nordic", name: "北歐風", icon: "△" },
   { id: "american-country", name: "美式鄉村", icon: "⌂" },
-] as const
+] as const;
 
 const TAIWAN_CITIES = [
   "基隆市",
@@ -36,22 +36,22 @@ const TAIWAN_CITIES = [
   "台南市",
   "高雄市",
   "宜蘭縣",
-]
+];
 
-type ModalStep = "form" | "analyzing" | "result"
+type ModalStep = "form" | "analyzing" | "result";
 
 interface LineConsultButtonProps {
-  children: ReactNode
-  className?: string
-  onClick?: () => void
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
 }
 
 interface FormErrors {
-  district?: string
-  designStyle?: string
-  lastName?: string
-  phoneLast3?: string
-  submit?: string
+  district?: string;
+  designStyle?: string;
+  lastName?: string;
+  phoneLast3?: string;
+  submit?: string;
 }
 
 export function LineConsultButton({
@@ -59,128 +59,131 @@ export function LineConsultButton({
   className = "",
   onClick,
 }: LineConsultButtonProps) {
-  const modalTitleId = useId()
+  const modalTitleId = useId();
 
-  const [mounted, setMounted] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [step, setStep] = useState<ModalStep>("form")
+  const [mounted, setMounted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [step, setStep] = useState<ModalStep>("form");
 
-  const [district, setDistrict] = useState("")
-  const [designStyle, setDesignStyle] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [phoneLast3, setPhoneLast3] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [errors, setErrors] = useState<FormErrors>({})
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [district, setDistrict] = useState("");
+  const [designStyle, setDesignStyle] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneLast3, setPhoneLast3] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
-    if (!showModal) return
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) return;
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !loading && step !== "analyzing") {
-        resetModal()
+        resetModal();
       }
-    }
+    };
 
-    const originalOverflow = document.body.style.overflow
+    const originalOverflow = document.body.style.overflow;
 
-    document.body.style.overflow = "hidden"
-    window.addEventListener("keydown", handleEscape)
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.body.style.overflow = originalOverflow
-      window.removeEventListener("keydown", handleEscape)
-    }
-  }, [showModal, loading, step])
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [showModal, loading, step]);
 
   useEffect(() => {
-    if (step !== "analyzing") return
+    if (step !== "analyzing") return;
 
-    setProgress(8)
+    setProgress(8);
 
-    const startedAt = Date.now()
-    const duration = 5000
+    const startedAt = Date.now();
+    const duration = 5000;
 
     const timer = window.setInterval(() => {
-      const elapsed = Date.now() - startedAt
-      const ratio = Math.min(elapsed / duration, 1)
-      const easedProgress = 8 + Math.round(92 * (1 - Math.pow(1 - ratio, 2.2)))
+      const elapsed = Date.now() - startedAt;
+      const ratio = Math.min(elapsed / duration, 1);
+      const easedProgress = 8 + Math.round(92 * (1 - Math.pow(1 - ratio, 2.2)));
 
-      setProgress(Math.min(easedProgress, 100))
+      setProgress(Math.min(easedProgress, 100));
 
       if (ratio >= 1) {
-        window.clearInterval(timer)
-        setProgress(100)
-        setStep("result")
-        setLoading(false)
+        window.clearInterval(timer);
+        setProgress(100);
+        setStep("result");
+        setLoading(false);
       }
-    }, 80)
+    }, 80);
 
-    return () => window.clearInterval(timer)
-  }, [step])
+    return () => window.clearInterval(timer);
+  }, [step]);
 
   const resetModal = () => {
-    setShowModal(false)
-    setStep("form")
-    setDistrict("")
-    setDesignStyle("")
-    setLastName("")
-    setPhoneLast3("")
-    setProgress(0)
-    setErrors({})
-    setLoading(false)
-  }
+    setShowModal(false);
+    setStep("form");
+    setDistrict("");
+    setDesignStyle("");
+    setLastName("");
+    setPhoneLast3("");
+    setProgress(0);
+    setErrors({});
+    setLoading(false);
+  };
 
   const handleOpenModal = () => {
-    setStep("form")
-    setDistrict("")
-    setDesignStyle("")
-    setLastName("")
-    setPhoneLast3("")
-    setProgress(0)
-    setErrors({})
-    setLoading(false)
-    setShowModal(true)
-  }
+    setStep("form");
+    setDistrict("");
+    setDesignStyle("");
+    setLastName("");
+    setPhoneLast3("");
+    setProgress(0);
+    setErrors({});
+    setLoading(false);
+    setShowModal(true);
+  };
 
   const validateForm = () => {
-    const nextErrors: FormErrors = {}
+    const nextErrors: FormErrors = {};
 
     if (!district.trim()) {
-      nextErrors.district = "請選擇需要服務的縣市"
+      nextErrors.district = "請選擇需要服務的縣市";
     }
 
     if (!designStyle.trim()) {
-      nextErrors.designStyle = "請選擇喜歡的設計風格"
+      nextErrors.designStyle = "請選擇喜歡的設計風格";
     }
 
     if (!lastName.trim()) {
-      nextErrors.lastName = "請輸入您的姓氏"
+      nextErrors.lastName = "請輸入您的姓氏";
     }
 
     if (!/^\d{3}$/.test(phoneLast3.trim())) {
-      nextErrors.phoneLast3 = "請輸入 3 位數字"
+      nextErrors.phoneLast3 = "請輸入 3 位數字";
     }
 
-    setErrors(nextErrors)
-    return Object.keys(nextErrors).length === 0
-  }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
   const handleSubmitLineConsult = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    const cleanDistrict = district.trim()
-    const cleanDesignStyle = designStyle.trim()
-    const cleanLastName = lastName.trim()
-    const cleanPhoneLast3 = phoneLast3.trim()
+    const cleanDistrict = district.trim();
+    const cleanDesignStyle = designStyle.trim();
+    const cleanDesignStyleName =
+      DESIGN_STYLES.find((style) => style.id === cleanDesignStyle)?.name ||
+      cleanDesignStyle;
+    const cleanLastName = lastName.trim();
+    const cleanPhoneLast3 = phoneLast3.trim();
 
     try {
-      setLoading(true)
-      setErrors({})
+      setLoading(true);
+      setErrors({});
 
       const res = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
@@ -189,57 +192,58 @@ export function LineConsultButton({
           vendorId: VENDOR_ID,
           vendorName: VENDOR_NAME,
           district: cleanDistrict,
-          serviceType: cleanDesignStyle,
+          serviceType: cleanDesignStyleName,
           lastName: cleanLastName,
           phoneLast3: cleanPhoneLast3,
           sourcePage: window.location.href,
         }),
-      })
+      });
 
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`)
+        throw new Error(`HTTP ${res.status}`);
       }
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!result.success) {
         setErrors({
           submit: result.message || "資料送出失敗，請稍後再試。",
-        })
-        setLoading(false)
-        return
+        });
+        setLoading(false);
+        return;
       }
 
-      setStep("analyzing")
+      setStep("analyzing");
     } catch (error) {
-      console.error("LINE consult submit error:", error)
+      console.error("LINE consult submit error:", error);
       setErrors({
         submit: "目前無法送出資料，請稍後再試。",
-      })
-      setLoading(false)
+      });
+      setLoading(false);
     }
-  }
+  };
 
   const selectedStyleName =
-    DESIGN_STYLES.find((style) => style.id === designStyle)?.name || designStyle
+    DESIGN_STYLES.find((style) => style.id === designStyle)?.name ||
+    designStyle;
 
   const analysisMessage =
     progress < 45
       ? "分析地區與風格偏好"
       : progress < 85
         ? "比對合適的設計團隊"
-        : "即將完成推薦"
+        : "即將完成推薦";
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 backdrop-blur-[3px] sm:py-10"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-2 backdrop-blur-[3px] sm:px-4 sm:py-8"
       onMouseDown={(event) => {
         if (
           event.target === event.currentTarget &&
           !loading &&
           step !== "analyzing"
         ) {
-          resetModal()
+          resetModal();
         }
       }}
     >
@@ -247,7 +251,7 @@ export function LineConsultButton({
         role="dialog"
         aria-modal="true"
         aria-labelledby={modalTitleId}
-        className="relative my-auto w-full max-w-xl overflow-hidden rounded-[28px] border border-black/5 bg-[#fbfaf7] shadow-[0_30px_90px_rgba(0,0,0,0.28)]"
+        className="relative my-auto max-h-[calc(100dvh-16px)] w-full max-w-xl overflow-hidden rounded-[22px] border border-black/5 bg-[#fbfaf7] shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:max-h-[calc(100dvh-32px)] sm:rounded-[28px]"
       >
         {step !== "analyzing" && (
           <button
@@ -255,7 +259,7 @@ export function LineConsultButton({
             onClick={resetModal}
             disabled={loading}
             aria-label="關閉諮詢視窗"
-            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-xl text-foreground shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-lg text-foreground shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 sm:right-4 sm:top-4 sm:h-10 sm:w-10 sm:text-xl"
           >
             ×
           </button>
@@ -263,21 +267,21 @@ export function LineConsultButton({
 
         {step === "form" && (
           <>
-            <div className="border-b border-black/5 bg-white px-6 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#06C755]/10">
-                  <span className="text-xl" aria-hidden="true">
+            <div className="border-b border-black/5 bg-white px-4 pb-3 pt-4 sm:px-8 sm:pb-6 sm:pt-7">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#06C755]/10 sm:h-11 sm:w-11 sm:rounded-2xl">
+                  <span className="text-lg sm:text-xl" aria-hidden="true">
                     ✦
                   </span>
                 </div>
 
-                <div>
-                  <p className="text-xs font-bold tracking-[0.18em] text-[#06A947]">
+                <div className="min-w-0 pr-10">
+                  <p className="hidden text-xs font-bold tracking-[0.18em] text-[#06A947] sm:block">
                     DESIGN CONSULTATION
                   </p>
                   <h3
                     id={modalTitleId}
-                    className="mt-1 text-2xl font-black tracking-tight text-foreground sm:text-[28px]"
+                    className="text-xl font-black tracking-tight text-foreground sm:mt-1 sm:text-[28px]"
                   >
                     尋找適合您的設計諮詢
                   </h3>
@@ -285,8 +289,8 @@ export function LineConsultButton({
               </div>
             </div>
 
-            <div className="px-6 py-6 sm:px-8 sm:py-7">
-              <div className="space-y-5">
+            <div className="px-4 py-3.5 sm:px-8 sm:py-7">
+              <div className="space-y-3 sm:space-y-5">
                 <div>
                   <label
                     htmlFor="consult-district"
@@ -300,22 +304,22 @@ export function LineConsultButton({
                     </span>
                   </label>
 
-                  <div className="relative mt-2">
+                  <div className="relative mt-1.5 sm:mt-2">
                     <select
                       id="consult-district"
                       value={district}
                       onChange={(event) => {
-                        setDistrict(event.target.value)
+                        setDistrict(event.target.value);
                         if (errors.district) {
                           setErrors((current) => ({
                             ...current,
                             district: undefined,
-                          }))
+                          }));
                         }
                       }}
                       disabled={loading}
                       aria-invalid={Boolean(errors.district)}
-                      className={`min-h-[52px] w-full appearance-none rounded-2xl border bg-white px-4 py-3.5 pr-11 text-sm text-foreground outline-none transition ${
+                      className={`h-[46px] w-full appearance-none rounded-xl border bg-white px-3.5 pr-10 text-sm text-foreground outline-none transition sm:h-[52px] sm:rounded-2xl sm:px-4 sm:pr-11 ${
                         errors.district
                           ? "border-red-400 ring-2 ring-red-100"
                           : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -337,7 +341,7 @@ export function LineConsultButton({
                   </div>
 
                   {errors.district && (
-                    <p className="mt-2 text-xs font-medium text-red-500">
+                    <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
                       {errors.district}
                     </p>
                   )}
@@ -354,55 +358,50 @@ export function LineConsultButton({
                     </span>
                   </legend>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-5">
+                  <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
                     {DESIGN_STYLES.map((style) => {
-                      const selected = designStyle === style.id
+                      const selected = designStyle === style.id;
 
                       return (
                         <button
                           key={style.id}
                           type="button"
                           onClick={() => {
-                            setDesignStyle(style.id)
+                            setDesignStyle(style.id);
                             if (errors.designStyle) {
                               setErrors((current) => ({
                                 ...current,
                                 designStyle: undefined,
-                              }))
+                              }));
                             }
                           }}
                           aria-pressed={selected}
                           disabled={loading}
-                          className={`flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-center transition ${
+                          className={`flex h-10 shrink-0 items-center justify-center rounded-full border px-3.5 text-sm font-bold whitespace-nowrap transition sm:h-12 sm:rounded-2xl sm:px-2 ${
                             selected
-                              ? "border-[#06C755] bg-[#06C755]/10 text-[#058a3b] ring-2 ring-[#06C755]/20"
-                              : "border-black/10 bg-white text-foreground hover:-translate-y-0.5 hover:border-black/20 hover:shadow-sm"
+                              ? "border-[#06C755] bg-[#06C755] text-white shadow-sm ring-2 ring-[#06C755]/15"
+                              : "border-black/10 bg-white text-foreground hover:border-black/20 hover:shadow-sm"
                           } disabled:cursor-not-allowed disabled:opacity-60`}
                         >
-                          <span
-                            className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-black ${
-                              selected ? "bg-[#06C755] text-white" : "bg-black/5"
-                            }`}
-                            aria-hidden="true"
-                          >
-                            {selected ? "✓" : style.icon}
-                          </span>
-                          <span className="text-xs font-bold leading-4">
-                            {style.name}
-                          </span>
+                          {selected && (
+                            <span className="mr-1.5 text-xs" aria-hidden="true">
+                              ✓
+                            </span>
+                          )}
+                          {style.name}
                         </button>
-                      )
+                      );
                     })}
                   </div>
 
                   {errors.designStyle && (
-                    <p className="mt-2 text-xs font-medium text-red-500">
+                    <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
                       {errors.designStyle}
                     </p>
                   )}
                 </fieldset>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
                   <div>
                     <label
                       htmlFor="consult-last-name"
@@ -415,26 +414,26 @@ export function LineConsultButton({
                       type="text"
                       value={lastName}
                       onChange={(event) => {
-                        setLastName(event.target.value.slice(0, 10))
+                        setLastName(event.target.value.slice(0, 10));
                         if (errors.lastName) {
                           setErrors((current) => ({
                             ...current,
                             lastName: undefined,
-                          }))
+                          }));
                         }
                       }}
                       placeholder="例如：王"
                       autoComplete="family-name"
                       disabled={loading}
                       aria-invalid={Boolean(errors.lastName)}
-                      className={`mt-2 min-h-[52px] w-full rounded-2xl border bg-white px-4 py-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 ${
+                      className={`mt-1.5 h-[46px] w-full rounded-xl border bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4 ${
                         errors.lastName
                           ? "border-red-400 ring-2 ring-red-100"
                           : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
                       } disabled:cursor-not-allowed disabled:opacity-60`}
                     />
                     {errors.lastName && (
-                      <p className="mt-2 text-xs font-medium text-red-500">
+                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
                         {errors.lastName}
                       </p>
                     )}
@@ -445,8 +444,7 @@ export function LineConsultButton({
                       htmlFor="consult-phone-last-3"
                       className="text-sm font-bold text-foreground"
                     >
-                      手機後 3 碼
-                      <span className="ml-1 text-red-500">*</span>
+                      手機後 3 碼<span className="ml-1 text-red-500">*</span>
                     </label>
                     <input
                       id="consult-phone-last-3"
@@ -455,13 +453,13 @@ export function LineConsultButton({
                       onChange={(event) => {
                         const value = event.target.value
                           .replace(/\D/g, "")
-                          .slice(0, 3)
-                        setPhoneLast3(value)
+                          .slice(0, 3);
+                        setPhoneLast3(value);
                         if (errors.phoneLast3) {
                           setErrors((current) => ({
                             ...current,
                             phoneLast3: undefined,
-                          }))
+                          }));
                         }
                       }}
                       placeholder="例如：168"
@@ -470,14 +468,14 @@ export function LineConsultButton({
                       maxLength={3}
                       disabled={loading}
                       aria-invalid={Boolean(errors.phoneLast3)}
-                      className={`mt-2 min-h-[52px] w-full rounded-2xl border bg-white px-4 py-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 ${
+                      className={`mt-1.5 h-[46px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4 ${
                         errors.phoneLast3
                           ? "border-red-400 ring-2 ring-red-100"
                           : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
                       } disabled:cursor-not-allowed disabled:opacity-60`}
                     />
                     {errors.phoneLast3 && (
-                      <p className="mt-2 text-xs font-medium text-red-500">
+                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
                         {errors.phoneLast3}
                       </p>
                     )}
@@ -488,7 +486,7 @@ export function LineConsultButton({
               {errors.submit && (
                 <div
                   role="alert"
-                  className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+                  className="mt-2.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
                 >
                   {errors.submit}
                 </div>
@@ -498,7 +496,7 @@ export function LineConsultButton({
                 type="button"
                 onClick={handleSubmitLineConsult}
                 disabled={loading}
-                className="mt-6 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#06C755] px-5 py-4 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+                className="mt-3.5 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-6 sm:h-14 sm:rounded-2xl"
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
@@ -512,7 +510,7 @@ export function LineConsultButton({
                 )}
               </button>
 
-              <div className="mt-4 flex items-center justify-center gap-2 text-center text-[11px] leading-5 text-muted-foreground">
+              <div className="mt-2 flex items-center justify-center gap-1.5 text-center text-[10px] leading-4 text-muted-foreground sm:mt-4 sm:gap-2 sm:text-[11px] sm:leading-5">
                 <span aria-hidden="true">🔒</span>
                 <span>送出即表示您同意本站使用資料聯繫本次諮詢</span>
               </div>
@@ -538,7 +536,9 @@ export function LineConsultButton({
                 className="mt-7 text-[28px] font-black leading-tight sm:text-4xl"
               >
                 正在為您挑選
-                <span className="mt-1 block text-[#55e891]">合適的設計公司</span>
+                <span className="mt-1 block text-[#55e891]">
+                  合適的設計公司
+                </span>
               </h3>
 
               <p className="mt-5 min-h-8 text-lg font-bold text-white/75">
@@ -618,15 +618,15 @@ export function LineConsultButton({
         )}
       </div>
     </div>
-  )
+  );
 
   return (
     <>
       <button
         type="button"
         onClick={() => {
-          onClick?.()
-          handleOpenModal()
+          onClick?.();
+          handleOpenModal();
         }}
         className={className}
       >
@@ -635,5 +635,5 @@ export function LineConsultButton({
 
       {mounted && showModal && createPortal(modalContent, document.body)}
     </>
-  )
+  );
 }
