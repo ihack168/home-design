@@ -11,6 +11,11 @@ const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw";
 const STORE_NAME = "匠將室內裝修設計";
 const STORE_LOGO_URL =
   "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png";
+const STORE_OFFICE_NAME = "台北總公司";
+const STORE_ADDRESS = "新北市林口區忠孝路308巷21號1樓";
+const STORE_EMAIL = "jiang53104525@gmail.com";
+const STORE_PHONE = "(02) 2600-5785";
+const STORE_PHONE_LINK = "tel:+886226005785";
 
 const VENDOR_ID = "home-design";
 const VENDOR_NAME = "台灣室內設計資訊網";
@@ -683,6 +688,62 @@ export function LineConsultButton({
                     →
                   </span>
                 </a>
+
+                <div className="mt-5 border-t border-black/10 pt-4">
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] text-sm"
+                    >
+                      ◉
+                    </span>
+                    <p className="text-sm font-black text-foreground">
+                      {STORE_OFFICE_NAME}
+                    </p>
+                  </div>
+
+                  <div className="mt-3 space-y-2.5 pl-1 text-sm leading-6 text-muted-foreground">
+                    <div className="flex items-start gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
+                      >
+                        ●
+                      </span>
+                      <span>{STORE_ADDRESS}</span>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
+                      >
+                        ✉
+                      </span>
+                      <a
+                        href={`mailto:${STORE_EMAIL}`}
+                        className="break-all transition hover:text-[#06A947]"
+                      >
+                        {STORE_EMAIL}
+                      </a>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
+                      >
+                        ☎
+                      </span>
+                      <a
+                        href={STORE_PHONE_LINK}
+                        className="font-bold text-foreground transition hover:text-[#06A947]"
+                      >
+                        {STORE_PHONE}
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
