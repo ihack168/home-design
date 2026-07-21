@@ -541,11 +541,11 @@ export default async function BlogPage({
 
       <main className="px-4 pb-16 pt-6 sm:px-6 md:pt-10">
         <div className="mx-auto max-w-7xl">
-          {/* 精簡頁首：保留搜尋引擎需要的主題文字與主要轉換按鈕 */}
-          <header className="rounded-3xl border border-border/70 bg-white px-5 py-7 shadow-sm sm:px-8 sm:py-9">
+          {/* 首頁主視覺與分類整合區 */}
+          <section className="rounded-3xl border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-8 sm:py-8">
             <nav
               aria-label="麵包屑"
-              className="mb-3 text-xs text-muted-foreground"
+              className="text-xs text-muted-foreground"
             >
               <ol className="flex flex-wrap items-center gap-2">
                 <li>
@@ -555,55 +555,79 @@ export default async function BlogPage({
                 </li>
                 <li aria-hidden="true">/</li>
                 <li aria-current="page">
-                  {selectedTag === "全部"
-                    ? "室內設計作品"
-                    : selectedTag}
+                  {selectedTag === "全部" ? "室內設計作品" : selectedTag}
                 </li>
               </ol>
             </nav>
 
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-3xl">
-                <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                  {selectedTag === "全部"
-                    ? "全台建案室內設計提案"
-                    : `${selectedTag}室內設計提案`}
-                </h1>
+            <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <h1 className="text-3xl font-black tracking-tight md:text-5xl">
+                {selectedTag === "全部"
+                  ? "全台建案室內設計提案"
+                  : `${selectedTag}室內設計提案`}
+              </h1>
 
-              </div>
-
-              <LineConsultButton className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-[#06C755] px-7 py-3 text-base font-black text-white shadow-sm transition hover:opacity-90">
+              <LineConsultButton className="inline-flex min-h-11 w-fit shrink-0 items-center justify-center rounded-full bg-[#06C755] px-6 py-2.5 text-sm font-black text-white shadow-sm transition hover:opacity-90 sm:text-base">
                 LINE 免費諮詢
               </LineConsultButton>
             </div>
-          </header>
 
-          {/* 分類只顯示「地區」與「設計風格」，不顯示行政區或建案名稱 */}
-          <nav
-            aria-label="作品分類"
-            className="mt-5 rounded-2xl border border-border/70 bg-white px-4 py-4 shadow-sm sm:px-5"
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href="/"
-                aria-current={selectedTag === "全部" ? "page" : undefined}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                  selectedTag === "全部"
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
-                }`}
-              >
-                全部
-                <span className="ml-1.5 opacity-60">
-                  {allTagsRaw.length}
-                </span>
-              </Link>
+            <nav
+              aria-label="作品分類"
+              className="mt-5 border-t border-border/70 pt-4"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/"
+                  aria-current={selectedTag === "全部" ? "page" : undefined}
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    selectedTag === "全部"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  全部
+                  <span className="ml-1.5 opacity-60">{allTagsRaw.length}</span>
+                </Link>
 
-              {cityTags.length > 0 && (
-                <>
-                  <span className="ml-2 mr-1 text-sm font-black">地區</span>
+                {cityTags.length > 0 && (
+                  <>
+                    <span className="ml-1 text-sm font-black text-foreground">
+                      地區
+                    </span>
 
-                  {cityTags.map((tagItem) => {
+                    {cityTags.map((tagItem) => {
+                      const isActive = selectedTag === tagItem.name
+
+                      return (
+                        <Link
+                          key={tagItem.name}
+                          href={buildBlogPath(tagItem.name)}
+                          aria-current={isActive ? "page" : undefined}
+                          className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                            isActive
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                          }`}
+                        >
+                          {tagItem.name}
+                          <span className="ml-1.5 opacity-60">
+                            {tagItem.count}
+                          </span>
+                        </Link>
+                      )
+                    })}
+                  </>
+                )}
+              </div>
+
+              {designStyleTags.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="mr-1 text-sm font-black text-foreground">
+                    設計風格
+                  </span>
+
+                  {designStyleTags.map((tagItem) => {
                     const isActive = selectedTag === tagItem.name
 
                     return (
@@ -624,38 +648,10 @@ export default async function BlogPage({
                       </Link>
                     )
                   })}
-                </>
+                </div>
               )}
-            </div>
-
-            {designStyleTags.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="mr-1 text-sm font-black">設計風格</span>
-
-                {designStyleTags.map((tagItem) => {
-                  const isActive = selectedTag === tagItem.name
-
-                  return (
-                    <Link
-                      key={tagItem.name}
-                      href={buildBlogPath(tagItem.name)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                        isActive
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
-                      }`}
-                    >
-                      {tagItem.name}
-                      <span className="ml-1.5 opacity-60">
-                        {tagItem.count}
-                      </span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-          </nav>
+            </nav>
+          </section>
 
           {/* 作品優先：手機兩欄、桌面四欄，快速看到大量內容 */}
           {posts.length > 0 ? (
