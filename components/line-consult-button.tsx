@@ -8,6 +8,9 @@ const GOOGLE_SCRIPT_URL =
 
 const LINE_ID = "@line88.tw"
 const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw"
+const STORE_NAME = "匠將室內裝修設計"
+const STORE_LOGO_URL =
+  "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png"
 
 const VENDOR_ID = "home-design"
 const VENDOR_NAME = "台灣室內設計資訊網"
@@ -186,7 +189,7 @@ export function LineConsultButton({
           vendorId: VENDOR_ID,
           vendorName: VENDOR_NAME,
           district: cleanDistrict,
-          designStyle: cleanDesignStyle,
+          serviceType: cleanDesignStyle,
           lastName: cleanLastName,
           phoneLast3: cleanPhoneLast3,
           sourcePage: window.location.href,
@@ -221,13 +224,11 @@ export function LineConsultButton({
     DESIGN_STYLES.find((style) => style.id === designStyle)?.name || designStyle
 
   const analysisMessage =
-    progress < 35
-      ? "正在分析您的服務區域與需求條件"
-      : progress < 70
-        ? `正在比對「${selectedStyleName}」相關設計條件`
-        : progress < 95
-          ? "正在整理適合您的諮詢窗口"
-          : "推薦結果即將完成"
+    progress < 45
+      ? "分析地區與風格偏好"
+      : progress < 85
+        ? "比對合適的設計團隊"
+        : "即將完成推薦"
 
   const modalContent = (
     <div
@@ -532,16 +533,15 @@ export function LineConsultButton({
                 </span>
               </div>
 
-              <p className="mt-7 text-xs font-bold tracking-[0.25em] text-[#55e891]">
-                SMART MATCHING
-              </p>
               <h3
                 id={modalTitleId}
-                className="mt-3 text-2xl font-black leading-tight sm:text-3xl"
+                className="mt-7 text-[28px] font-black leading-tight sm:text-4xl"
               >
-                正在根據您的區域與喜好進行推薦
+                正在為您挑選
+                <span className="mt-1 block text-[#55e891]">合適的設計公司</span>
               </h3>
-              <p className="mt-3 min-h-12 text-sm leading-6 text-white/65">
+
+              <p className="mt-5 min-h-8 text-lg font-bold text-white/75">
                 {analysisMessage}
               </p>
 
@@ -552,28 +552,8 @@ export function LineConsultButton({
                 />
               </div>
 
-              <div className="mt-3 flex items-center justify-between text-xs text-white/50">
-                <span>條件分析中</span>
-                <span className="font-mono text-white/80">{progress}%</span>
-              </div>
-
-              <div className="mt-7 grid grid-cols-3 gap-2 text-left text-[11px] text-white/60">
-                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                  <span className="block text-white/35">AREA</span>
-                  <strong className="mt-1 block truncate text-white">
-                    {district}
-                  </strong>
-                </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                  <span className="block text-white/35">STYLE</span>
-                  <strong className="mt-1 block truncate text-white">
-                    {selectedStyleName}
-                  </strong>
-                </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                  <span className="block text-white/35">STATUS</span>
-                  <strong className="mt-1 block text-[#55e891]">MATCHING</strong>
-                </div>
+              <div className="mt-4 text-lg font-black text-white/90">
+                {progress}%
               </div>
             </div>
           </div>
@@ -601,15 +581,22 @@ export function LineConsultButton({
 
               <div className="mt-7 rounded-[24px] border border-black/10 bg-[#fbfaf7] p-5 text-left shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#06C755] text-2xl font-black text-white">
-                    L
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-black/10 bg-white p-2 shadow-sm">
+                    <img
+                      src={STORE_LOGO_URL}
+                      alt={`${STORE_NAME} Logo`}
+                      className="h-full w-full object-contain"
+                    />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold tracking-[0.14em] text-muted-foreground">
-                      LINE CONTACT
+                    <p className="text-xs font-bold tracking-[0.14em] text-[#06A947]">
+                      推薦設計公司
                     </p>
-                    <p className="mt-1 truncate text-xl font-black text-foreground">
-                      {LINE_ID}
+                    <p className="mt-1 text-xl font-black leading-tight text-foreground">
+                      {STORE_NAME}
+                    </p>
+                    <p className="mt-2 truncate text-sm font-bold text-muted-foreground">
+                      LINE ID：{LINE_ID}
                     </p>
                   </div>
                 </div>
