@@ -1,4 +1,3 @@
-
 import Link from "next/link"
 
 import { LineConsultButton } from "@/components/line-consult-button"
@@ -9,16 +8,20 @@ const footerLinks = [
     href: "/projects",
   },
   {
-    label: "設計風格",
-    href: "/styles",
-  },
-  {
     label: "關於我們",
     href: "/about",
   },
   {
     label: "隱私權政策",
     href: "/privacy-policy",
+  },
+  {
+    label: "服務條款",
+    href: "/terms",
+  },
+  {
+    label: "免責聲明",
+    href: "/disclaimer",
   },
 ]
 
