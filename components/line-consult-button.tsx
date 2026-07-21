@@ -626,14 +626,6 @@ export function LineConsultButton({
                   </span>
                 </a>
               </div>
-
-              <button
-                type="button"
-                onClick={resetModal}
-                className="mt-5 text-sm font-bold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                稍後再聯絡
-              </button>
             </div>
           </div>
         )}
