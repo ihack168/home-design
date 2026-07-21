@@ -584,7 +584,6 @@ export default async function BlogPage({
             className="mt-5 rounded-2xl border border-border/70 bg-white px-4 py-4 shadow-sm sm:px-5"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="mr-1 text-sm font-black">全部</span>
               <Link
                 href="/"
                 aria-current={selectedTag === "全部" ? "page" : undefined}
@@ -599,38 +598,40 @@ export default async function BlogPage({
                   {allTagsRaw.length}
                 </span>
               </Link>
+
+              {cityTags.length > 0 && (
+                <>
+                  <span className="ml-2 mr-1 text-sm font-black">地區</span>
+
+                  {cityTags.map((tagItem) => {
+                    const isActive = selectedTag === tagItem.name
+
+                    return (
+                      <Link
+                        key={tagItem.name}
+                        href={buildBlogPath(tagItem.name)}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                          isActive
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                        }`}
+                      >
+                        {tagItem.name}
+                        <span className="ml-1.5 opacity-60">
+                          {tagItem.count}
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </>
+              )}
             </div>
 
-            {cityTags.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <span className="mr-1 text-sm font-black">地區</span>
-                {cityTags.map((tagItem) => {
-                  const isActive = selectedTag === tagItem.name
-
-                  return (
-                    <Link
-                      key={tagItem.name}
-                      href={buildBlogPath(tagItem.name)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                        isActive
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
-                      }`}
-                    >
-                      {tagItem.name}
-                      <span className="ml-1.5 opacity-60">
-                        {tagItem.count}
-                      </span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-
             {designStyleTags.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="mr-1 text-sm font-black">設計風格</span>
+
                 {designStyleTags.map((tagItem) => {
                   const isActive = selectedTag === tagItem.name
 
