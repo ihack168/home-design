@@ -665,9 +665,17 @@ export function LineConsultButton({
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold tracking-[0.14em] text-[#06A947]">
-                      推薦設計公司
-                    </p>
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      <span
+                        aria-label="AI 配對推薦"
+                        className="text-[13px] font-black tracking-[0.04em] text-amber-400"
+                      >
+                        ★★★★★
+                      </span>
+                      <span className="text-[11px] font-bold tracking-[0.12em] text-[#06A947]">
+                        AI 配對推薦
+                      </span>
+                    </div>
                     <p className="mt-1 text-xl font-black leading-tight text-foreground">
                       {STORE_NAME}
                     </p>
