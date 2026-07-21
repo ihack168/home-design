@@ -23,6 +23,12 @@ const DESIGN_STYLES = [
   { id: "american-country", name: "美式鄉村", icon: "⌂" },
 ] as const;
 
+const BUDGET_OPTIONS = [
+  "100萬-200萬",
+  "200萬-300萬",
+  "300萬-500萬",
+] as const;
+
 const TAIWAN_CITIES = [
   "基隆市",
   "台北市",
@@ -49,6 +55,7 @@ interface LineConsultButtonProps {
 interface FormErrors {
   district?: string;
   designStyle?: string;
+  budget?: string;
   lastName?: string;
   phoneLast3?: string;
   submit?: string;
@@ -67,6 +74,7 @@ export function LineConsultButton({
 
   const [district, setDistrict] = useState("");
   const [designStyle, setDesignStyle] = useState("");
+  const [budget, setBudget] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneLast3, setPhoneLast3] = useState("");
   const [loading, setLoading] = useState(false);
@@ -128,6 +136,7 @@ export function LineConsultButton({
     setStep("form");
     setDistrict("");
     setDesignStyle("");
+    setBudget("");
     setLastName("");
     setPhoneLast3("");
     setProgress(0);
@@ -139,6 +148,7 @@ export function LineConsultButton({
     setStep("form");
     setDistrict("");
     setDesignStyle("");
+    setBudget("");
     setLastName("");
     setPhoneLast3("");
     setProgress(0);
@@ -156,6 +166,10 @@ export function LineConsultButton({
 
     if (!designStyle.trim()) {
       nextErrors.designStyle = "請選擇喜歡的設計風格";
+    }
+
+    if (!budget.trim()) {
+      nextErrors.budget = "請選擇預算範圍";
     }
 
     if (!lastName.trim()) {
@@ -178,6 +192,7 @@ export function LineConsultButton({
     const cleanDesignStyleName =
       DESIGN_STYLES.find((style) => style.id === cleanDesignStyle)?.name ||
       cleanDesignStyle;
+    const cleanBudget = budget.trim();
     const cleanLastName = lastName.trim();
     const cleanPhoneLast3 = phoneLast3.trim();
 
@@ -193,6 +208,7 @@ export function LineConsultButton({
           vendorName: VENDOR_NAME,
           district: cleanDistrict,
           serviceType: cleanDesignStyleName,
+          budget: cleanBudget,
           lastName: cleanLastName,
           phoneLast3: cleanPhoneLast3,
           sourcePage: window.location.href,
@@ -358,7 +374,7 @@ export function LineConsultButton({
                     </span>
                   </legend>
 
-                  <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
+                  <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {DESIGN_STYLES.map((style) => {
                       const selected = designStyle === style.id;
 
@@ -377,7 +393,7 @@ export function LineConsultButton({
                           }}
                           aria-pressed={selected}
                           disabled={loading}
-                          className={`flex h-10 shrink-0 items-center justify-center rounded-full border px-3.5 text-sm font-bold whitespace-nowrap transition sm:h-12 sm:rounded-2xl sm:px-2 ${
+                          className={`flex h-10 min-w-0 items-center justify-center rounded-xl border px-2 text-[13px] font-bold leading-none whitespace-nowrap transition sm:h-12 sm:rounded-2xl sm:text-sm ${
                             selected
                               ? "border-[#06C755] bg-[#06C755] text-white shadow-sm ring-2 ring-[#06C755]/15"
                               : "border-black/10 bg-white text-foreground hover:border-black/20 hover:shadow-sm"
@@ -397,6 +413,61 @@ export function LineConsultButton({
                   {errors.designStyle && (
                     <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
                       {errors.designStyle}
+                    </p>
+                  )}
+                </fieldset>
+
+
+
+                <fieldset>
+                  <legend className="flex w-full items-center justify-between text-sm font-bold text-foreground">
+                    <span>
+                      預算<span className="ml-1 text-red-500">*</span>
+                    </span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      請選擇範圍
+                    </span>
+                  </legend>
+
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {BUDGET_OPTIONS.map((option) => {
+                      const selected = budget === option;
+
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => {
+                            setBudget(option);
+                            if (errors.budget) {
+                              setErrors((current) => ({
+                                ...current,
+                                budget: undefined,
+                              }));
+                            }
+                          }}
+                          aria-pressed={selected}
+                          disabled={loading}
+                          className={`flex h-10 min-w-0 items-center justify-center rounded-xl border px-1.5 text-[12px] font-bold leading-tight transition sm:h-12 sm:rounded-2xl sm:px-2 sm:text-sm ${
+                            selected
+                              ? "border-[#06C755] bg-[#06C755] text-white shadow-sm ring-2 ring-[#06C755]/15"
+                              : "border-black/10 bg-white text-foreground hover:border-black/20 hover:shadow-sm"
+                          } disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                          {selected && (
+                            <span className="mr-1 text-[10px]" aria-hidden="true">
+                              ✓
+                            </span>
+                          )}
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {errors.budget && (
+                    <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
+                      {errors.budget}
                     </p>
                   )}
                 </fieldset>
@@ -575,7 +646,7 @@ export function LineConsultButton({
                 已為您找到適合的諮詢窗口
               </h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                依據您位於「{district}」且偏好「{selectedStyleName}」的條件，
+                依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件，
                 可透過下方 LINE 進一步確認空間需求與服務內容。
               </p>
 
