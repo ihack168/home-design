@@ -94,6 +94,8 @@ export function LineConsultButton({
   const [budget, setBudget] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneLast3, setPhoneLast3] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [lineId, setLineId] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [analysisIndex, setAnalysisIndex] = useState(0);
@@ -169,6 +171,8 @@ export function LineConsultButton({
     setBudget("");
     setLastName("");
     setPhoneLast3("");
+    setContactEmail("");
+    setLineId("");
     setProgress(0);
     setAnalysisIndex(0);
     setErrors({});
@@ -182,6 +186,8 @@ export function LineConsultButton({
     setBudget("");
     setLastName("");
     setPhoneLast3("");
+    setContactEmail("");
+    setLineId("");
     setProgress(0);
     setAnalysisIndex(0);
     setErrors({});
@@ -227,6 +233,8 @@ export function LineConsultButton({
     const cleanBudget = budget.trim();
     const cleanLastName = lastName.trim();
     const cleanPhoneLast3 = phoneLast3.trim();
+    const cleanContactEmail = contactEmail.trim();
+    const cleanLineId = lineId.trim();
 
     const payload = JSON.stringify({
       action: "lineConsult",
@@ -237,6 +245,8 @@ export function LineConsultButton({
       budget: cleanBudget,
       lastName: cleanLastName,
       phoneLast3: cleanPhoneLast3,
+      contactEmail: cleanContactEmail,
+      lineId: cleanLineId,
       sourcePage: window.location.href,
     });
 
@@ -562,6 +572,56 @@ export function LineConsultButton({
                         {errors.phoneLast3}
                       </p>
                     )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
+                  <div>
+                    <label
+                      htmlFor="consult-contact-email"
+                      className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
+                    >
+                      <span>聯絡 Email</span>
+                      <span className="whitespace-nowrap text-[10px] font-normal text-muted-foreground sm:text-xs">
+                        選填・服務追蹤
+                      </span>
+                    </label>
+                    <input
+                      id="consult-contact-email"
+                      type="email"
+                      value={contactEmail}
+                      onChange={(event) =>
+                        setContactEmail(event.target.value.slice(0, 120))
+                      }
+                      placeholder="name@example.com"
+                      autoComplete="email"
+                      disabled={loading}
+                      className="mt-1.5 h-[46px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="consult-line-id"
+                      className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
+                    >
+                      <span>LINE ID</span>
+                      <span className="whitespace-nowrap text-[10px] font-normal text-muted-foreground sm:text-xs">
+                        選填・服務追蹤
+                      </span>
+                    </label>
+                    <input
+                      id="consult-line-id"
+                      type="text"
+                      value={lineId}
+                      onChange={(event) =>
+                        setLineId(event.target.value.slice(0, 50))
+                      }
+                      placeholder="例如：line168"
+                      autoComplete="off"
+                      disabled={loading}
+                      className="mt-1.5 h-[46px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4"
+                    />
                   </div>
                 </div>
               </div>
