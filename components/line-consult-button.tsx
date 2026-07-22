@@ -308,7 +308,7 @@ export function LineConsultButton({
 
         {step === "form" && (
           <>
-            <div className="border-b border-black/5 bg-white px-4 pb-3 pt-4 sm:px-8 sm:pb-6 sm:pt-7">
+            <div className="border-b border-black/5 bg-white px-4 pb-3 pt-4 sm:px-8 sm:pb-4 sm:pt-5">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#06C755]/10 sm:h-11 sm:w-11 sm:rounded-2xl">
                   <span className="text-lg sm:text-xl" aria-hidden="true">
@@ -327,118 +327,77 @@ export function LineConsultButton({
               </div>
             </div>
 
-            <div className="px-4 py-3.5 sm:px-8 sm:py-7">
-              <div className="space-y-3 sm:space-y-5">
-                <div>
-                  <label
-                    htmlFor="consult-district"
-                    className="flex items-center justify-between text-sm font-bold text-foreground"
-                  >
-                    <span>
+            <div className="px-4 py-3.5 sm:px-8 sm:py-5">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
+                  <div>
+                    <label htmlFor="consult-district" className="text-sm font-bold text-foreground">
                       服務地區<span className="ml-1 text-red-500">*</span>
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      請選擇縣市
-                    </span>
-                  </label>
-
-                  <div className="relative mt-1.5 sm:mt-2">
-                    <select
-                      id="consult-district"
-                      value={district}
-                      onChange={(event) => {
-                        setDistrict(event.target.value);
-                        if (errors.district) {
-                          setErrors((current) => ({
-                            ...current,
-                            district: undefined,
-                          }));
-                        }
-                      }}
-                      disabled={loading}
-                      aria-invalid={Boolean(errors.district)}
-                      className={`h-[46px] w-full appearance-none rounded-xl border bg-white px-3.5 pr-10 text-sm text-foreground outline-none transition sm:h-[52px] sm:rounded-2xl sm:px-4 sm:pr-11 ${
-                        errors.district
-                          ? "border-red-400 ring-2 ring-red-100"
-                          : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    >
-                      <option value="">選擇需要服務的縣市</option>
-                      {TAIWAN_CITIES.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"
-                    >
-                      ▼
-                    </span>
+                    </label>
+                    <div className="relative mt-1.5 sm:mt-2">
+                      <select
+                        id="consult-district"
+                        value={district}
+                        onChange={(event) => {
+                          setDistrict(event.target.value);
+                          if (errors.district) {
+                            setErrors((current) => ({ ...current, district: undefined }));
+                          }
+                        }}
+                        disabled={loading}
+                        aria-invalid={Boolean(errors.district)}
+                        className={`h-[46px] w-full appearance-none rounded-xl border bg-white px-3 pr-8 text-sm text-foreground outline-none transition sm:h-[52px] sm:rounded-2xl sm:px-4 sm:pr-10 ${
+                          errors.district
+                            ? "border-red-400 ring-2 ring-red-100"
+                            : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        <option value="">選擇縣市</option>
+                        {TAIWAN_CITIES.map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">▼</span>
+                    </div>
+                    {errors.district && (
+                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">{errors.district}</p>
+                    )}
                   </div>
 
-                  {errors.district && (
-                    <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
-                      {errors.district}
-                    </p>
-                  )}
+                  <div>
+                    <label htmlFor="consult-design-style" className="text-sm font-bold text-foreground">
+                      設計風格<span className="ml-1 text-red-500">*</span>
+                    </label>
+                    <div className="relative mt-1.5 sm:mt-2">
+                      <select
+                        id="consult-design-style"
+                        value={designStyle}
+                        onChange={(event) => {
+                          setDesignStyle(event.target.value);
+                          if (errors.designStyle) {
+                            setErrors((current) => ({ ...current, designStyle: undefined }));
+                          }
+                        }}
+                        disabled={loading}
+                        aria-invalid={Boolean(errors.designStyle)}
+                        className={`h-[46px] w-full appearance-none rounded-xl border bg-white px-3 pr-8 text-sm text-foreground outline-none transition sm:h-[52px] sm:rounded-2xl sm:px-4 sm:pr-10 ${
+                          errors.designStyle
+                            ? "border-red-400 ring-2 ring-red-100"
+                            : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        <option value="">選擇風格</option>
+                        {DESIGN_STYLES.map((style) => (
+                          <option key={style.id} value={style.id}>{style.name}</option>
+                        ))}
+                      </select>
+                      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">▼</span>
+                    </div>
+                    {errors.designStyle && (
+                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">{errors.designStyle}</p>
+                    )}
+                  </div>
                 </div>
-
-                <fieldset>
-                  <legend className="flex w-full items-center justify-between text-sm font-bold text-foreground">
-                    <span>
-                      我喜歡的設計風格
-                      <span className="ml-1 text-red-500">*</span>
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      請選擇一種
-                    </span>
-                  </legend>
-
-                  <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                    {DESIGN_STYLES.map((style) => {
-                      const selected = designStyle === style.id;
-
-                      return (
-                        <button
-                          key={style.id}
-                          type="button"
-                          onClick={() => {
-                            setDesignStyle(style.id);
-                            if (errors.designStyle) {
-                              setErrors((current) => ({
-                                ...current,
-                                designStyle: undefined,
-                              }));
-                            }
-                          }}
-                          aria-pressed={selected}
-                          disabled={loading}
-                          className={`flex h-10 min-w-0 items-center justify-center rounded-xl border px-2 text-[13px] font-bold leading-none whitespace-nowrap transition sm:h-12 sm:rounded-2xl sm:text-sm ${
-                            selected
-                              ? "border-[#06C755] bg-[#06C755] text-white shadow-sm ring-2 ring-[#06C755]/15"
-                              : "border-black/10 bg-white text-foreground hover:border-black/20 hover:shadow-sm"
-                          } disabled:cursor-not-allowed disabled:opacity-60`}
-                        >
-                          {selected && (
-                            <span className="mr-1.5 text-xs" aria-hidden="true">
-                              ✓
-                            </span>
-                          )}
-                          {style.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {errors.designStyle && (
-                    <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
-                      {errors.designStyle}
-                    </p>
-                  )}
-                </fieldset>
-
 
 
                 <fieldset>
@@ -494,112 +453,78 @@ export function LineConsultButton({
                   )}
                 </fieldset>
 
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
-                  <div>
-                    <label
-                      htmlFor="consult-last-name"
-                      className="text-sm font-bold text-foreground"
-                    >
-                      貴姓<span className="ml-1 text-red-500">*</span>
-                    </label>
-                    <input
-                      id="consult-last-name"
-                      type="text"
-                      value={lastName}
-                      onChange={(event) => {
-                        setLastName(event.target.value.slice(0, 10));
-                        if (errors.lastName) {
-                          setErrors((current) => ({
-                            ...current,
-                            lastName: undefined,
-                          }));
-                        }
-                      }}
-                      placeholder="例如：王"
-                      autoComplete="family-name"
-                      disabled={loading}
-                      aria-invalid={Boolean(errors.lastName)}
-                      className={`mt-1.5 h-[46px] w-full rounded-xl border bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4 ${
-                        errors.lastName
-                          ? "border-red-400 ring-2 ring-red-100"
-                          : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    />
-                    {errors.lastName && (
-                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
-                        {errors.lastName}
-                      </p>
-                    )}
+                <div className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 sm:p-4">
+                  <div className="mb-3 flex items-start gap-2.5">
+                    <span aria-hidden="true" className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#06C755]/10 text-xs font-black text-[#06A947]">✓</span>
+                    <div>
+                      <p className="text-sm font-black text-foreground">留下簡單資料，方便辨識您的推薦紀錄</p>
+                      <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground sm:text-xs">Email 僅用於後續確認設計公司是否妥善服務，不會提供給其他業者。</p>
+                    </div>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="consult-phone-last-3"
-                      className="text-sm font-bold text-foreground"
-                    >
-                      手機後 3 碼<span className="ml-1 text-red-500">*</span>
-                    </label>
-                    <input
-                      id="consult-phone-last-3"
-                      type="text"
-                      value={phoneLast3}
-                      onChange={(event) => {
-                        const value = event.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 3);
-                        setPhoneLast3(value);
-                        if (errors.phoneLast3) {
-                          setErrors((current) => ({
-                            ...current,
-                            phoneLast3: undefined,
-                          }));
-                        }
-                      }}
-                      placeholder="例如：168"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      maxLength={3}
-                      disabled={loading}
-                      aria-invalid={Boolean(errors.phoneLast3)}
-                      className={`mt-1.5 h-[46px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4 ${
-                        errors.phoneLast3
-                          ? "border-red-400 ring-2 ring-red-100"
-                          : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    />
-                    {errors.phoneLast3 && (
-                      <p className="mt-1 text-[11px] font-medium text-red-500 sm:mt-2 sm:text-xs">
-                        {errors.phoneLast3}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                    <div>
+                      <label htmlFor="consult-last-name" className="text-sm font-bold text-foreground">貴姓<span className="ml-1 text-red-500">*</span></label>
+                      <input
+                        id="consult-last-name"
+                        type="text"
+                        value={lastName}
+                        onChange={(event) => {
+                          setLastName(event.target.value.slice(0, 10));
+                          if (errors.lastName) setErrors((current) => ({ ...current, lastName: undefined }));
+                        }}
+                        placeholder="例如：王"
+                        autoComplete="family-name"
+                        disabled={loading}
+                        aria-invalid={Boolean(errors.lastName)}
+                        className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 sm:h-[48px] ${
+                          errors.lastName ? "border-red-400 ring-2 ring-red-100" : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      />
+                      {errors.lastName && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.lastName}</p>}
+                    </div>
 
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
-                  <div>
-                    <label
-                      htmlFor="consult-contact-email"
-                      className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
-                    >
+                    <div>
+                      <label htmlFor="consult-phone-last-3" className="text-sm font-bold text-foreground">手機後 3 碼<span className="ml-1 text-red-500">*</span></label>
+                      <input
+                        id="consult-phone-last-3"
+                        type="text"
+                        value={phoneLast3}
+                        onChange={(event) => {
+                          const value = event.target.value.replace(/\D/g, "").slice(0, 3);
+                          setPhoneLast3(value);
+                          if (errors.phoneLast3) setErrors((current) => ({ ...current, phoneLast3: undefined }));
+                        }}
+                        placeholder="例如：168"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={3}
+                        disabled={loading}
+                        aria-invalid={Boolean(errors.phoneLast3)}
+                        className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:h-[48px] ${
+                          errors.phoneLast3 ? "border-red-400 ring-2 ring-red-100" : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      />
+                      {errors.phoneLast3 && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.phoneLast3}</p>}
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <label htmlFor="consult-contact-email" className="flex items-center justify-between gap-3 text-sm font-bold text-foreground">
                       <span>聯絡 Email</span>
-                      <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
-                        便於我們追蹤服務品質
-                      </span>
+                      <span className="shrink-0 rounded-full bg-[#06C755]/10 px-2 py-0.5 text-[10px] font-black text-[#06A947] sm:text-[11px]">選填・服務保障</span>
                     </label>
                     <input
                       id="consult-contact-email"
                       type="email"
                       value={contactEmail}
-                      onChange={(event) =>
-                        setContactEmail(event.target.value.slice(0, 120))
-                      }
-                      placeholder="name@example.com"
+                      onChange={(event) => setContactEmail(event.target.value.slice(0, 120))}
+                      placeholder="方便日後確認服務狀況"
                       autoComplete="email"
                       disabled={loading}
-                      className="mt-1.5 h-[46px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4"
+                      className="mt-1.5 h-[44px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:h-[48px]"
                     />
                   </div>
-
                 </div>
               </div>
 
@@ -616,7 +541,7 @@ export function LineConsultButton({
                 type="button"
                 onClick={handleSubmitLineConsult}
                 disabled={loading}
-                className="mt-3.5 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-6 sm:h-14 sm:rounded-2xl"
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-4 sm:h-14 sm:rounded-2xl"
               >
                 <span className="flex items-center gap-2">
                   開始推薦分析<span aria-hidden="true">→</span>
