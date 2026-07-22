@@ -214,8 +214,8 @@ export function LineConsultButton({
       nextErrors.lastName = "請輸入您的姓氏";
     }
 
-    if (!/^\d{3}$/.test(phoneLast3.trim())) {
-      nextErrors.phoneLast3 = "請輸入 3 位數字";
+    if (!/^09\d{8}$/.test(phoneLast3.trim())) {
+      nextErrors.phoneLast3 = "請輸入正確的手機號碼";
     }
 
     setErrors(nextErrors);
@@ -490,14 +490,14 @@ export function LineConsultButton({
                         type="text"
                         value={phoneLast3}
                         onChange={(event) => {
-                          const value = event.target.value.replace(/\D/g, "").slice(0, 3);
+                          const value = event.target.value.replace(/\D/g, "").slice(0, 10);
                           setPhoneLast3(value);
                           if (errors.phoneLast3) setErrors((current) => ({ ...current, phoneLast3: undefined }));
                         }}
                         placeholder="例如：0912-345-678"
                         inputMode="numeric"
                         autoComplete="off"
-                        maxLength={15}
+                        maxLength={10}
                         disabled={loading}
                         aria-invalid={Boolean(errors.phoneLast3)}
                         className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:h-[48px] ${
@@ -505,27 +505,11 @@ export function LineConsultButton({
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       />
                       {errors.phoneLast3 && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.phoneLast3}</p>}
+                      <p className="mt-2 text-xs font-bold text-red-500">※ 聯絡資訊僅供確認推薦公司服務品質，不會提供給其他業者。</p>
                     </div>
                   </div>
-
-                  <div className="mt-3">
-                    <label htmlFor="consult-contact-email" className="flex items-center justify-between gap-3 text-sm font-bold text-foreground">
-                      <span>聯絡 Email</span>
-                      <span className="shrink-0 rounded-full bg-[#06C755]/10 px-2 py-0.5 text-[10px] font-black text-[#06A947] sm:text-[11px]">選填・服務保障</span>
-                    </label>
-                    <input
-                      id="consult-contact-email"
-                      type="email"
-                      value={contactEmail}
-                      onChange={(event) => setContactEmail(event.target.value.slice(0, 120))}
-                      placeholder="方便日後確認服務狀況"
-                      autoComplete="email"
-                      disabled={loading}
-                      className="mt-1.5 h-[44px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:h-[48px]"
-                    />
                   </div>
                 </div>
-              </div>
 
               {errors.submit && (
                 <div
