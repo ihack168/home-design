@@ -707,9 +707,6 @@ export function LineConsultButton({
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#06C755]/10 text-3xl text-[#06A947]">
                 ✓
               </div>
-              <p className="mt-5 text-xs font-bold tracking-[0.2em] text-[#06A947]">
-                RECOMMENDATION READY
-              </p>
               <h3
                 id={modalTitleId}
                 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
@@ -717,8 +714,7 @@ export function LineConsultButton({
                 已為您找到適合的諮詢窗口
               </h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件，
-                可透過下方 LINE 進一步確認空間需求與服務內容。
+                依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件推薦
               </p>
 
               <div className="mt-7 rounded-[24px] border border-black/10 bg-[#fbfaf7] p-5 text-left shadow-sm">
@@ -739,7 +735,7 @@ export function LineConsultButton({
                         ★★★★★
                       </span>
                       <span className="text-[11px] font-bold tracking-[0.12em] text-[#06A947]">
-                        AI 配對推薦
+                        配對推薦
                       </span>
                     </div>
                     <p className="mt-1 text-xl font-black leading-tight text-foreground">
