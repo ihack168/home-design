@@ -6,7 +6,7 @@ const SANITY_TOKEN = process.env.SANITY_TOKEN;
 
 const SHEET_NAME = 'home-design';
 
-const OFFICIAL_BASE_URL = 'https://home-design.line88.tw/blog';
+const OFFICIAL_BASE_URL = 'https://www.deco77.com/blog';
 
 const GOOGLE_SCRIPT_BASE_URL =
   'https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec';

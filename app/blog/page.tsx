@@ -8,7 +8,7 @@ import { client } from "@/lib/sanity"
 
 export const revalidate = 60
 
-const SITE_URL = "https://home-design.line88.tw"
+const SITE_URL = "https://www.deco77.com"
 const SITE_NAME = "台灣室內設計資訊網"
 const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-home.jpg`
 
