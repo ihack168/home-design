@@ -444,14 +444,7 @@ export function LineConsultButton({
                 </fieldset>
 
                 <div className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 sm:p-4">
-                  <div className="mb-3 flex items-start gap-2.5">
-                    <span aria-hidden="true" className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#06C755]/10 text-xs font-black text-[#06A947]">✓</span>
-                    <div>
-                      <p className="text-sm font-black text-foreground">留下簡單資料，方便辨識您的推薦紀錄</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+<div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                     <div>
                       <label htmlFor="consult-last-name" className="text-sm font-bold text-foreground">貴姓<span className="ml-1 text-red-500">*</span></label>
                       <input
@@ -516,7 +509,7 @@ export function LineConsultButton({
                 className="mt-3 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-4 sm:h-14 sm:rounded-2xl"
               >
                 <span className="flex items-center gap-2">
-                  開始推薦分析<span aria-hidden="true">→</span>
+                  AI開始分析適合您的設計公司<span aria-hidden="true">→</span>
                 </span>
               </button>
             </div>
