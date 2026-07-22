@@ -704,7 +704,7 @@ export function LineConsultButton({
                 id={modalTitleId}
                 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
               >
-                已為您找到適合的諮詢窗口
+                AI分析完成
               </h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件推薦
