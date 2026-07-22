@@ -594,46 +594,55 @@ export function LineConsultButton({
           </>
         )}
 
-        {step === "analyzing" && (
-          <div className="relative overflow-hidden bg-[#07110c] px-6 py-12 text-white sm:px-10 sm:py-14">
-            <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,rgba(6,199,85,.45),transparent_30%),radial-gradient(circle_at_80%_70%,rgba(38,166,255,.35),transparent_35%)]" />
-            <div className="relative mx-auto max-w-md text-center">
-              <div className="relative mx-auto flex h-24 w-24 items-center justify-center">
-                <span className="absolute inset-0 animate-ping rounded-full border border-[#06C755]/30" />
-                <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-r-[#06C755] border-t-[#06C755]" />
-                <span className="absolute inset-5 animate-[spin_2.4s_linear_infinite_reverse] rounded-full border border-transparent border-b-cyan-300 border-l-cyan-300" />
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-2xl backdrop-blur">
-                  ✦
-                </span>
-              </div>
+ // ===== 放在 useState 區 ===== const ANALYSIS_ITEMS = [ “設計案例”,
+“施工品質”, “客戶評價”, “溝通效率”, “業界口碑”, “風格匹配”, “預算匹配”,
+“AI 配對模型”,];
 
-              <h3
-                id={modalTitleId}
-                className="mt-7 text-[28px] font-black leading-tight sm:text-4xl"
-              >
-                正在為您挑選
-                <span className="mt-1 block text-[#55e891]">
-                  合適的設計公司
-                </span>
-              </h3>
+const [analysisIndex, setAnalysisIndex] = useState(0);
 
-              <p className="mt-5 min-h-8 text-lg font-bold text-white/75">
-                {analysisMessage}
-              </p>
+// ===== 放在 analyzing 的 useEffect ===== useEffect(() => { if (step
+!== “analyzing”) return;
 
-              <div className="mt-8 overflow-hidden rounded-full bg-white/10 p-1">
-                <div
-                  className="h-3 rounded-full bg-gradient-to-r from-[#06C755] via-emerald-300 to-cyan-300 transition-[width] duration-150 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+setAnalysisIndex(0);
 
-              <div className="mt-4 text-lg font-black text-white/90">
-                {progress}%
-              </div>
-            </div>
-          </div>
-        )}
+const timer = window.setInterval(() => { setAnalysisIndex((prev) => { if
+(prev >= ANALYSIS_ITEMS.length) { window.clearInterval(timer); return
+prev; } return prev + 1; }); }, 600);
+
+return () => window.clearInterval(timer); }, [step]);
+
+// ===== 在 step === “analyzing” 畫面中，將下方區塊貼到標題與進度條中間
+=====
+
+    {ANALYSIS_ITEMS.map((item, index) => {
+      const done = index < analysisIndex;
+      const current = index === analysisIndex;
+
+      return (
+        <div
+          key={item}
+          className="flex items-center justify-between text-[15px]"
+        >
+          <span className="font-medium">
+            {done ? "✓" : current ? "◉" : "○"} {item}
+          </span>
+
+          {done ? (
+            <span className="font-bold text-[#55e891]">
+              已完成
+            </span>
+          ) : current ? (
+            <span className="font-bold text-cyan-300 animate-pulse">
+              AI 分析中...
+            </span>
+          ) : (
+            <span className="text-white/35">
+              等待分析
+            </span>
+          )}
+        </div>
+      );
+    })}
 
         {step === "result" && (
           <div className="bg-white px-6 py-9 sm:px-10 sm:py-11">
