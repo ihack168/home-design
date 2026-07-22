@@ -21,10 +21,11 @@ const VENDOR_ID = "home-design";
 const VENDOR_NAME = "台灣室內設計資訊網";
 
 const DESIGN_STYLES = [
-  { id: "modern", name: "現代簡約", icon: "◻" },
+  { id: "modern", name: "現代風", icon: "◻" },
   { id: "japanese", name: "日式無印", icon: "木" },
   { id: "wabi-sabi", name: "侘寂風", icon: "◯" },
   { id: "nordic", name: "北歐風", icon: "△" },
+  { id: "american-country", name: "奶油風", icon: "⌂" },
   { id: "american-country", name: "美式鄉村", icon: "⌂" },
 ] as const;
 
