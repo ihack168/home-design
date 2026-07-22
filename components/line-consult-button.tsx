@@ -582,8 +582,8 @@ export function LineConsultButton({
                       className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
                     >
                       <span>聯絡 Email</span>
-                      <span className="whitespace-nowrap text-[10px] font-normal text-muted-foreground sm:text-xs">
-                        選填・服務追蹤
+                      <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
+                        選填・便於我們追蹤服務品質
                       </span>
                     </label>
                     <input
@@ -606,8 +606,8 @@ export function LineConsultButton({
                       className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
                     >
                       <span>LINE ID</span>
-                      <span className="whitespace-nowrap text-[10px] font-normal text-muted-foreground sm:text-xs">
-                        選填・服務追蹤
+                      <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
+                        選填・便於我們追蹤服務品質
                       </span>
                     </label>
                     <input
