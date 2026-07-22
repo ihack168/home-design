@@ -311,7 +311,7 @@ export function LineConsultButton({
                     id={modalTitleId}
                     className="text-xl font-black tracking-tight text-foreground sm:mt-1 sm:text-[28px]"
                   >
-                    尋找適合您的設計諮詢
+                    分析適合您的設計公司
                   </h3>
                 </div>
               </div>
