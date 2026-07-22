@@ -215,7 +215,7 @@ export default function RootLayout({
 
         <Script
           id="umami-analytics"
-          src="https://ana.line88.tw/script.js"
+          src="https://ana.deco77.com/script.js"
           data-website-id="d9c20b02-c07c-4fe4-99ac-c8440daa70b1"
           strategy="afterInteractive"
         />
