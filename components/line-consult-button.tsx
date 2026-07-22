@@ -316,9 +316,6 @@ export function LineConsultButton({
                 </div>
 
                 <div className="min-w-0 pr-10">
-                  <p className="hidden text-xs font-bold tracking-[0.18em] text-[#06A947] sm:block">
-                    DESIGN CONSULTATION
-                  </p>
                   <h3
                     id={modalTitleId}
                     className="text-xl font-black tracking-tight text-foreground sm:mt-1 sm:text-[28px]"
@@ -604,11 +601,6 @@ export function LineConsultButton({
                   </span>
                 )}
               </button>
-
-              <div className="mt-2 flex items-center justify-center gap-1.5 text-center text-[10px] leading-4 text-muted-foreground sm:mt-4 sm:gap-2 sm:text-[11px] sm:leading-5">
-                <span aria-hidden="true">🔒</span>
-                <span>送出即表示您同意本站使用資料聯繫本次諮詢</span>
-              </div>
             </div>
           </>
         )}
