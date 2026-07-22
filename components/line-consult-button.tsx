@@ -25,7 +25,7 @@ const DESIGN_STYLES = [
   { id: "japanese", name: "日式無印", icon: "木" },
   { id: "wabi-sabi", name: "侘寂風", icon: "◯" },
   { id: "nordic", name: "北歐風", icon: "△" },
-  { id: "american-country", name: "奶油風", icon: "⌂" },
+  { id: "creamy", name: "奶油風", icon: "⌂" },
   { id: "american-country", name: "美式鄉村", icon: "⌂" },
 ] as const;
 
@@ -216,7 +216,7 @@ export function LineConsultButton({
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmitLineConsult = async () => {
+  const handleSubmitLineConsult = () => {
     if (!validateForm()) return;
 
     const cleanDistrict = district.trim();
@@ -228,47 +228,37 @@ export function LineConsultButton({
     const cleanLastName = lastName.trim();
     const cleanPhoneLast3 = phoneLast3.trim();
 
-    try {
-      setLoading(true);
-      setErrors({});
+    const payload = JSON.stringify({
+      action: "lineConsult",
+      vendorId: VENDOR_ID,
+      vendorName: VENDOR_NAME,
+      district: cleanDistrict,
+      serviceType: cleanDesignStyleName,
+      budget: cleanBudget,
+      lastName: cleanLastName,
+      phoneLast3: cleanPhoneLast3,
+      sourcePage: window.location.href,
+    });
 
-      const res = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "lineConsult",
-          vendorId: VENDOR_ID,
-          vendorName: VENDOR_NAME,
-          district: cleanDistrict,
-          serviceType: cleanDesignStyleName,
-          budget: cleanBudget,
-          lastName: cleanLastName,
-          phoneLast3: cleanPhoneLast3,
-          sourcePage: window.location.href,
-        }),
-      });
+    // 先立刻進入分析畫面，不等待 Google Script 回覆。
+    setLoading(true);
+    setErrors({});
+    setStep("analyzing");
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      const result = await res.json();
-
-      if (!result.success) {
-        setErrors({
-          submit: result.message || "資料送出失敗，請稍後再試。",
-        });
-        setLoading(false);
-        return;
-      }
-
-      setStep("analyzing");
-    } catch (error) {
-      console.error("LINE consult submit error:", error);
-      setErrors({
-        submit: "目前無法送出資料，請稍後再試。",
-      });
-      setLoading(false);
-    }
+    // 背景送出資料。使用 no-cors，避免 Apps Script 回傳格式、
+    // 重新導向或跨網域限制讓前端誤判為送出失敗。
+    void fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      keepalive: true,
+      headers: {
+        "Content-Type": "text/plain;charset=UTF-8",
+      },
+      body: payload,
+    }).catch((error) => {
+      // 不打斷使用者流程，但在瀏覽器主控台保留紀錄。
+      console.error("LINE consult background submit error:", error);
+    });
   };
 
   const selectedStyleName =
@@ -591,16 +581,9 @@ export function LineConsultButton({
                 disabled={loading}
                 className="mt-3.5 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-6 sm:h-14 sm:rounded-2xl"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    資料送出中
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    開始推薦分析<span aria-hidden="true">→</span>
-                  </span>
-                )}
+                <span className="flex items-center gap-2">
+                  開始推薦分析<span aria-hidden="true">→</span>
+                </span>
               </button>
             </div>
           </>
