@@ -444,38 +444,66 @@ export function LineConsultButton({
                 </fieldset>
 
                 <div className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 sm:p-4">
-<div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                     <div>
-                      <label htmlFor="consult-last-name" className="text-sm font-bold text-foreground">貴姓<span className="ml-1 text-red-500">*</span></label>
+                      <label
+                        htmlFor="consult-last-name"
+                        className="text-sm font-bold text-foreground"
+                      >
+                        貴姓<span className="ml-1 text-red-500">*</span>
+                      </label>
                       <input
                         id="consult-last-name"
                         type="text"
                         value={lastName}
                         onChange={(event) => {
                           setLastName(event.target.value.slice(0, 10));
-                          if (errors.lastName) setErrors((current) => ({ ...current, lastName: undefined }));
+                          if (errors.lastName) {
+                            setErrors((current) => ({
+                              ...current,
+                              lastName: undefined,
+                            }));
+                          }
                         }}
                         placeholder="例如：王"
                         autoComplete="family-name"
                         disabled={loading}
                         aria-invalid={Boolean(errors.lastName)}
                         className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 sm:h-[48px] ${
-                          errors.lastName ? "border-red-400 ring-2 ring-red-100" : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                          errors.lastName
+                            ? "border-red-400 ring-2 ring-red-100"
+                            : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       />
-                      {errors.lastName && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.lastName}</p>}
+                      {errors.lastName && (
+                        <p className="mt-1 text-[11px] font-medium text-red-500">
+                          {errors.lastName}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label htmlFor="consult-phone-last-3" className="text-sm font-bold text-foreground">聯絡電話<span className="ml-1 text-red-500">*</span></label>
+                      <label
+                        htmlFor="consult-phone-last-3"
+                        className="text-sm font-bold text-foreground"
+                      >
+                        聯絡電話<span className="ml-1 text-red-500">*</span>
+                      </label>
                       <input
                         id="consult-phone-last-3"
                         type="text"
                         value={phoneLast3}
                         onChange={(event) => {
-                          const value = event.target.value.replace(/\D/g, "").slice(0, 10);
+                          const value = event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10);
                           setPhoneLast3(value);
-                          if (errors.phoneLast3) setErrors((current) => ({ ...current, phoneLast3: undefined }));
+                          if (errors.phoneLast3) {
+                            setErrors((current) => ({
+                              ...current,
+                              phoneLast3: undefined,
+                            }));
+                          }
                         }}
                         placeholder="例如：0912-345-678"
                         inputMode="numeric"
@@ -484,13 +512,22 @@ export function LineConsultButton({
                         disabled={loading}
                         aria-invalid={Boolean(errors.phoneLast3)}
                         className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:h-[48px] ${
-                          errors.phoneLast3 ? "border-red-400 ring-2 ring-red-100" : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                          errors.phoneLast3
+                            ? "border-red-400 ring-2 ring-red-100"
+                            : "border-black/10 focus:border-primary focus:ring-4 focus:ring-primary/10"
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       />
-                      {errors.phoneLast3 && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.phoneLast3}</p>}
+                      {errors.phoneLast3 && (
+                        <p className="mt-1 text-[11px] font-medium text-red-500">
+                          {errors.phoneLast3}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  </div>
+
+                  <p className="mt-3 w-full rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-xs font-black leading-5 text-red-600 sm:text-sm">
+                    聯絡資訊僅供我們追蹤推薦公司服務品質
+                  </p>
                 </div>
 
               {errors.submit && (
@@ -509,7 +546,7 @@ export function LineConsultButton({
                 className="mt-3 flex h-12 w-full items-center justify-center rounded-xl bg-[#06C755] px-5 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e] hover:shadow-[0_16px_35px_rgba(6,199,85,0.3)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:mt-4 sm:h-14 sm:rounded-2xl"
               >
                 <span className="flex items-center gap-2">
-                  AI開始分析適合您的設計公司<span aria-hidden="true">→</span>
+                  送出資料開始思考<span aria-hidden="true">→</span>
                 </span>
               </button>
             </div>
@@ -717,9 +754,6 @@ export function LineConsultButton({
                     </div>
                   </div>
 
-                  <p className="mt-3 w-full rounded-xl bg-red-50 px-3 py-2 text-center text-xs font-bold leading-5 text-red-600 sm:text-sm">
-                    聯絡資訊僅供我們追蹤推薦公司服務品質
-                  </p>
                 </div>
               </div>
             </div>
