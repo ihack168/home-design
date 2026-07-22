@@ -30,9 +30,9 @@ const DESIGN_STYLES = [
 ] as const;
 
 const BUDGET_OPTIONS = [
-  "100萬-200萬",
-  "200萬-300萬",
-  "300萬-500萬",
+  "低",
+  "中",
+  "高",
 ] as const;
 
 const TAIWAN_CITIES = [
@@ -549,6 +549,7 @@ export function LineConsultButton({
                   送出資料開始思考<span aria-hidden="true">→</span>
                 </span>
               </button>
+              </div>
             </div>
           </>
         )}
