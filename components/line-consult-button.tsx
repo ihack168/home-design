@@ -94,8 +94,6 @@ export function LineConsultButton({
   const [budget, setBudget] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneLast3, setPhoneLast3] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [lineId, setLineId] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [analysisIndex, setAnalysisIndex] = useState(0);
@@ -171,8 +169,6 @@ export function LineConsultButton({
     setBudget("");
     setLastName("");
     setPhoneLast3("");
-    setContactEmail("");
-    setLineId("");
     setProgress(0);
     setAnalysisIndex(0);
     setErrors({});
@@ -186,8 +182,6 @@ export function LineConsultButton({
     setBudget("");
     setLastName("");
     setPhoneLast3("");
-    setContactEmail("");
-    setLineId("");
     setProgress(0);
     setAnalysisIndex(0);
     setErrors({});
@@ -215,7 +209,7 @@ export function LineConsultButton({
     }
 
     if (!/^09\d{8}$/.test(phoneLast3.trim())) {
-      nextErrors.phoneLast3 = "請輸入正確的手機號碼";
+      nextErrors.phoneLast3 = "請輸入正確的 10 碼手機號碼";
     }
 
     setErrors(nextErrors);
@@ -233,8 +227,6 @@ export function LineConsultButton({
     const cleanBudget = budget.trim();
     const cleanLastName = lastName.trim();
     const cleanPhoneLast3 = phoneLast3.trim();
-    const cleanContactEmail = contactEmail.trim();
-    const cleanLineId = lineId.trim();
 
     const payload = JSON.stringify({
       action: "lineConsult",
@@ -245,8 +237,6 @@ export function LineConsultButton({
       budget: cleanBudget,
       lastName: cleanLastName,
       phoneLast3: cleanPhoneLast3,
-      contactEmail: cleanContactEmail,
-      lineId: cleanLineId,
       sourcePage: window.location.href,
     });
 
@@ -496,7 +486,7 @@ export function LineConsultButton({
                         }}
                         placeholder="例如：0912-345-678"
                         inputMode="numeric"
-                        autoComplete="off"
+                        autoComplete="tel"
                         maxLength={10}
                         disabled={loading}
                         aria-invalid={Boolean(errors.phoneLast3)}
@@ -505,7 +495,6 @@ export function LineConsultButton({
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       />
                       {errors.phoneLast3 && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.phoneLast3}</p>}
-                      <p className="mt-2 text-xs font-bold text-red-500">※ 聯絡資訊僅供確認推薦公司服務品質，不會提供給其他業者。</p>
                     </div>
                   </div>
                   </div>
@@ -734,6 +723,10 @@ export function LineConsultButton({
                       </a>
                     </div>
                   </div>
+
+                  <p className="mt-3 w-full rounded-xl bg-red-50 px-3 py-2 text-center text-xs font-bold leading-5 text-red-600 sm:text-sm">
+                    聯絡資訊僅供我們追蹤推薦公司服務品質
+                  </p>
                 </div>
               </div>
             </div>
