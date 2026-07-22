@@ -49,6 +49,17 @@ const TAIWAN_CITIES = [
   "宜蘭縣",
 ];
 
+const ANALYSIS_ITEMS = [
+  "設計案例",
+  "施工品質",
+  "客戶評價",
+  "溝通效率",
+  "業界口碑",
+  "風格匹配",
+  "預算匹配",
+  "AI 配對模型",
+];
+
 type ModalStep = "form" | "analyzing" | "result";
 
 interface LineConsultButtonProps {
@@ -84,6 +95,7 @@ export function LineConsultButton({
   const [phoneLast3, setPhoneLast3] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [analysisIndex, setAnalysisIndex] = useState(0);
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
@@ -114,6 +126,7 @@ export function LineConsultButton({
     if (step !== "analyzing") return;
 
     setProgress(8);
+    setAnalysisIndex(0);
 
     const startedAt = Date.now();
     const duration = 5000;
@@ -121,15 +134,26 @@ export function LineConsultButton({
     const timer = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
       const ratio = Math.min(elapsed / duration, 1);
-      const easedProgress = 8 + Math.round(92 * (1 - Math.pow(1 - ratio, 2.2)));
+      const easedProgress =
+        8 + Math.round(92 * (1 - Math.pow(1 - ratio, 2.2)));
 
       setProgress(Math.min(easedProgress, 100));
+      setAnalysisIndex(
+        Math.min(
+          Math.floor(ratio * ANALYSIS_ITEMS.length),
+          ANALYSIS_ITEMS.length
+        )
+      );
 
       if (ratio >= 1) {
         window.clearInterval(timer);
         setProgress(100);
-        setStep("result");
-        setLoading(false);
+        setAnalysisIndex(ANALYSIS_ITEMS.length);
+
+        window.setTimeout(() => {
+          setStep("result");
+          setLoading(false);
+        }, 350);
       }
     }, 80);
 
@@ -145,6 +169,7 @@ export function LineConsultButton({
     setLastName("");
     setPhoneLast3("");
     setProgress(0);
+    setAnalysisIndex(0);
     setErrors({});
     setLoading(false);
   };
@@ -157,6 +182,7 @@ export function LineConsultButton({
     setLastName("");
     setPhoneLast3("");
     setProgress(0);
+    setAnalysisIndex(0);
     setErrors({});
     setLoading(false);
     setShowModal(true);
@@ -247,13 +273,6 @@ export function LineConsultButton({
   const selectedStyleName =
     DESIGN_STYLES.find((style) => style.id === designStyle)?.name ||
     designStyle;
-
-  const analysisMessage =
-    progress < 45
-      ? "分析地區與風格偏好"
-      : progress < 85
-        ? "比對合適的設計團隊"
-        : "即將完成推薦";
 
   const modalContent = (
     <div
@@ -594,55 +613,93 @@ export function LineConsultButton({
           </>
         )}
 
- // ===== 放在 useState 區 ===== const ANALYSIS_ITEMS = [ “設計案例”,
-“施工品質”, “客戶評價”, “溝通效率”, “業界口碑”, “風格匹配”, “預算匹配”,
-“AI 配對模型”,];
+        {step === "analyzing" && (
+          <div className="relative overflow-hidden bg-[#07110c] px-6 py-12 text-white sm:px-10 sm:py-14">
+            <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,rgba(6,199,85,.45),transparent_30%),radial-gradient(circle_at_80%_70%,rgba(38,166,255,.35),transparent_35%)]" />
+            <div className="relative mx-auto max-w-md text-center">
+              <div className="relative mx-auto flex h-24 w-24 items-center justify-center">
+                <span className="absolute inset-0 animate-ping rounded-full border border-[#06C755]/30" />
+                <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-r-[#06C755] border-t-[#06C755]" />
+                <span className="absolute inset-5 animate-[spin_2.4s_linear_infinite_reverse] rounded-full border border-transparent border-b-cyan-300 border-l-cyan-300" />
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-2xl backdrop-blur">
+                  ✦
+                </span>
+              </div>
 
-const [analysisIndex, setAnalysisIndex] = useState(0);
+              <h3
+                id={modalTitleId}
+                className="mt-7 text-[28px] font-black leading-tight sm:text-4xl"
+              >
+                正在為您挑選
+                <span className="mt-1 block text-[#55e891]">
+                  合適的設計公司
+                </span>
+              </h3>
 
-// ===== 放在 analyzing 的 useEffect ===== useEffect(() => { if (step
-!== “analyzing”) return;
+              <p className="mt-4 text-sm font-medium text-white/60">
+                正在比對全台室內設計資料
+              </p>
 
-setAnalysisIndex(0);
+              <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur">
+                <div className="space-y-3">
+                  {ANALYSIS_ITEMS.map((item, index) => {
+                    const done = index < analysisIndex;
+                    const current =
+                      index === analysisIndex &&
+                      analysisIndex < ANALYSIS_ITEMS.length;
 
-const timer = window.setInterval(() => { setAnalysisIndex((prev) => { if
-(prev >= ANALYSIS_ITEMS.length) { window.clearInterval(timer); return
-prev; } return prev + 1; }); }, 600);
+                    return (
+                      <div
+                        key={item}
+                        className="flex items-center justify-between gap-4 text-sm"
+                      >
+                        <span
+                          className={`font-bold transition ${
+                            done
+                              ? "text-white"
+                              : current
+                                ? "text-cyan-200"
+                                : "text-white/40"
+                          }`}
+                        >
+                          <span className="mr-2 inline-block w-4 text-center">
+                            {done ? "✓" : current ? "◉" : "○"}
+                          </span>
+                          {item}
+                        </span>
 
-return () => window.clearInterval(timer); }, [step]);
+                        {done ? (
+                          <span className="shrink-0 font-black text-[#55e891]">
+                            已完成
+                          </span>
+                        ) : current ? (
+                          <span className="shrink-0 animate-pulse font-black text-cyan-300">
+                            AI 分析中...
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-white/30">
+                            等待分析
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-// ===== 在 step === “analyzing” 畫面中，將下方區塊貼到標題與進度條中間
-=====
+              <div className="mt-7 overflow-hidden rounded-full bg-white/10 p-1">
+                <div
+                  className="h-3 rounded-full bg-gradient-to-r from-[#06C755] via-emerald-300 to-cyan-300 transition-[width] duration-150 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
 
-    {ANALYSIS_ITEMS.map((item, index) => {
-      const done = index < analysisIndex;
-      const current = index === analysisIndex;
-
-      return (
-        <div
-          key={item}
-          className="flex items-center justify-between text-[15px]"
-        >
-          <span className="font-medium">
-            {done ? "✓" : current ? "◉" : "○"} {item}
-          </span>
-
-          {done ? (
-            <span className="font-bold text-[#55e891]">
-              已完成
-            </span>
-          ) : current ? (
-            <span className="font-bold text-cyan-300 animate-pulse">
-              AI 分析中...
-            </span>
-          ) : (
-            <span className="text-white/35">
-              等待分析
-            </span>
-          )}
-        </div>
-      );
-    })}
+              <div className="mt-4 text-lg font-black text-white/90">
+                {progress}%
+              </div>
+            </div>
+          </div>
+        )}
 
         {step === "result" && (
           <div className="bg-white px-6 py-9 sm:px-10 sm:py-11">
