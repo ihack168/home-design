@@ -51,13 +51,13 @@ export default function AboutPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <h2 className="text-3xl font-black">聯絡資訊</h2>
+        <h2 className="text-3xl font-black">聯絡資訊-平臺系統商</h2>
 
         <div className="mt-8 overflow-hidden rounded-3xl border bg-white">
           <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
             <div className="p-7">
               <p className="text-sm font-bold text-[#2f7a55]">聯絡電話</p>
-              <p className="mt-2 text-lg font-semibold">(650) 253-0000</p>
+              <p className="mt-2 text-lg font-semibold">(650) 253-0000 美國矽谷辦公室</p>
             </div>
 
             <div className="p-7">
@@ -76,7 +76,7 @@ export default function AboutPage() {
             <div className="p-7">
               <p className="text-sm font-bold text-[#2f7a55]">E-mail</p>
               <p className="mt-2 text-lg font-semibold text-black/45">
-                （請填入您的 Email）
+                deco77.com@gmail.com
               </p>
             </div>
           </div>
