@@ -583,7 +583,7 @@ export function LineConsultButton({
                     >
                       <span>聯絡 Email</span>
                       <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
-                        選填・便於我們追蹤服務品質
+                        便於我們追蹤服務品質
                       </span>
                     </label>
                     <input
@@ -607,7 +607,7 @@ export function LineConsultButton({
                     >
                       <span>LINE ID</span>
                       <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
-                        選填・便於我們追蹤服務品質
+                        便於我們追蹤服務品質
                       </span>
                     </label>
                     <input
