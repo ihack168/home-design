@@ -600,29 +600,6 @@ export function LineConsultButton({
                     />
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="consult-line-id"
-                      className="flex items-center justify-between gap-2 text-sm font-bold text-foreground"
-                    >
-                      <span>LINE ID</span>
-                      <span className="whitespace-nowrap text-[10px] font-bold text-red-500 sm:text-xs">
-                        便於我們追蹤服務品質
-                      </span>
-                    </label>
-                    <input
-                      id="consult-line-id"
-                      type="text"
-                      value={lineId}
-                      onChange={(event) =>
-                        setLineId(event.target.value.slice(0, 50))
-                      }
-                      placeholder="例如：line168"
-                      autoComplete="off"
-                      disabled={loading}
-                      className="mt-1.5 h-[46px] w-full rounded-xl border border-black/10 bg-white px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-2 sm:h-[52px] sm:rounded-2xl sm:px-4"
-                    />
-                  </div>
                 </div>
               </div>
 
