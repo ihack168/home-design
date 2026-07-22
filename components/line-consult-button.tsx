@@ -458,7 +458,6 @@ export function LineConsultButton({
                     <span aria-hidden="true" className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#06C755]/10 text-xs font-black text-[#06A947]">✓</span>
                     <div>
                       <p className="text-sm font-black text-foreground">留下簡單資料，方便辨識您的推薦紀錄</p>
-                      <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground sm:text-xs">Email 僅用於後續確認設計公司是否妥善服務，不會提供給其他業者。</p>
                     </div>
                   </div>
 
@@ -485,7 +484,7 @@ export function LineConsultButton({
                     </div>
 
                     <div>
-                      <label htmlFor="consult-phone-last-3" className="text-sm font-bold text-foreground">手機後 3 碼<span className="ml-1 text-red-500">*</span></label>
+                      <label htmlFor="consult-phone-last-3" className="text-sm font-bold text-foreground">聯絡電話<span className="ml-1 text-red-500">*</span></label>
                       <input
                         id="consult-phone-last-3"
                         type="text"
@@ -495,10 +494,10 @@ export function LineConsultButton({
                           setPhoneLast3(value);
                           if (errors.phoneLast3) setErrors((current) => ({ ...current, phoneLast3: undefined }));
                         }}
-                        placeholder="例如：168"
+                        placeholder="例如：0912-345-678"
                         inputMode="numeric"
                         autoComplete="off"
-                        maxLength={3}
+                        maxLength={15}
                         disabled={loading}
                         aria-invalid={Boolean(errors.phoneLast3)}
                         className={`mt-1.5 h-[44px] w-full rounded-xl border bg-white px-3.5 text-sm tracking-[0.2em] text-foreground outline-none transition placeholder:tracking-normal placeholder:text-muted-foreground/70 sm:h-[48px] ${
