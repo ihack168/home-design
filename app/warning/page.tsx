@@ -118,15 +118,32 @@ export default function WarningCasesPage() {
       {/* 頁首 */}
       <section className="bg-stone-950 text-white">
         <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-20">
-          <p className="text-sm font-bold text-red-400">裝修踩雷警示</p>
+         <p className="text-sm font-bold text-red-400">
+  裝修踩雷警示
+</p>
 
-          <h1 className="mt-3 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-            檢舉不良設計公司
-          </h1>
+<h1 className="mt-3 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
+  檢舉不良設計公司
+</h1>
 
-          <p className="mt-5 max-w-2xl leading-7 text-stone-300">
-            分享您曾遇過的裝修問題，提醒更多屋主在簽約與付款前提高警覺。
-          </p>
+<p className="mt-5 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
+  分享您的裝修糾紛與不良經驗，協助我們完善 AI 裝修風險辨識模型，
+  提供更精準的公司推薦與踩雷提醒。
+</p>
+
+<div className="mt-6 flex flex-wrap gap-2">
+  <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-stone-300">
+    分析常見裝修爭議
+  </span>
+
+  <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-stone-300">
+    辨識高風險模式
+  </span>
+
+  <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-stone-300">
+    優化 AI 推薦結果
+  </span>
+</div>
 
           <a
             href="#report-form"
