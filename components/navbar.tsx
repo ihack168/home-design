@@ -9,9 +9,10 @@ import { LineConsultButton } from "@/components/line-consult-button"
 
 const navLinks = [
   { label: "首頁", href: "/" },
-  { label: "建案作品", href: "/blog" },
+  { label: "建案設計", href: "/blog" },
+  { label: "商業設計", href: "/blog" },
+  { label: "套房設計", href: "/blog" },
   { label: "檢舉不良業者", href: "/warning" },
- // { label: "裝潢知識", href: "/blog" },
 ]
 
 function isActivePath(pathname: string, href: string) {
