@@ -10,7 +10,7 @@ import { LineConsultButton } from "@/components/line-consult-button"
 const navLinks = [
   { label: "首頁", href: "/" },
   { label: "建案作品", href: "/blog" },
- // { label: "設計風格", href: "/styles" },
+  { label: "檢舉不良公司", href: "/warning" },
  // { label: "裝潢知識", href: "/blog" },
 ]
 
