@@ -682,13 +682,13 @@ export function LineConsultButton({
                     <p className="mt-1 text-xl font-black leading-tight text-foreground">
                       {STORE_NAME}
                     </p>
-                    <p className="mt-2 truncate text-sm font-bold text-muted-foreground">
+                    {/*<p className="mt-2 truncate text-sm font-bold text-muted-foreground">
                       LINE ID：{LINE_ID}
-                    </p>
+                    </p>*/}
                   </div>
                 </div>
 
-                <a
+               {/* <a
                   href={LINE_ADD_URL}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -698,7 +698,7 @@ export function LineConsultButton({
                   <span className="ml-2" aria-hidden="true">
                     →
                   </span>
-                </a>
+                </a>*/}
 
                 <div className="mt-5 border-t border-black/10 pt-4">
                   <div className="flex items-center gap-2">
