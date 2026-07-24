@@ -243,13 +243,12 @@ export default async function WarningCasesPage() {
             </div>
 
             <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.08] tracking-tight sm:text-6xl">
-              裝潢前先看案例，
-              <span className="text-red-500">別讓百萬預算變成教訓。</span>
+              檢舉不良業者，
+              <span className="text-red-500">讓我們避開風險。</span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
-              收錄匿名室內設計與裝修爭議經驗，整理工期延誤、追加費用、
-              施工瑕疵與售後失聯等常見風險。
+              收錄匿名室內設計與裝修不良業者，讓AI避開推薦。
             </p>
 
             <div className="mt-7 flex flex-wrap gap-2">
