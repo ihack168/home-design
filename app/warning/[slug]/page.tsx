@@ -324,9 +324,6 @@ export default async function WarningCasePage({ params }: PageProps) {
               匿名檢舉
             </span>
 
-            <span className="text-xs font-bold text-stone-400">
-              案例編號 #{warningCase.caseNumber}
-            </span>
           </div>
 
           <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">
@@ -380,9 +377,6 @@ export default async function WarningCasePage({ params }: PageProps) {
 
         <aside className="space-y-5">
           <section className="rounded-2xl border border-stone-300 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,.04)]">
-            <p className="text-xs font-black tracking-[0.18em] text-red-700">
-              CASE DETAILS
-            </p>
 
             <h2 className="mt-2 text-xl font-black">案例資訊</h2>
 
