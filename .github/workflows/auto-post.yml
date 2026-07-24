@@ -1,17 +1,18 @@
+```yaml
 name: Auto Post to Sanity
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 07:00 台灣時間 (UTC 23:00)
-    - cron: '0 0 * * *'   # 08:00 台灣時間 (UTC 00:00)
-    #- cron: '0 1 * * *'   # 09:00 台灣時間 (UTC 01:00)
+    - cron: '0 23 * * *'  # 台灣時間 07:00：一般文章
+    - cron: '0 0 * * *'   # 台灣時間 08:00：一般文章
+    - cron: '0 1 * * *'   # 台灣時間 09:00：踩雷案例隨機發布
+
   workflow_dispatch:
 
 jobs:
   post:
     runs-on: ubuntu-latest
-    
-    # 設定全域環境變數
+
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -23,11 +24,24 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          
-      - name: Install dependencies
-        run: echo "Starting post script..."
 
-      - name: Run auto post script
+      # 07:00、08:00 執行一般文章
+      - name: Run normal auto post script
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          github.event.schedule == '0 23 * * *' ||
+          github.event.schedule == '0 0 * * *'
         run: node .github/scripts/auto-post.mjs
         env:
           SANITY_TOKEN: ${{ secrets.SANITY_TOKEN }}
+
+      # 09:00 執行踩雷案例
+      # 是否真的發布，由 warningcasepost.mjs 隨機決定
+      - name: Run warning case auto post script
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          github.event.schedule == '0 1 * * *'
+        run: node .github/scripts/warningcasepost.mjs
+        env:
+          SANITY_TOKEN: ${{ secrets.SANITY_TOKEN }}
+```
