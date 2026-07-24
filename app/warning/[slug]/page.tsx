@@ -371,10 +371,6 @@ export default async function WarningCasePage({ params }: PageProps) {
           </div>
 
           <div className="p-5 sm:p-8">
-            <div className="rounded-xl border-l-4 border-red-700 bg-red-50 px-4 py-4 text-sm leading-7 text-red-950">
-              以下內容為投稿者單方陳述，本站僅進行匿名整理與風險資訊彙整，
-              不代表已認定任何一方違法或有過失。
-            </div>
 
             <div className="mt-8 whitespace-pre-wrap break-words text-base leading-9 text-stone-700">
               {warningCase.describe}

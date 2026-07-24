@@ -242,18 +242,18 @@ export default async function WarningCasesPage() {
   const warningCases = sanityCases.map(buildDisplayCase);
 
   return (
-    <main className="min-h-screen bg-[#f4f1eb] text-stone-950">
+    <main className="min-h-screen overflow-x-hidden bg-[#f4f1eb] text-stone-950">
       <section className="relative overflow-hidden border-b-8 border-red-700 bg-[#151515] text-white">
         <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-red-300">
+        <div className="relative mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,.8fr)] lg:items-end">
+          <div className="min-w-0">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-red-300">
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
               裝修踩雷警報
             </div>
 
-            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.08] tracking-tight sm:text-6xl">
+            <h1 className="mt-6 max-w-4xl break-words text-4xl font-black leading-[1.08] tracking-tight [overflow-wrap:anywhere] sm:text-6xl">
               檢舉不良業者，
               <span className="text-red-500">讓我們避開風險。</span>
             </h1>
@@ -289,13 +289,13 @@ export default async function WarningCasesPage() {
             </div>
           </div>
 
-          <aside className="rounded-2xl border border-red-500/30 bg-red-950/30 p-5 backdrop-blur sm:p-6">
+          <aside className="min-w-0 rounded-2xl border border-red-500/30 bg-red-950/30 p-5 backdrop-blur sm:p-6">
             <div className="flex items-center gap-2 text-red-300">
               <AlertIcon />
               <p className="text-sm font-black">案例資料持續更新</p>
             </div>
 
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+            <div className="mt-5 grid min-w-0 grid-cols-3 gap-2 text-center sm:gap-3">
               <div className="rounded-xl bg-black/30 p-4">
                 <p className="text-2xl font-black">{warningCases.length}</p>
                 <p className="mt-1 text-xs text-stone-400">公開案例</p>
@@ -320,7 +320,7 @@ export default async function WarningCasesPage() {
 
       <section
         id="cases"
-        className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16"
+        className="mx-auto min-w-0 max-w-6xl px-5 py-12 sm:px-8 sm:py-16"
       >
         <div className="flex flex-col justify-between gap-5 border-b-2 border-stone-950 pb-5 sm:flex-row sm:items-end">
           <div>
@@ -345,7 +345,7 @@ export default async function WarningCasesPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="mt-8 grid min-w-0 gap-5 lg:grid-cols-2">
             {warningCases.map((warningCase, index) => {
               const caseHref = warningCase.slug
                 ? `/warning/${warningCase.slug}`
@@ -353,13 +353,13 @@ export default async function WarningCasesPage() {
 
               const cardContent = (
                 <article
-                  className={`group relative h-full overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-[0_10px_30px_rgba(0,0,0,.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,.1)] ${
+                  className={`group relative min-w-0 h-full overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-[0_10px_30px_rgba(0,0,0,.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,.1)] ${
                     index === 0 ? "lg:col-span-2" : ""
                   }`}
                 >
                   <div className="border-b border-stone-200 bg-stone-950 px-5 py-3 text-white sm:px-7">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <span className="rounded bg-red-600 px-2 py-1 text-[11px] font-black">
                           匿名檢舉
                         </span>
@@ -386,7 +386,7 @@ export default async function WarningCasesPage() {
                     </p>
 
                     <h3
-                      className={`mt-3 font-black leading-tight tracking-tight transition group-hover:text-red-700 ${
+                      className={`mt-3 break-words font-black leading-tight tracking-tight transition [overflow-wrap:anywhere] group-hover:text-red-700 ${
                         index === 0
                           ? "text-3xl sm:text-4xl"
                           : "text-2xl"
@@ -427,7 +427,7 @@ export default async function WarningCasesPage() {
                     </div>
 
                     <p
-                      className={`mt-5 whitespace-pre-line text-stone-600 ${
+                      className={`mt-5 whitespace-pre-line break-words text-stone-600 [overflow-wrap:anywhere] ${
                         index === 0
                           ? "line-clamp-6 text-base leading-8"
                           : "line-clamp-5 text-sm leading-7 sm:text-base"
@@ -455,14 +455,14 @@ export default async function WarningCasesPage() {
                 <Link
                   key={warningCase._id}
                   href={caseHref}
-                  className={index === 0 ? "lg:col-span-2" : ""}
+                  className={`block min-w-0 ${index === 0 ? "lg:col-span-2" : ""}`}
                 >
                   {cardContent}
                 </Link>
               ) : (
                 <div
                   key={warningCase._id}
-                  className={index === 0 ? "lg:col-span-2" : ""}
+                  className={`min-w-0 ${index === 0 ? "lg:col-span-2" : ""}`}
                 >
                   {cardContent}
                 </div>
@@ -479,7 +479,7 @@ export default async function WarningCasesPage() {
       </section>
 
       <section id="report-form" className="border-t border-stone-300 bg-white">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[.8fr_1.2fr]">
+        <div className="mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
           <div>
             <p className="text-sm font-black tracking-[0.2em] text-red-700">
               SHARE YOUR STORY
