@@ -22,6 +22,8 @@ type SanityWarningCase = {
 type DisplayWarningCase = SanityWarningCase & {
   reporter: string;
   reportedTarget: string;
+  city: string;
+  district: string;
   displayDate: string;
   caseNumber: string;
 };
@@ -59,31 +61,85 @@ const reporterPool = [
   "劉小姐",
 ];
 
-const reportedTargetPool = [
-  "築○室內設計",
-  "森○室內設計",
-  "沐○室內設計",
-  "禾○空間設計",
-  "澄○空間設計",
-  "日○室內裝修",
-  "光○室內裝修",
-  "里○室內裝修",
-  "品○裝潢工程",
-  "家○裝潢公司",
-  "大○裝潢工程",
-  "創○設計工程",
-  "尚○室內設計",
-  "原○空間設計",
-  "木○室內裝修",
-  "安○裝潢公司",
-  "境○設計工程",
-  "宅○室內設計",
-  "藝○室內裝修",
-  "居○裝潢工程",
-  "采○空間設計",
-  "方○室內設計",
-  "璞○設計工程",
-  "和○室內裝修",
+const reportedTarget = "OOXX";
+
+const locationPool = [
+  {
+    city: "基隆市",
+    districts: ["仁愛區", "信義區", "中正區", "中山區", "安樂區", "暖暖區", "七堵區"],
+  },
+  {
+    city: "台北市",
+    districts: [
+      "中正區",
+      "大同區",
+      "中山區",
+      "松山區",
+      "大安區",
+      "萬華區",
+      "信義區",
+      "士林區",
+      "北投區",
+      "內湖區",
+      "南港區",
+      "文山區",
+    ],
+  },
+  {
+    city: "新北市",
+    districts: [
+      "板橋區",
+      "三重區",
+      "中和區",
+      "永和區",
+      "新莊區",
+      "新店區",
+      "土城區",
+      "蘆洲區",
+      "汐止區",
+      "樹林區",
+      "淡水區",
+      "林口區",
+      "五股區",
+      "泰山區",
+      "三峽區",
+      "鶯歌區",
+    ],
+  },
+  {
+    city: "桃園市",
+    districts: [
+      "桃園區",
+      "中壢區",
+      "平鎮區",
+      "八德區",
+      "楊梅區",
+      "蘆竹區",
+      "龜山區",
+      "龍潭區",
+      "大溪區",
+      "大園區",
+      "觀音區",
+      "新屋區",
+    ],
+  },
+  {
+    city: "新竹市",
+    districts: ["東區", "北區", "香山區"],
+  },
+  {
+    city: "新竹縣",
+    districts: [
+      "竹北市",
+      "竹東鎮",
+      "新豐鄉",
+      "湖口鄉",
+      "新埔鎮",
+      "關西鎮",
+      "芎林鄉",
+      "寶山鄉",
+    ],
+  },
 ];
 
 const warningTags = [
@@ -124,10 +180,19 @@ function buildDisplayCase(
   warningCase: SanityWarningCase,
   index: number
 ): DisplayWarningCase {
+  const location = pickStableItem(locationPool, warningCase._id, 2);
+  const district = pickStableItem(
+    location.districts,
+    warningCase._id,
+    3
+  );
+
   return {
     ...warningCase,
     reporter: pickStableItem(reporterPool, warningCase._id, 1),
-    reportedTarget: pickStableItem(reportedTargetPool, warningCase._id, 2),
+    reportedTarget,
+    city: location.city,
+    district,
     displayDate: formatDate(warningCase._createdAt),
     caseNumber: String(index + 1).padStart(3, "0"),
   };
@@ -291,6 +356,9 @@ export default async function WarningCasesPage() {
                         <span className="text-xs font-bold text-stone-300">
                           被檢舉對象：{warningCase.reportedTarget}
                         </span>
+                        <span className="text-xs font-bold text-stone-300">
+                          地區：{warningCase.city}{warningCase.district}
+                        </span>
                       </div>
 
                       <time
@@ -318,7 +386,7 @@ export default async function WarningCasesPage() {
                     </h3>
 
                     <div className="mt-5 rounded-xl border border-stone-200 bg-stone-50 p-4 sm:p-5">
-                      <div className="grid gap-4 text-sm sm:grid-cols-2">
+                      <div className="grid gap-4 text-sm sm:grid-cols-3">
                         <div>
                           <p className="text-xs font-bold text-stone-400">
                             檢舉者
@@ -334,6 +402,15 @@ export default async function WarningCasesPage() {
                           </p>
                           <p className="mt-1 font-black text-red-800">
                             {warningCase.reportedTarget}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold text-stone-400">
+                            案例地區
+                          </p>
+                          <p className="mt-1 font-black">
+                            {warningCase.city}{warningCase.district}
                           </p>
                         </div>
                       </div>
