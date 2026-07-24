@@ -295,15 +295,16 @@ export default async function WarningCasesPage() {
               <p className="text-sm font-black">案例資料持續更新</p>
             </div>
 
-            <div className="mt-5 grid min-w-0 grid-cols-3 gap-2 text-center sm:gap-3">
+            <div className="mt-5 grid min-w-0 grid-cols-2 gap-2 text-center sm:gap-3">
               <div className="rounded-xl bg-black/30 p-4">
-                <p className="text-2xl font-black">{warningCases.length}</p>
-                <p className="mt-1 text-xs text-stone-400">公開案例</p>
+                <p className="text-2xl font-black">
+                  2,789<span className="ml-1 text-sm">件</span>
+                </p>
+                <p className="mt-1 text-xs text-stone-400">
+                  AI資料庫案件數
+                </p>
               </div>
-              <div className="rounded-xl bg-black/30 p-4">
-                <p className="text-2xl font-black">5</p>
-                <p className="mt-1 text-xs text-stone-400">高頻風險</p>
-              </div>
+
               <div className="rounded-xl bg-black/30 p-4">
                 <p className="text-2xl font-black">匿名</p>
                 <p className="mt-1 text-xs text-stone-400">身分保護</p>
