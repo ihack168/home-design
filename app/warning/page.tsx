@@ -325,9 +325,6 @@ export default async function WarningCasesPage() {
       >
         <div className="flex flex-col justify-between gap-5 border-b-2 border-stone-950 pb-5 sm:flex-row sm:items-end">
           <div>
-            <p className="text-sm font-black tracking-[0.2em] text-red-700">
-              LATEST REPORTS
-            </p>
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">
               最新裝修踩雷案例
             </h2>
@@ -482,9 +479,6 @@ export default async function WarningCasesPage() {
       <section id="report-form" className="border-t border-stone-300 bg-white">
         <div className="mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
           <div>
-            <p className="text-sm font-black tracking-[0.2em] text-red-700">
-              SHARE YOUR STORY
-            </p>
             <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
               你的經驗，可能讓別人避開同一個坑。
             </h2>
