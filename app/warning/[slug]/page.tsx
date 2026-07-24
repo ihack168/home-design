@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { client } from "@/lib/sanity";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 type PageProps = {
   params: Promise<{
