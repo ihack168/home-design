@@ -61,7 +61,14 @@ const reporterPool = [
   "劉小姐",
 ];
 
-const reportedTarget = "OOXX";
+const reportedTargetPool = [
+  "○○室內設計",
+  "○○空間設計",
+  "○○室內裝修",
+  "○○裝潢工程",
+  "○○裝潢公司",
+  "○○設計工程",
+];
 
 const locationPool = [
   {
@@ -190,7 +197,11 @@ function buildDisplayCase(
   return {
     ...warningCase,
     reporter: pickStableItem(reporterPool, warningCase._id, 1),
-    reportedTarget,
+    reportedTarget: pickStableItem(
+      reportedTargetPool,
+      warningCase._id,
+      4
+    ),
     city: location.city,
     district,
     displayDate: formatDate(warningCase._createdAt),
