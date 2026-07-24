@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { client } from "@/sanity/lib/client";
+import { client } from "@/lib/sanity";
 import WarningCaseForm from "./WarningCaseForm";
 
 export const metadata: Metadata = {
@@ -15,9 +15,7 @@ type SanityWarningCase = {
   _id: string;
   title: string;
   describe: string;
-  slug?: {
-    current?: string;
-  };
+  slug?: string;
   _createdAt: string;
 };
 
@@ -38,7 +36,7 @@ const WARNING_CASES_QUERY = `
     _id,
     title,
     describe,
-    slug,
+"slug": slug.current,
     _createdAt
   }
 `;
@@ -161,8 +159,7 @@ export default async function WarningCasesPage() {
     {},
     {
       next: {
-        revalidate: 3600,
-        tags: ["warningCasePost"],
+        revalidate,
       },
     }
   );
@@ -276,8 +273,8 @@ export default async function WarningCasesPage() {
         ) : (
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {warningCases.map((warningCase, index) => {
-              const caseHref = warningCase.slug?.current
-                ? `/warning/${warningCase.slug.current}`
+              const caseHref = warningCase.slug
+                ? `/warning/${warningCase.slug}`
                 : undefined;
 
               const cardContent = (
