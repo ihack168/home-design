@@ -17,6 +17,7 @@ type SanityWarningCase = {
   title: string;
   describe: string;
   slug: string;
+  publishedAt?: string;
   _createdAt: string;
 };
 
@@ -44,6 +45,7 @@ const WARNING_CASE_QUERY = `
     "title": coalesce(title, warningCaseTitle),
     "describe": coalesce(describe, warningCaseDescription),
     "slug": slug.current,
+    publishedAt,
     _createdAt
   },
 
@@ -51,7 +53,7 @@ const WARNING_CASE_QUERY = `
     _type == "warningCasePost"
     && defined(slug.current)
   ]
-  | order(_createdAt desc)._id
+  | order(coalesce(publishedAt, _createdAt) desc)._id
 }
 `;
 
@@ -221,7 +223,9 @@ function buildDisplayCase(
     ),
     city: location.city,
     district,
-    displayDate: formatDate(warningCase._createdAt),
+    displayDate: formatDate(
+      warningCase.publishedAt || warningCase._createdAt
+    ),
     caseNumber: String(caseIndex >= 0 ? caseIndex + 1 : 1).padStart(3, "0"),
   };
 }
@@ -367,7 +371,9 @@ export default async function WarningCasePage({ params }: PageProps) {
               </strong>
             </p>
 
-            <time dateTime={warningCase._createdAt}>
+            <time
+              dateTime={warningCase.publishedAt || warningCase._createdAt}
+            >
               發布日期：
               <strong className="ml-1 text-white">
                 {warningCase.displayDate}
