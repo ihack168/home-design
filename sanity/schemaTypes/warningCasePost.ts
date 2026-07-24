@@ -36,8 +36,7 @@ export default defineType({
             .replace(/-+/g, "-")
             .replace(/^-|-$/g, ""),
       },
-      validation: (Rule) =>
-        Rule.required().error("Slug 不能空白"),
+      validation: (Rule) => Rule.required().error("Slug 不能空白"),
     }),
 
     defineField({
@@ -51,9 +50,43 @@ export default defineType({
           .min(20)
           .error("踩雷內容為必填，至少需要 20 個字"),
     }),
+
+    defineField({
+      name: "publishedAt",
+      title: "發文時間",
+      type: "datetime",
+      description: "文章實際顯示的發布日期與時間，可手動修改",
+      options: {
+        dateFormat: "YYYY-MM-DD",
+        timeFormat: "HH:mm",
+        timeStep: 15,
+      },
+      initialValue: () => new Date().toISOString(),
+      validation: (Rule) => Rule.required().error("請設定發文時間"),
+    }),
   ],
 
   orderings: [
+    {
+      title: "發文時間：新到舊",
+      name: "publishedAtDesc",
+      by: [
+        {
+          field: "publishedAt",
+          direction: "desc",
+        },
+      ],
+    },
+    {
+      title: "發文時間：舊到新",
+      name: "publishedAtAsc",
+      by: [
+        {
+          field: "publishedAt",
+          direction: "asc",
+        },
+      ],
+    },
     {
       title: "建立時間：新到舊",
       name: "createdAtDesc",
@@ -61,16 +94,6 @@ export default defineType({
         {
           field: "_createdAt",
           direction: "desc",
-        },
-      ],
-    },
-    {
-      title: "建立時間：舊到新",
-      name: "createdAtAsc",
-      by: [
-        {
-          field: "_createdAt",
-          direction: "asc",
         },
       ],
     },
@@ -90,27 +113,38 @@ export default defineType({
     select: {
       title: "title",
       describe: "describe",
+      publishedAt: "publishedAt",
       createdAt: "_createdAt",
     },
 
     prepare({
       title,
       describe,
+      publishedAt,
       createdAt,
     }: {
       title?: string
       describe?: string
+      publishedAt?: string
       createdAt?: string
     }) {
       const cleanDescription = String(describe || "")
         .replace(/\s+/g, " ")
         .trim()
 
-      const dateText = createdAt
-        ? new Date(createdAt).toLocaleDateString("zh-TW", {
+      const displayDate = publishedAt || createdAt
+
+      const dateText = displayDate
+        ? new Date(displayDate).toLocaleString("zh-TW", {
             timeZone: "Asia/Taipei",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
           })
-        : "尚未建立"
+        : "尚未設定時間"
 
       return {
         title: title || "尚未填寫踩雷案例標題",

@@ -379,10 +379,6 @@ export default async function WarningCasesPage() {
                   </div>
 
                   <div className="p-5 sm:p-7">
-                    <p className="text-xs font-bold text-stone-400">
-                      案例編號 #{warningCase.caseNumber}
-                    </p>
-
                     <h3
                       className={`mt-3 break-words font-black leading-tight tracking-tight transition [overflow-wrap:anywhere] group-hover:text-red-700 ${
                         index === 0
