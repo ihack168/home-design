@@ -259,7 +259,7 @@ export default async function WarningCasesPage() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
-              收錄匿名室內設計與裝修不良業者，讓AI避開推薦。
+              收錄不良業者，讓AI避開推薦。
             </p>
 
             <div className="mt-7 flex flex-wrap gap-2">
@@ -328,7 +328,7 @@ export default async function WarningCasesPage() {
               LATEST REPORTS
             </p>
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">
-              最新匿名裝修踩雷案例
+              最新裝修踩雷案例
             </h2>
           </div>
 
