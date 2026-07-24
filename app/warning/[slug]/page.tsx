@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { client } from "@/lib/sanity";
 
-export const revalidate = 60;
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{
@@ -37,7 +38,7 @@ const WARNING_CASE_QUERY = `
 {
   "warningCase": *[
     _type == "warningCasePost"
-    && slug.current == $slug
+    && slug.current in $slugCandidates
   ][0] {
     _id,
     "title": coalesce(title, warningCaseTitle),
@@ -225,16 +226,36 @@ function buildDisplayCase(
   };
 }
 
+function buildSlugCandidates(rawSlug: string) {
+  let decodedSlug = rawSlug;
+
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch {
+    decodedSlug = rawSlug;
+  }
+
+  const encodedSlug = encodeURIComponent(decodedSlug);
+
+  return Array.from(
+    new Set([
+      rawSlug,
+      decodedSlug,
+      encodedSlug,
+    ])
+  );
+}
+
 async function getWarningCase(slug: string) {
+  const slugCandidates = buildSlugCandidates(slug);
+
   return client.fetch<WarningCaseQueryResult>(
     WARNING_CASE_QUERY,
     {
-      slug,
+      slugCandidates,
     },
     {
-      next: {
-        revalidate,
-      },
+      cache: "no-store",
     }
   );
 }
@@ -324,6 +345,9 @@ export default async function WarningCasePage({ params }: PageProps) {
               匿名檢舉
             </span>
 
+            <span className="text-xs font-bold text-stone-400">
+              案例編號 #{warningCase.caseNumber}
+            </span>
           </div>
 
           <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">
@@ -368,6 +392,10 @@ export default async function WarningCasePage({ params }: PageProps) {
           </div>
 
           <div className="p-5 sm:p-8">
+            <div className="rounded-xl border-l-4 border-red-700 bg-red-50 px-4 py-4 text-sm leading-7 text-red-950">
+              以下內容為投稿者單方陳述，本站僅進行匿名整理與風險資訊彙整，
+              不代表已認定任何一方違法或有過失。
+            </div>
 
             <div className="mt-8 whitespace-pre-wrap break-words text-base leading-9 text-stone-700">
               {warningCase.describe}
@@ -377,6 +405,9 @@ export default async function WarningCasePage({ params }: PageProps) {
 
         <aside className="space-y-5">
           <section className="rounded-2xl border border-stone-300 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,.04)]">
+            <p className="text-xs font-black tracking-[0.18em] text-red-700">
+              CASE DETAILS
+            </p>
 
             <h2 className="mt-2 text-xl font-black">案例資訊</h2>
 

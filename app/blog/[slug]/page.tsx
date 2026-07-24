@@ -1,464 +1,1224 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { client } from "@/lib/sanity";
+import type { Metadata } from "next"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { PortableText } from "@portabletext/react"
+import { createImageUrlBuilder } from "@sanity/image-url"
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+import { ShareBar } from "@/components/share-bar"
+import { YouTubeCoverPlayer } from "@/components/youtube-cover-player"
+import { sanitizePostHtml } from "@/lib/content-cleanup"
+import { client } from "@/lib/sanity"
 
-type PageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
+export const revalidate = 0
+export const dynamic = "force-dynamic"
 
-type SanityWarningCase = {
-  _id: string;
-  title: string;
-  describe: string;
-  slug: string;
-  _createdAt: string;
-};
+const siteName = "台灣室內設計資訊網"
+const shortSiteName = "室內設計資訊網"
+const siteUrl = "https://www.deco77.com"
+const defaultAuthorName = "台灣室內設計資訊網編輯部"
+const defaultArticleCategory = "室內設計與居家裝潢"
 
-type WarningCaseQueryResult = {
-  warningCase: SanityWarningCase | null;
-  orderedIds: string[];
-};
+const builder = createImageUrlBuilder(client)
 
-type DisplayWarningCase = SanityWarningCase & {
-  reporter: string;
-  reportedTarget: string;
-  city: string;
-  district: string;
-  displayDate: string;
-  caseNumber: string;
-};
-
-const WARNING_CASE_QUERY = `
-{
-  "warningCase": *[
-    _type == "warningCasePost"
-    && slug.current in $slugCandidates
-  ][0] {
-    _id,
-    "title": coalesce(title, warningCaseTitle),
-    "describe": coalesce(describe, warningCaseDescription),
-    "slug": slug.current,
-    _createdAt
-  },
-
-  "orderedIds": *[
-    _type == "warningCasePost"
-    && defined(slug.current)
-  ]
-  | order(_createdAt desc)._id
-}
-`;
-
-const reporterPool = [
-  "林先生",
-  "林小姐",
-  "陳先生",
-  "陳小姐",
-  "張先生",
-  "張小姐",
-  "王先生",
-  "王小姐",
-  "李先生",
-  "李小姐",
-  "黃先生",
-  "黃小姐",
-  "吳先生",
-  "吳小姐",
-  "劉先生",
-  "劉小姐",
-];
-
-const reportedTargetPool = [
-  "○○室內設計",
-  "○○空間設計",
-  "○○室內裝修",
-  "○○裝潢工程",
-  "○○裝潢公司",
-  "○○設計工程",
-];
-
-const locationPool = [
-  {
-    city: "基隆市",
-    districts: [
-      "仁愛區",
-      "信義區",
-      "中正區",
-      "中山區",
-      "安樂區",
-      "暖暖區",
-      "七堵區",
-    ],
-  },
-  {
-    city: "台北市",
-    districts: [
-      "中正區",
-      "大同區",
-      "中山區",
-      "松山區",
-      "大安區",
-      "萬華區",
-      "信義區",
-      "士林區",
-      "北投區",
-      "內湖區",
-      "南港區",
-      "文山區",
-    ],
-  },
-  {
-    city: "新北市",
-    districts: [
-      "板橋區",
-      "三重區",
-      "中和區",
-      "永和區",
-      "新莊區",
-      "新店區",
-      "土城區",
-      "蘆洲區",
-      "汐止區",
-      "樹林區",
-      "淡水區",
-      "林口區",
-      "五股區",
-      "泰山區",
-      "三峽區",
-      "鶯歌區",
-    ],
-  },
-  {
-    city: "桃園市",
-    districts: [
-      "桃園區",
-      "中壢區",
-      "平鎮區",
-      "八德區",
-      "楊梅區",
-      "蘆竹區",
-      "龜山區",
-      "龍潭區",
-      "大溪區",
-      "大園區",
-      "觀音區",
-      "新屋區",
-    ],
-  },
-  {
-    city: "新竹市",
-    districts: ["東區", "北區", "香山區"],
-  },
-  {
-    city: "新竹縣",
-    districts: [
-      "竹北市",
-      "竹東鎮",
-      "新豐鄉",
-      "湖口鄉",
-      "新埔鎮",
-      "關西鎮",
-      "芎林鄉",
-      "寶山鄉",
-    ],
-  },
-];
-
-function stringHash(value: string) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(index);
-    hash |= 0;
-  }
-
-  return Math.abs(hash);
-}
-
-function pickStableItem<T>(pool: T[], seed: string, offset = 0): T {
-  return pool[
-    (stringHash(`${seed}-${offset}`) % pool.length + pool.length) % pool.length
-  ];
-}
-
-function formatDate(dateString: string) {
-  return new Intl.DateTimeFormat("zh-TW", {
-    timeZone: "Asia/Taipei",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
-    .format(new Date(dateString))
-    .replaceAll("/", ".");
-}
-
-function buildDisplayCase(
-  warningCase: SanityWarningCase,
-  orderedIds: string[]
-): DisplayWarningCase {
-  const location = pickStableItem(locationPool, warningCase._id, 2);
-  const district = pickStableItem(
-    location.districts,
-    warningCase._id,
-    3
-  );
-
-  const caseIndex = orderedIds.indexOf(warningCase._id);
-
-  return {
-    ...warningCase,
-    reporter: pickStableItem(reporterPool, warningCase._id, 1),
-    reportedTarget: pickStableItem(
-      reportedTargetPool,
-      warningCase._id,
-      4
-    ),
-    city: location.city,
-    district,
-    displayDate: formatDate(warningCase._createdAt),
-    caseNumber: String(caseIndex >= 0 ? caseIndex + 1 : 1).padStart(3, "0"),
-  };
-}
-
-function buildSlugCandidates(rawSlug: string) {
-  let decodedSlug = rawSlug;
-
-  try {
-    decodedSlug = decodeURIComponent(rawSlug);
-  } catch {
-    decodedSlug = rawSlug;
-  }
-
-  const encodedSlug = encodeURIComponent(decodedSlug);
-
-  return Array.from(
-    new Set([
-      rawSlug,
-      decodedSlug,
-      encodedSlug,
-    ])
-  );
-}
-
-async function getWarningCase(slug: string) {
-  const slugCandidates = buildSlugCandidates(slug);
-
-  return client.fetch<WarningCaseQueryResult>(
-    WARNING_CASE_QUERY,
-    {
-      slugCandidates,
-    },
-    {
-      cache: "no-store",
+function urlFor(source: unknown) {
+  if (!source) {
+    return {
+      url: () => "",
     }
-  );
+  }
+
+  return builder.image(source)
+}
+
+function optimizeSanityImages(html?: string) {
+  if (!html) return ""
+
+  return html.replace(
+    /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
+    (url) => {
+      let optimizedUrl = url
+
+      if (!optimizedUrl.includes("auto=format")) {
+        optimizedUrl += `${
+          optimizedUrl.includes("?") ? "&" : "?"
+        }auto=format`
+      }
+
+      if (!optimizedUrl.includes("q=")) {
+        optimizedUrl += `${
+          optimizedUrl.includes("?") ? "&" : "?"
+        }q=85`
+      }
+
+      return optimizedUrl
+    }
+  )
+}
+
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+}
+
+function extractFirstImageFromHtml(htmlContent?: string) {
+  if (!htmlContent) return ""
+
+  const match = htmlContent.match(
+    /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/i
+  )
+
+  if (!match?.[1]) return ""
+
+  return decodeHtmlEntities(match[1].trim())
+}
+
+function buildSocialImageUrl(imageUrl: string) {
+  if (!imageUrl) return ""
+
+  if (!imageUrl.includes("cdn.sanity.io/images/")) {
+    return imageUrl
+  }
+
+  const separator = imageUrl.includes("?") ? "&" : "?"
+
+  return `${imageUrl}${separator}w=1200&h=630&fit=crop&auto=format&q=85`
+}
+
+function stripHtml(value?: string) {
+  if (!value) return ""
+
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function removeRepeatedTitle(text: string, title: string) {
+  const normalizedText = text.trim()
+  const normalizedTitle = title.trim()
+
+  if (!normalizedText || !normalizedTitle) {
+    return normalizedText
+  }
+
+  if (normalizedText.startsWith(normalizedTitle)) {
+    return normalizedText
+      .slice(normalizedTitle.length)
+      .replace(/^[\s：:｜|\-–—]+/, "")
+  }
+
+  return normalizedText
+}
+
+function removeLeadingDuplicateHeading(
+  htmlContent: string,
+  title: string
+) {
+  if (!htmlContent || !title) return htmlContent
+
+  const normalizedTitle = title
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+
+  let removed = false
+
+  return htmlContent.replace(
+    /<h2\b[^>]*>([\s\S]*?)<\/h2>/i,
+    (fullMatch, headingContent: string) => {
+      if (removed) return fullMatch
+
+      const normalizedHeading = headingContent
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&quot;/gi, "\"")
+        .replace(/&#39;/gi, "'")
+        .replace(/\s+/g, " ")
+        .trim()
+
+      if (normalizedHeading === normalizedTitle) {
+        removed = true
+        return ""
+      }
+
+      return fullMatch
+    }
+  )
+}
+
+function buildDescription(
+  description: string | undefined,
+  htmlContent: string | undefined,
+  title: string
+) {
+  const supplied = removeRepeatedTitle(
+    stripHtml(description),
+    title
+  )
+
+  if (
+    supplied &&
+    supplied !== "點擊閱讀詳情..."
+  ) {
+    return `${supplied.slice(0, 150)}${
+      supplied.length > 150 ? "…" : ""
+    }`
+  }
+
+  const fromHtml = removeRepeatedTitle(
+    stripHtml(htmlContent),
+    title
+  )
+
+  if (fromHtml) {
+    return `${fromHtml.slice(0, 150)}${
+      fromHtml.length > 150 ? "…" : ""
+    }`
+  }
+
+  return `${title}｜${shortSiteName}`
+}
+
+function formatDate(date?: string) {
+  if (!date) return null
+
+  const parsed = new Date(date)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return parsed.toLocaleDateString("zh-TW", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Asia/Taipei",
+  })
+}
+
+function toIsoDate(date?: string) {
+  if (!date) return undefined
+
+  const parsed = new Date(date)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined
+  }
+
+  return parsed.toISOString()
+}
+
+function serializeJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c")
+}
+
+function escapeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+}
+
+function insertImageAfterHeading(
+  html: string,
+  headingText: string,
+  imageUrl?: string,
+  alt?: string
+) {
+  if (!html || !imageUrl) return html
+
+  const escapedHeading = headingText.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  )
+
+  const headingRegex = new RegExp(
+    `(<h2\\b[^>]*>\\s*${escapedHeading}\\s*<\\/h2>)`,
+    "i"
+  )
+
+  if (!headingRegex.test(html)) {
+    return html
+  }
+
+  const safeUrl = escapeHtmlAttribute(imageUrl)
+  const safeAlt = escapeHtmlAttribute(
+    alt || headingText
+  )
+
+  return html.replace(
+    headingRegex,
+    `$1
+<figure class="article-space-image">
+  <img
+    src="${safeUrl}"
+    alt="${safeAlt}"
+    loading="lazy"
+    decoding="async"
+  />
+</figure>`
+  )
+}
+
+interface PostMetadataResult {
+  title?: string
+  description?: string
+  htmlContent?: string
+  publishedAt?: string
+  _updatedAt?: string
+  mainImage?: unknown
+  livingRoomImage?: any
+  diningRoomImage?: any
+  masterBedroomImage?: any
+  secondBedroomImage?: any
+  authorName?: string
+  authorSlug?: string
+  tags?: string[]
+}
+
+interface RelatedPost {
+  _id: string
+  title: string
+  slug: string
+  publishedAt?: string
+}
+
+interface PostResult extends PostMetadataResult {
+  _id: string
+  slug: string
+  body?: unknown
+  youtubeVideoId?: string
+}
+
+const ptComponents = {
+  types: {
+    image: ({ value }: { value: any }) => {
+      if (!value?.asset?._ref) return null
+
+      const imageUrl = urlFor(value)
+        .width(1400)
+        .fit("max")
+        .auto("format")
+        .url()
+
+      return (
+        <figure className="my-10 flex flex-col items-center">
+          <img
+            src={imageUrl}
+            alt={value.alt || "住宅室內設計文章圖片"}
+            className="h-auto w-full rounded-[2rem] border border-border shadow-[0_16px_50px_rgba(53,51,46,0.12)]"
+            loading="lazy"
+            decoding="async"
+          />
+
+          {value.caption && (
+            <figcaption className="mt-3 text-center text-sm leading-6 text-muted-foreground">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
+      )
+    },
+  },
 }
 
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const result = await getWarningCase(slug);
-  const warningCase = result.warningCase;
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
 
-  if (!warningCase) {
+  const post =
+    await client.fetch<PostMetadataResult | null>(
+      `*[
+        _type == "post" &&
+        slug.current == $slug
+      ][0] {
+        title,
+        description,
+        htmlContent,
+        publishedAt,
+        _updatedAt,
+        mainImage,
+        "authorName": author->name,
+        "authorSlug": author->slug.current,
+        "tags": coalesce(categories[]->title, tags)
+      }`,
+      {
+        slug,
+      },
+      {
+        cache: "no-store",
+      }
+    )
+
+  if (!post?.title) {
     return {
-      title: "找不到踩雷案例",
+      title: "找不到文章",
       robots: {
         index: false,
         follow: false,
       },
-    };
+    }
   }
 
-  const description = warningCase.describe
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 150);
+  const description = buildDescription(
+    post.description,
+    post.htmlContent,
+    post.title
+  )
+
+  const canonicalUrl = `${siteUrl}/blog/${slug}`
+  const firstHtmlImage = extractFirstImageFromHtml(
+    post.htmlContent
+  )
+
+  const ogImage = firstHtmlImage
+    ? buildSocialImageUrl(firstHtmlImage)
+    : post.mainImage
+      ? urlFor(post.mainImage)
+          .width(1200)
+          .height(630)
+          .fit("crop")
+          .auto("format")
+          .url()
+      : `${siteUrl}/images/og-home.jpg`
+
+  const publishedTime = toIsoDate(post.publishedAt)
+  const rawModifiedTime = toIsoDate(
+    post._updatedAt || post.publishedAt
+  )
+
+  const modifiedTime =
+    publishedTime &&
+    rawModifiedTime &&
+    new Date(rawModifiedTime).getTime() <
+      new Date(publishedTime).getTime()
+      ? publishedTime
+      : rawModifiedTime
+
+  const authorName =
+    post.authorName || defaultAuthorName
+
+  const tags = Array.isArray(post.tags)
+    ? post.tags.filter(Boolean)
+    : []
 
   return {
-    title: `${warningCase.title}｜裝修踩雷案例`,
-    description:
-      description ||
-      "匿名整理室內設計、室內裝修與裝潢工程爭議案例，提醒消費者留意裝修風險。",
-  };
+    title: post.title,
+    description,
+
+    alternates: {
+      canonical: canonicalUrl,
+    },
+
+    authors: [
+      {
+        name: authorName,
+        url: post.authorSlug
+          ? `${siteUrl}/authors/${post.authorSlug}`
+          : siteUrl,
+      },
+    ],
+
+    category:
+      tags[0] || defaultArticleCategory,
+
+    keywords: tags,
+
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+
+    openGraph: {
+      title: post.title,
+      description,
+      url: canonicalUrl,
+      siteName,
+      locale: "zh_TW",
+      type: "article",
+      publishedTime,
+      modifiedTime,
+      authors: [authorName],
+      section:
+        tags[0] || defaultArticleCategory,
+      tags,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [ogImage],
+    },
+  }
 }
 
-function AlertIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 9v4m0 4h.01M10.3 3.7 2.2 18a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"
-      />
-    </svg>
-  );
-}
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
 
-export default async function WarningCasePage({ params }: PageProps) {
-  const { slug } = await params;
-  const result = await getWarningCase(slug);
+  const post =
+    await client.fetch<PostResult | null>(
+      `*[
+        _type == "post" &&
+        slug.current == $slug
+      ][0] {
+        _id,
+        title,
+        description,
+        "slug": slug.current,
+        publishedAt,
+        _updatedAt,
+        mainImage,
+        livingRoomImage,
+        diningRoomImage,
+        masterBedroomImage,
+        secondBedroomImage,
+        youtubeVideoId,
+        body,
+        htmlContent,
+        "authorName": author->name,
+        "authorSlug": author->slug.current,
+        "tags": coalesce(categories[]->title, tags)
+      }`,
+      {
+        slug,
+      },
+      {
+        cache: "no-store",
+      }
+    )
 
-  if (!result.warningCase) {
-    notFound();
+  if (!post?.title) {
+    notFound()
   }
 
-  const warningCase = buildDisplayCase(
-    result.warningCase,
-    result.orderedIds
-  );
+  const tags = Array.isArray(post.tags)
+    ? post.tags.filter(Boolean)
+    : []
+
+  const displayedTags = tags
+
+  const authorName =
+    post.authorName || defaultAuthorName
+
+  const authorUrl = post.authorSlug
+    ? `/authors/${post.authorSlug}`
+    : "/"
+
+  const description = buildDescription(
+    post.description,
+    post.htmlContent,
+    post.title
+  )
+
+  const publishedIso = toIsoDate(
+    post.publishedAt
+  )
+
+  const rawModifiedIso = toIsoDate(
+    post._updatedAt || post.publishedAt
+  )
+
+  const modifiedIso =
+    publishedIso &&
+    rawModifiedIso &&
+    new Date(rawModifiedIso).getTime() <
+      new Date(publishedIso).getTime()
+      ? publishedIso
+      : rawModifiedIso
+
+  const publishedDate =
+    formatDate(publishedIso)
+
+  const modifiedDate =
+    formatDate(modifiedIso)
+
+  const canonicalUrl =
+    `${siteUrl}/blog/${slug}`
+
+  const youtubeVideoId =
+    typeof post.youtubeVideoId === "string" &&
+    /^[a-zA-Z0-9_-]{11}$/.test(
+      post.youtubeVideoId.trim()
+    )
+      ? post.youtubeVideoId.trim()
+      : undefined
+
+  const mainImageUrl = post.mainImage
+    ? urlFor(post.mainImage)
+        .width(1600)
+        .fit("max")
+        .auto("format")
+        .url()
+    : undefined
+
+  const livingRoomImageUrl =
+    post.livingRoomImage
+      ? urlFor(post.livingRoomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const diningRoomImageUrl =
+    post.diningRoomImage
+      ? urlFor(post.diningRoomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const masterBedroomImageUrl =
+    post.masterBedroomImage
+      ? urlFor(post.masterBedroomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const secondBedroomImageUrl =
+    post.secondBedroomImage
+      ? urlFor(post.secondBedroomImage)
+          .width(1600)
+          .fit("max")
+          .auto("format")
+          .url()
+      : undefined
+
+  const firstHtmlImage =
+    extractFirstImageFromHtml(
+      post.htmlContent
+    )
+
+  const videoPosterImage =
+    firstHtmlImage || mainImageUrl
+
+  const structuredImageUrl = firstHtmlImage
+    ? buildSocialImageUrl(firstHtmlImage)
+    : post.mainImage
+      ? urlFor(post.mainImage)
+          .width(1200)
+          .height(630)
+          .fit("crop")
+          .auto("format")
+          .url()
+      : `${siteUrl}/images/og-home.jpg`
+
+  /*
+   * HTML Pipeline：
+   * 圖片最佳化
+   * → sanitizePostHtml 移除重複 H1、首圖及異常內容
+   * → 移除與文章主標題重複的第一個 H2
+   * → Render
+   */
+  const optimizedHtml =
+    optimizeSanityImages(post.htmlContent)
+
+  const sanitizedHtml = optimizedHtml
+    ? sanitizePostHtml(
+        optimizedHtml,
+        post.title,
+        Boolean(
+          post.mainImage ||
+          (youtubeVideoId && firstHtmlImage)
+        )
+      )
+    : ""
+
+  let cleanedHtml = sanitizedHtml
+    ? removeLeadingDuplicateHeading(
+        sanitizedHtml,
+        post.title
+      )
+    : ""
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "客廳設計",
+    livingRoomImageUrl,
+    post.livingRoomImage?.alt ||
+      `${post.title}－客廳設計`
+  )
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "餐廳設計",
+    diningRoomImageUrl,
+    post.diningRoomImage?.alt ||
+      `${post.title}－餐廳設計`
+  )
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "主臥設計",
+    masterBedroomImageUrl,
+    post.masterBedroomImage?.alt ||
+      `${post.title}－主臥設計`
+  )
+
+  cleanedHtml = insertImageAfterHeading(
+    cleanedHtml,
+    "次臥設計",
+    secondBedroomImageUrl,
+    post.secondBedroomImage?.alt ||
+      `${post.title}－次臥設計`
+  )
+
+  const relatedPosts =
+    await client.fetch<RelatedPost[]>(
+      `*[
+        _type == "post" &&
+        _id != $postId &&
+        defined(slug.current) &&
+        defined(title) &&
+        count(
+          coalesce(
+            categories[]->title,
+            tags
+          )[@ in $tags]
+        ) > 0
+      ]
+      | order(
+          count(
+            coalesce(
+              categories[]->title,
+              tags
+            )[@ in $tags]
+          ) desc,
+          coalesce(
+            publishedAt,
+            _createdAt
+          ) desc
+        )[0...3] {
+          _id,
+          title,
+          "slug": slug.current,
+          "publishedAt": coalesce(
+            publishedAt,
+            _createdAt
+          )
+        }`,
+      {
+        postId: post._id,
+        tags,
+      },
+      {
+        cache: "no-store",
+      }
+    )
+
+  const blogPostingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${canonicalUrl}#article`,
+    url: canonicalUrl,
+    headline: post.title,
+    description,
+    inLanguage: "zh-Hant-TW",
+
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonicalUrl,
+    },
+
+    isPartOf: {
+      "@id": `${siteUrl}/#website`,
+    },
+
+    author: post.authorSlug
+      ? {
+          "@type": "Person",
+          "@id": `${siteUrl}/authors/${post.authorSlug}#person`,
+          name: authorName,
+          url: `${siteUrl}/authors/${post.authorSlug}`,
+        }
+      : {
+          "@type": "Organization",
+          "@id": `${siteUrl}/#organization`,
+          name: defaultAuthorName,
+          url: siteUrl,
+        },
+
+    publisher: {
+      "@id": `${siteUrl}/#organization`,
+    },
+
+    datePublished: publishedIso,
+    dateModified: modifiedIso,
+
+    image: {
+      "@type": "ImageObject",
+      url: structuredImageUrl,
+      width: 1200,
+      height: 630,
+    },
+
+    articleSection:
+      tags[0] || defaultArticleCategory,
+
+    keywords: tags,
+
+    about:
+      tags.length > 0
+        ? tags.map((tag) => ({
+            "@type": "Thing",
+            name: tag,
+          }))
+        : [
+            {
+              "@type": "Thing",
+              name: "室內設計",
+            },
+            {
+              "@type": "Thing",
+              name: "居家裝潢",
+            },
+            {
+              "@type": "Thing",
+              name: "住宅空間規劃",
+            },
+          ],
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "首頁",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "室內設計文章",
+        item: `${siteUrl}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: canonicalUrl,
+      },
+    ],
+  }
 
   return (
-    <main className="min-h-screen bg-[#f4f1eb] text-stone-950">
-      <section className="relative overflow-hidden border-b-8 border-red-700 bg-[#151515] text-white">
-        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:32px_32px]" />
+    <div className="min-h-screen bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(
+              blogPostingJsonLd
+            ),
+        }}
+      />
 
-        <div className="relative mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
-          <Link
-            href="/warning"
-            className="inline-flex items-center gap-2 text-sm font-bold text-stone-300 transition hover:text-white"
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(
+              breadcrumbJsonLd
+            ),
+        }}
+      />
+
+      <div className="px-5 pb-24 pt-12 md:px-6 md:pt-20">
+        <div className="mx-auto max-w-4xl">
+          {/* 麵包屑 */}
+          <nav
+            aria-label="麵包屑導覽"
+            className="mb-7 flex items-center gap-2 overflow-hidden text-xs text-muted-foreground"
           >
-            ← 返回裝修踩雷案例
-          </Link>
+            <Link
+              href="/"
+              className="shrink-0 transition-colors hover:text-accent"
+            >
+              首頁
+            </Link>
 
-          <div className="mt-8 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-red-300">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-              裝修踩雷警報
+            <span aria-hidden="true">
+              /
             </span>
 
-            <span className="rounded bg-red-600 px-2.5 py-1.5 text-xs font-black">
-              匿名檢舉
+            <Link
+              href="/blog"
+              className="shrink-0 transition-colors hover:text-accent"
+            >
+              室內設計文章
+            </Link>
+
+            <span aria-hidden="true">
+              /
             </span>
 
-            <span className="text-xs font-bold text-stone-400">
-              案例編號 #{warningCase.caseNumber}
+            <span
+              aria-current="page"
+              className="truncate text-foreground"
+            >
+              {post.title}
             </span>
-          </div>
+          </nav>
 
-          <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">
-            {warningCase.title}
-          </h1>
+          {/* 文章標籤 */}
+          {displayedTags.length > 0 && (
+            <div className="mb-5 flex flex-wrap gap-2">
+              {displayedTags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/blog?tag=${encodeURIComponent(
+                    tag
+                  )}`}
+                  className="rounded-full border border-accent/20 bg-accent/5 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
 
-          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-300">
-            <p>
-              被檢舉對象：
-              <strong className="ml-1 text-red-300">
-                {warningCase.reportedTarget}
-              </strong>
-            </p>
+          {/* 文章標題 */}
+          <header>
+            <h1 className="text-4xl font-black leading-tight tracking-tight text-foreground md:text-5xl md:leading-[1.15]">
+              {post.title}
+            </h1>
 
-            <p>
-              案例地區：
-              <strong className="ml-1 text-white">
-                {warningCase.city}
-                {warningCase.district}
-              </strong>
-            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border pb-7 text-sm text-muted-foreground">
+              <span>
+                撰文者：
+                <Link
+                  href={authorUrl}
+                  rel="author"
+                  className="font-semibold text-foreground transition-colors hover:text-accent"
+                >
+                  {authorName}
+                </Link>
+              </span>
 
-            <time dateTime={warningCase._createdAt}>
-              發布日期：
-              <strong className="ml-1 text-white">
-                {warningCase.displayDate}
-              </strong>
-            </time>
+              {publishedDate && (
+                <>
+                  <span
+                    className="text-border"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
+
+                  <time
+                    dateTime={publishedIso}
+                  >
+                    發布於 {publishedDate}
+                  </time>
+                </>
+              )}
+
+              {modifiedDate &&
+                modifiedIso &&
+                publishedIso &&
+                modifiedIso !==
+                  publishedIso && (
+                  <>
+                    <span
+                      className="text-border"
+                      aria-hidden="true"
+                    >
+                      |
+                    </span>
+
+                    <time
+                      dateTime={modifiedIso}
+                    >
+                      更新於 {modifiedDate}
+                    </time>
+                  </>
+                )}
+            </div>
+          </header>
+
+          {/* 文章主視覺：先顯示高畫質首圖，點擊後原位置播放 YouTube */}
+          {youtubeVideoId ? (
+            <YouTubeCoverPlayer
+              videoId={youtubeVideoId}
+              posterImage={videoPosterImage}
+              title={post.title}
+            />
+          ) : (
+            mainImageUrl && (
+              <figure className="mb-14 mt-10 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_20px_70px_rgba(53,51,46,0.12)]">
+                <img
+                  src={mainImageUrl}
+                  alt={`${post.title}室內設計與空間提案`}
+                  className="h-auto w-full object-cover"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </figure>
+            )
+          )}
+
+          {/* 文章內容 */}
+          <article
+            className="
+              prose max-w-none
+              prose-lg
+              prose-p:mb-5
+              prose-p:leading-[1.9]
+              prose-p:text-muted-foreground
+              prose-headings:font-black
+              prose-headings:tracking-tight
+              prose-headings:text-foreground
+              prose-h2:mb-5
+              prose-h2:mt-12
+              prose-h2:border-l-4
+              prose-h2:border-accent
+              prose-h2:pl-4
+              prose-h2:text-2xl
+              prose-h3:mt-8
+              prose-h3:text-xl
+              prose-strong:font-bold
+              prose-strong:text-foreground
+              prose-a:text-accent
+              prose-a:no-underline
+              hover:prose-a:opacity-75
+              prose-ul:rounded-2xl
+              prose-ul:border
+              prose-ul:border-border
+              prose-ul:bg-white/70
+              prose-ul:p-6
+              prose-ol:rounded-2xl
+              prose-ol:border
+              prose-ol:border-border
+              prose-ol:bg-white/70
+              prose-ol:p-6
+              prose-li:text-muted-foreground
+              prose-li:marker:text-accent
+              prose-table:my-10
+              prose-table:block
+              prose-table:overflow-x-auto
+              prose-table:border-collapse
+              prose-thead:bg-secondary
+              prose-th:border
+              prose-th:border-border
+              prose-th:p-4
+              prose-th:text-primary
+              prose-td:border
+              prose-td:border-border
+              prose-td:p-4
+              prose-td:text-muted-foreground
+              prose-img:rounded-[2rem]
+              prose-img:border
+              prose-img:border-border
+              prose-blockquote:rounded-r-2xl
+              prose-blockquote:border-l-accent
+              prose-blockquote:bg-secondary/60
+              prose-blockquote:px-6
+              prose-blockquote:py-3
+              prose-blockquote:text-muted-foreground
+            "
+          >
+            {cleanedHtml ? (
+              <div
+                className="
+                  [&_table]:!my-10
+                  [&_table]:!w-full
+                  [&_table]:!border-collapse
+                  [&_table]:!overflow-hidden
+                  [&_table]:!rounded-2xl
+                  [&_th]:!border
+                  [&_th]:!border-border
+                  [&_th]:!bg-secondary
+                  [&_th]:!p-4
+                  [&_th]:!text-primary
+                  [&_td]:!border
+                  [&_td]:!border-border
+                  [&_td]:!p-4
+                  [&_td]:!text-muted-foreground
+                  [&_tr]:!bg-transparent
+                  [&_img]:mx-auto
+                  [&_img]:my-9
+                  [&_img]:block
+                  [&_img]:h-auto
+                  [&_img]:max-w-full
+                  [&_img]:rounded-[2rem]
+                  [&_img]:border
+                  [&_img]:border-border
+                  [&_img]:shadow-[0_16px_50px_rgba(53,51,46,0.12)]
+                  [&_p]:mb-5
+                  [&_p]:leading-[1.9]
+                  [&_p]:text-muted-foreground
+                  [&_h2]:mb-5
+                  [&_h2]:mt-12
+                  [&_h2]:border-l-4
+                  [&_h2]:border-accent
+                  [&_h2]:pl-4
+                  [&_h2]:text-2xl
+                  [&_h2]:font-black
+                  [&_h2]:text-foreground
+                  [&_h3]:mt-8
+                  [&_h3]:text-xl
+                  [&_h3]:font-bold
+                  [&_h3]:text-foreground
+                  [&_li]:mb-2
+                  [&_li]:leading-7
+                  [&_li]:text-muted-foreground
+                  [&_strong]:text-foreground
+                  [&_a]:text-accent
+                "
+                dangerouslySetInnerHTML={{
+                  __html: cleanedHtml,
+                }}
+              />
+            ) : (
+              post.body && (
+                <PortableText
+                  value={post.body as any}
+                  components={ptComponents}
+                />
+              )
+            )}
+          </article>
+
+          {/* 資訊聲明 */}
+          <aside
+            aria-label="網站內容聲明"
+            className="mt-14 rounded-[2rem] border border-border/70 bg-secondary/60 px-6 py-6 text-sm leading-7 text-muted-foreground"
+          >
+            本站內容包含住宅室內設計資訊、空間規劃概念、
+            裝潢風格提案與設計模擬圖片，主要供屋主尋找設計方向與裝潢靈感。
+            部分圖片與內容不一定代表該建案之實際完工案例，也不等同正式施工圖。
+            實際尺寸、材質、預算、法規、設計與施工內容，
+            應由屋主與依法執業的設計、建築或室內裝修專業人員進一步確認。
+          </aside>
+
+          <ShareBar />
+
+          {/* 延伸閱讀 */}
+          {relatedPosts.length > 0 && (
+            <section
+              aria-labelledby="related-articles"
+              className="mt-14 border-t border-border pt-10"
+            >
+              <p className="text-sm font-semibold tracking-[0.2em] text-accent">
+                RELATED ARTICLES
+              </p>
+
+              <h2
+                id="related-articles"
+                className="mt-2 text-2xl font-black tracking-tight text-foreground"
+              >
+                延伸閱讀
+              </h2>
+
+              <div className="mt-6 divide-y divide-border overflow-hidden rounded-[2rem] border border-border bg-white/70 shadow-sm">
+                {relatedPosts.map(
+                  (relatedPost) => (
+                    <article
+                      key={relatedPost._id}
+                    >
+                      <Link
+                        href={`/blog/${relatedPost.slug}`}
+                        className="group flex items-center justify-between gap-5 px-6 py-5 transition-colors hover:bg-secondary/70"
+                      >
+                        <div>
+                          <h3 className="font-semibold leading-7 text-foreground transition-colors group-hover:text-accent">
+                            {relatedPost.title}
+                          </h3>
+
+                          {relatedPost.publishedAt && (
+                            <time
+                              dateTime={
+                                relatedPost.publishedAt
+                              }
+                              className="mt-1 block text-xs text-muted-foreground"
+                            >
+                              {formatDate(
+                                relatedPost.publishedAt
+                              )}
+                            </time>
+                          )}
+                        </div>
+
+                        <span
+                          aria-hidden="true"
+                          className="shrink-0 text-accent transition-transform group-hover:translate-x-1"
+                        >
+                          →
+                        </span>
+                      </Link>
+                    </article>
+                  )
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* 返回文章列表 */}
+          <div className="mt-12 border-t border-border pt-8">
+            <Link
+              href="/blog"
+              className="inline-flex items-center text-sm font-semibold text-primary transition-colors hover:text-accent"
+            >
+              <span
+                aria-hidden="true"
+                className="mr-2"
+              >
+                ←
+              </span>
+
+              返回室內設計文章列表
+            </Link>
           </div>
         </div>
-      </section>
-
-      <section className="mx-auto grid max-w-5xl gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article className="overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-[0_12px_35px_rgba(0,0,0,.06)]">
-          <div className="border-b border-stone-200 bg-stone-950 px-5 py-4 text-white sm:px-8">
-            <div className="flex items-center gap-2 text-red-300">
-              <AlertIcon />
-              <p className="text-sm font-black tracking-wide">
-                案例完整內容
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 sm:p-8">
-            <div className="rounded-xl border-l-4 border-red-700 bg-red-50 px-4 py-4 text-sm leading-7 text-red-950">
-              以下內容為投稿者單方陳述，本站僅進行匿名整理與風險資訊彙整，
-              不代表已認定任何一方違法或有過失。
-            </div>
-
-            <div className="mt-8 whitespace-pre-wrap break-words text-base leading-9 text-stone-700">
-              {warningCase.describe}
-            </div>
-          </div>
-        </article>
-
-        <aside className="space-y-5">
-          <section className="rounded-2xl border border-stone-300 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,.04)]">
-            <p className="text-xs font-black tracking-[0.18em] text-red-700">
-              CASE DETAILS
-            </p>
-
-            <h2 className="mt-2 text-xl font-black">案例資訊</h2>
-
-            <dl className="mt-5 space-y-4 text-sm">
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">檢舉者</dt>
-                <dd className="mt-1 font-black">{warningCase.reporter}</dd>
-              </div>
-
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">
-                  被檢舉對象
-                </dt>
-                <dd className="mt-1 font-black text-red-800">
-                  {warningCase.reportedTarget}
-                </dd>
-              </div>
-
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">案例地區</dt>
-                <dd className="mt-1 font-black">
-                  {warningCase.city}
-                  {warningCase.district}
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-xs font-bold text-stone-400">發布日期</dt>
-                <dd className="mt-1 font-black">
-                  {warningCase.displayDate}
-                </dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-xs leading-6 text-amber-950">
-            <p className="font-black">閱讀提醒</p>
-            <p className="mt-2">
-              公司名稱為系統產生的匿名代稱，不應據此影射或辨識任何真實業者。
-              簽約前仍應自行查證、比較合約，並保留付款及溝通紀錄。
-            </p>
-          </section>
-
-          <Link
-            href="/warning#report-form"
-            className="block rounded-xl bg-red-700 px-5 py-4 text-center text-sm font-black text-white transition hover:bg-red-800"
-          >
-            匿名提供裝修經驗
-          </Link>
-        </aside>
-      </section>
-    </main>
-  );
+      </div>
+    </div>
+  )
 }
