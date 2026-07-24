@@ -38,7 +38,7 @@ const WARNING_CASE_QUERY = `
 {
   "warningCase": *[
     _type == "warningCasePost"
-    && slug.current == $slug
+    && slug.current in $slugCandidates
   ][0] {
     _id,
     "title": coalesce(title, warningCaseTitle),
@@ -226,11 +226,33 @@ function buildDisplayCase(
   };
 }
 
+function buildSlugCandidates(rawSlug: string) {
+  let decodedSlug = rawSlug;
+
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch {
+    decodedSlug = rawSlug;
+  }
+
+  const encodedSlug = encodeURIComponent(decodedSlug);
+
+  return Array.from(
+    new Set([
+      rawSlug,
+      decodedSlug,
+      encodedSlug,
+    ])
+  );
+}
+
 async function getWarningCase(slug: string) {
+  const slugCandidates = buildSlugCandidates(slug);
+
   return client.fetch<WarningCaseQueryResult>(
     WARNING_CASE_QUERY,
     {
-      slug,
+      slugCandidates,
     },
     {
       cache: "no-store",
