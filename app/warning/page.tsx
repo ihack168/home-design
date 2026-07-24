@@ -277,7 +277,7 @@ export default async function WarningCasesPage() {
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {warningCases.map((warningCase, index) => {
               const caseHref = warningCase.slug?.current
-                ? `/warning-cases/${warningCase.slug.current}`
+                ? `/warning/${warningCase.slug.current}`
                 : undefined;
 
               const cardContent = (
