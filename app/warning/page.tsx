@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "整理匿名室內設計、室內裝修與裝潢工程踩雷案例，包含工期延誤、追加費用、施工瑕疵與售後爭議。",
 };
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 type SanityWarningCase = {
   _id: string;
