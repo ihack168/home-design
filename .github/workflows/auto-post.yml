@@ -1,4 +1,3 @@
-```yaml
 name: Auto Post to Sanity
 
 on:
@@ -44,4 +43,3 @@ jobs:
         run: node .github/scripts/warningcasepost.mjs
         env:
           SANITY_TOKEN: ${{ secrets.SANITY_TOKEN }}
-```
