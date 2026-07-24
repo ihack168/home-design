@@ -29,13 +29,12 @@ type DisplayWarningCase = SanityWarningCase & {
 const WARNING_CASES_QUERY = `
   *[
     _type == "warningCasePost"
-    && defined(title)
-    && defined(describe)
+    && defined(slug.current)
   ]
   | order(_createdAt desc) {
     _id,
-    title,
-    describe,
+    "title": coalesce(title, warningCaseTitle),
+    "describe": coalesce(describe, warningCaseDescription),
 "slug": slug.current,
     _createdAt
   }
