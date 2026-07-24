@@ -16,6 +16,7 @@ type SanityWarningCase = {
   title: string;
   describe: string;
   slug?: string;
+  publishedAt?: string;
   _createdAt: string;
 };
 
@@ -33,32 +34,65 @@ const WARNING_CASES_QUERY = `
     _type == "warningCasePost"
     && defined(slug.current)
   ]
-  | order(_createdAt desc) {
+  | order(coalesce(publishedAt, _createdAt) desc) {
     _id,
     "title": coalesce(title, warningCaseTitle),
     "describe": coalesce(describe, warningCaseDescription),
 "slug": slug.current,
+    publishedAt,
     _createdAt
   }
 `;
 
 const reporterPool = [
-  "林先生",
-  "林小姐",
-  "陳先生",
-  "陳小姐",
-  "張先生",
-  "張小姐",
-  "王先生",
-  "王小姐",
-  "李先生",
-  "李小姐",
-  "黃先生",
-  "黃小姐",
-  "吳先生",
-  "吳小姐",
-  "劉先生",
-  "劉小姐",
+  "蔡先生",
+  "蔡小姐",
+  "楊先生",
+  "楊小姐",
+  "許先生",
+  "許小姐",
+  "鄭先生",
+  "鄭小姐",
+  "謝先生",
+  "謝小姐",
+  "洪先生",
+  "洪小姐",
+  "郭先生",
+  "郭小姐",
+  "曾先生",
+  "曾小姐",
+  "邱先生",
+  "邱小姐",
+  "廖先生",
+  "廖小姐",
+  "賴先生",
+  "賴小姐",
+  "徐先生",
+  "徐小姐",
+  "周先生",
+  "周小姐",
+  "葉先生",
+  "葉小姐",
+  "蘇先生",
+  "蘇小姐",
+  "莊先生",
+  "莊小姐",
+  "呂先生",
+  "呂小姐",
+  "江先生",
+  "江小姐",
+  "何先生",
+  "何小姐",
+  "蕭先生",
+  "蕭小姐",
+  "羅先生",
+  "羅小姐",
+  "高先生",
+  "高小姐",
+  "簡先生",
+  "簡小姐",
+  "朱先生",
+  "朱小姐",
 ];
 
 const reportedTargetPool = [
@@ -204,7 +238,7 @@ function buildDisplayCase(
     ),
     city: location.city,
     district,
-    displayDate: formatDate(warningCase._createdAt),
+    displayDate: formatDate(warningCase.publishedAt || warningCase._createdAt),
     caseNumber: String(index + 1).padStart(3, "0"),
   };
 }
@@ -370,7 +404,7 @@ export default async function WarningCasesPage() {
                       </div>
 
                       <time
-                        dateTime={warningCase._createdAt}
+                        dateTime={warningCase.publishedAt || warningCase._createdAt}
                         className="text-xs text-stone-400"
                       >
                         {warningCase.displayDate}
