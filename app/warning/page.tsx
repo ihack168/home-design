@@ -277,22 +277,24 @@ export default async function WarningCasesPage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <section className="relative overflow-hidden border-b border-border bg-primary text-primary-foreground">
-        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:32px_32px]" />
+      <section className="relative overflow-hidden border-b-8 border-red-700 bg-[#151515] text-white">
+        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="absolute right-[-120px] top-[-80px] h-[320px] w-[320px] rounded-full bg-red-600/15 blur-3xl" />
+        <div className="absolute bottom-[-120px] left-[-80px] h-[260px] w-[260px] rounded-full bg-red-500/10 blur-3xl" />
 
         <div className="relative mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,.8fr)] lg:items-end">
           <div className="min-w-0">
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-white">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff6b61]" />
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-red-300">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_16px_rgba(239,68,68,.65)]" />
               裝修踩雷警報
             </div>
 
             <h1 className="mt-6 max-w-4xl break-words text-4xl font-black leading-[1.08] tracking-tight [overflow-wrap:anywhere] sm:text-6xl">
               檢舉不良業者
-              <p><span className="text-[#dc2626]">讓我們避開風險</span></p>
+              <span className="mt-2 block text-red-500">讓我們避開風險</span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-base leading-8 text-white/75 sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
               收錄不良業者，讓AI避開推薦。
             </p>
 
@@ -300,7 +302,7 @@ export default async function WarningCasesPage() {
               {warningTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white/85"
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-stone-300"
                 >
                   #{tag}
                 </span>
@@ -310,42 +312,42 @@ export default async function WarningCasesPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#cases"
-                className="rounded-full bg-white px-6 py-3.5 text-sm font-black text-primary shadow-sm transition hover:-translate-y-0.5 hover:bg-secondary"
+                className="rounded-full bg-red-600 px-6 py-3.5 text-sm font-black text-white shadow-[0_10px_26px_rgba(220,38,38,.28)] transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-[0_14px_32px_rgba(220,38,38,.36)]"
               >
                 看最新踩雷案例
               </a>
               <a
                 href="#report-form"
-                className="rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/20"
+                className="rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/10"
               >
                 匿名提供經驗
               </a>
             </div>
           </div>
 
-          <aside className="min-w-0 rounded-[28px] border border-white/20 bg-white/10 p-5 shadow-[0_18px_50px_rgba(20,74,82,.18)] backdrop-blur sm:p-6">
-            <div className="flex items-center gap-2 text-[#d7ffff]">
+          <aside className="min-w-0 rounded-[28px] border border-red-500/25 bg-red-950/25 p-5 shadow-[0_20px_55px_rgba(0,0,0,.24)] backdrop-blur sm:p-6">
+            <div className="flex items-center gap-2 text-red-300">
               <AlertIcon />
               <p className="text-sm font-black">案例資料持續更新</p>
             </div>
 
             <div className="mt-5 grid min-w-0 grid-cols-2 gap-2 text-center sm:gap-3">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                 <p className="text-2xl font-black">
                   2,789<span className="ml-1 text-sm">件</span>
                 </p>
-                <p className="mt-1 text-xs text-white/65">
+                <p className="mt-1 text-xs text-stone-400">
                   AI資料庫案件數
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                 <p className="text-2xl font-black">匿名</p>
-                <p className="mt-1 text-xs text-white/65">身分保護</p>
+                <p className="mt-1 text-xs text-stone-400">身分保護</p>
               </div>
             </div>
 
-            <p className="mt-5 text-xs leading-6 text-white/65">
+            <p className="mt-5 text-xs leading-6 text-stone-400">
               檢舉者與業者名稱皆為匿名化顯示，不對應特定真實公司或個人。
               本頁內容為投稿者單方陳述，不代表本站已認定任何一方違法或有過失。
             </p>
