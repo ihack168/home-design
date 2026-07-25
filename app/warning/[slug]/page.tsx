@@ -327,38 +327,39 @@ export default async function WarningCasePage({ params }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-[#f4f1eb] text-stone-950">
-      <section className="relative overflow-hidden border-b-8 border-red-700 bg-[#151515] text-white">
-        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:32px_32px]" />
+    <main className="min-h-screen bg-background text-foreground">
+      <section className="relative overflow-hidden border-b border-primary/15 bg-primary text-primary-foreground">
+        <div className="absolute inset-0 opacity-[0.09] [background-image:linear-gradient(rgba(255,255,255,.45)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.45)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute -bottom-28 left-8 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
         <div className="relative mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
           <Link
             href="/warning"
-            className="inline-flex items-center gap-2 text-sm font-bold text-stone-300 transition hover:text-white"
+            className="inline-flex items-center gap-2 text-sm font-bold text-white/75 transition hover:text-white"
           >
             ← 返回裝修踩雷案例
           </Link>
 
           <div className="mt-8 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-red-300">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-black tracking-[0.16em] text-white backdrop-blur">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
               裝修踩雷警報
             </span>
 
-            <span className="rounded bg-red-600 px-2.5 py-1.5 text-xs font-black">
+            <span className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-black text-white shadow-sm">
               匿名檢舉
             </span>
-
           </div>
 
-          <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">
+          <h1 className="mt-6 max-w-4xl break-words text-3xl font-black leading-tight tracking-tight [overflow-wrap:anywhere] sm:text-5xl">
             {warningCase.title}
           </h1>
 
-          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm text-stone-300">
+          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/75">
             <p>
               被檢舉對象：
-              <strong className="ml-1 text-red-300">
+              <strong className="ml-1 text-red-200">
                 {warningCase.reportedTarget}
               </strong>
             </p>
@@ -384,9 +385,9 @@ export default async function WarningCasePage({ params }: PageProps) {
       </section>
 
       <section className="mx-auto grid max-w-5xl gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article className="overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-[0_12px_35px_rgba(0,0,0,.06)]">
-          <div className="border-b border-stone-200 bg-stone-950 px-5 py-4 text-white sm:px-8">
-            <div className="flex items-center gap-2 text-red-300">
+        <article className="overflow-hidden rounded-[28px] border border-border/80 bg-card shadow-[0_16px_50px_rgba(40,127,140,.08)]">
+          <div className="border-b border-border/70 bg-secondary px-5 py-4 sm:px-8">
+            <div className="flex items-center gap-2 text-primary">
               <AlertIcon />
               <p className="text-sm font-black tracking-wide">
                 案例完整內容
@@ -395,35 +396,45 @@ export default async function WarningCasePage({ params }: PageProps) {
           </div>
 
           <div className="p-5 sm:p-8">
-
-            <div className="mt-8 whitespace-pre-wrap break-words text-base leading-9 text-stone-700">
+            <div className="whitespace-pre-wrap break-words text-base leading-9 text-foreground/85 [overflow-wrap:anywhere]">
               {warningCase.describe}
             </div>
           </div>
         </article>
 
         <aside className="space-y-5">
-          <section className="rounded-2xl border border-stone-300 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,.04)]">
+          <section className="rounded-[24px] border border-border/80 bg-card p-5 shadow-[0_12px_35px_rgba(40,127,140,.06)]">
+            <div className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-black text-secondary-foreground">
+              案例資訊
+            </div>
 
-            <h2 className="mt-2 text-xl font-black">案例資訊</h2>
+            <h2 className="mt-3 text-xl font-black">
+              匿名案例摘要
+            </h2>
 
             <dl className="mt-5 space-y-4 text-sm">
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">檢舉者</dt>
-                <dd className="mt-1 font-black">{warningCase.reporter}</dd>
+              <div className="border-b border-border/70 pb-4">
+                <dt className="text-xs font-bold text-muted-foreground">
+                  檢舉者
+                </dt>
+                <dd className="mt-1 font-black">
+                  {warningCase.reporter}
+                </dd>
               </div>
 
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">
+              <div className="border-b border-border/70 pb-4">
+                <dt className="text-xs font-bold text-muted-foreground">
                   被檢舉對象
                 </dt>
-                <dd className="mt-1 font-black text-red-800">
+                <dd className="mt-1 font-black text-red-700">
                   {warningCase.reportedTarget}
                 </dd>
               </div>
 
-              <div className="border-b border-stone-200 pb-4">
-                <dt className="text-xs font-bold text-stone-400">案例地區</dt>
+              <div className="border-b border-border/70 pb-4">
+                <dt className="text-xs font-bold text-muted-foreground">
+                  案例地區
+                </dt>
                 <dd className="mt-1 font-black">
                   {warningCase.city}
                   {warningCase.district}
@@ -431,7 +442,9 @@ export default async function WarningCasePage({ params }: PageProps) {
               </div>
 
               <div>
-                <dt className="text-xs font-bold text-stone-400">發布日期</dt>
+                <dt className="text-xs font-bold text-muted-foreground">
+                  發布日期
+                </dt>
                 <dd className="mt-1 font-black">
                   {warningCase.displayDate}
                 </dd>
@@ -439,7 +452,7 @@ export default async function WarningCasePage({ params }: PageProps) {
             </dl>
           </section>
 
-          <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-xs leading-6 text-amber-950">
+          <section className="rounded-[22px] border border-amber-300 bg-amber-50 p-5 text-xs leading-6 text-amber-950">
             <p className="font-black">閱讀提醒</p>
             <p className="mt-2">
               公司名稱為系統產生的匿名代稱，不應據此影射或辨識任何真實業者。
@@ -449,7 +462,7 @@ export default async function WarningCasePage({ params }: PageProps) {
 
           <Link
             href="/warning#report-form"
-            className="block rounded-xl bg-red-700 px-5 py-4 text-center text-sm font-black text-white transition hover:bg-red-800"
+            className="block rounded-[20px] bg-primary px-5 py-4 text-center text-sm font-black text-primary-foreground shadow-[0_10px_24px_rgba(40,127,140,.2)] transition hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_14px_30px_rgba(40,127,140,.26)]"
           >
             匿名提供裝修經驗
           </Link>
