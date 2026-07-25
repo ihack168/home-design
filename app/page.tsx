@@ -662,9 +662,9 @@ export default async function BlogPage({
               {posts.map((post) => (
                 <article
                   key={post.id}
-                  className="group min-w-0 rounded-[28px] border border-black/[0.06] bg-white p-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.05),0_12px_30px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-black/[0.09] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08),0_20px_48px_rgba(0,0,0,0.08)] sm:rounded-[30px] sm:p-3"
+                  className="group min-w-0"
                 >
-                  <div className="overflow-hidden rounded-[22px] bg-muted sm:rounded-[24px]">
+                  <div className="overflow-hidden rounded-[24px] bg-muted shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_14px_34px_rgba(0,0,0,0.12)] sm:rounded-[28px]">
                     <PostThumbnail
                       slug={post.slug}
                       title={post.title}
@@ -673,7 +673,7 @@ export default async function BlogPage({
                     />
                   </div>
 
-                  <div className="px-1.5 pb-2 pt-3 sm:px-2 sm:pb-2.5 sm:pt-4">
+                  <div className="px-1 pt-3 sm:px-1.5 sm:pt-4">
                     <h2 className="line-clamp-2 text-sm font-black leading-6 tracking-tight sm:text-base">
                       <Link
                         href={`/blog/${post.slug}`}
