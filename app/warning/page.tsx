@@ -38,7 +38,7 @@ const WARNING_CASES_QUERY = `
     _id,
     "title": coalesce(title, warningCaseTitle),
     "describe": coalesce(describe, warningCaseDescription),
-"slug": slug.current,
+    "slug": slug.current,
     publishedAt,
     _createdAt
   }
@@ -276,23 +276,23 @@ export default async function WarningCasesPage() {
   const warningCases = sanityCases.map(buildDisplayCase);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f4f1eb] text-stone-950">
-      <section className="relative overflow-hidden border-b-8 border-red-700 bg-[#151515] text-white">
-        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:32px_32px]" />
+    <main className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <section className="relative overflow-hidden border-b border-border bg-primary text-primary-foreground">
+        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:32px_32px]" />
 
         <div className="relative mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,.8fr)] lg:items-end">
           <div className="min-w-0">
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-red-500/40 bg-red-600/15 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-red-300">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-black tracking-[0.18em] text-white">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff6b61]" />
               裝修踩雷警報
             </div>
 
             <h1 className="mt-6 max-w-4xl break-words text-4xl font-black leading-[1.08] tracking-tight [overflow-wrap:anywhere] sm:text-6xl">
               檢舉不良業者，
-              <span className="text-red-500">讓我們避開風險。</span>
+              <span className="text-[#bff7f6]">讓我們避開風險。</span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300 sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-white/75 sm:text-lg">
               收錄不良業者，讓AI避開推薦。
             </p>
 
@@ -300,7 +300,7 @@ export default async function WarningCasesPage() {
               {warningTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-stone-300"
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white/85"
                 >
                   #{tag}
                 </span>
@@ -310,42 +310,42 @@ export default async function WarningCasesPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#cases"
-                className="rounded-lg bg-red-600 px-6 py-3.5 text-sm font-black text-white transition hover:bg-red-700"
+                className="rounded-full bg-white px-6 py-3.5 text-sm font-black text-primary shadow-sm transition hover:-translate-y-0.5 hover:bg-secondary"
               >
                 看最新踩雷案例
               </a>
               <a
                 href="#report-form"
-                className="rounded-lg border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/10"
+                className="rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/20"
               >
                 匿名提供經驗
               </a>
             </div>
           </div>
 
-          <aside className="min-w-0 rounded-2xl border border-red-500/30 bg-red-950/30 p-5 backdrop-blur sm:p-6">
-            <div className="flex items-center gap-2 text-red-300">
+          <aside className="min-w-0 rounded-[28px] border border-white/20 bg-white/10 p-5 shadow-[0_18px_50px_rgba(20,74,82,.18)] backdrop-blur sm:p-6">
+            <div className="flex items-center gap-2 text-[#d7ffff]">
               <AlertIcon />
               <p className="text-sm font-black">案例資料持續更新</p>
             </div>
 
             <div className="mt-5 grid min-w-0 grid-cols-2 gap-2 text-center sm:gap-3">
-              <div className="rounded-xl bg-black/30 p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-2xl font-black">
                   2,789<span className="ml-1 text-sm">件</span>
                 </p>
-                <p className="mt-1 text-xs text-stone-400">
+                <p className="mt-1 text-xs text-white/65">
                   AI資料庫案件數
                 </p>
               </div>
 
-              <div className="rounded-xl bg-black/30 p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-2xl font-black">匿名</p>
-                <p className="mt-1 text-xs text-stone-400">身分保護</p>
+                <p className="mt-1 text-xs text-white/65">身分保護</p>
               </div>
             </div>
 
-            <p className="mt-5 text-xs leading-6 text-stone-400">
+            <p className="mt-5 text-xs leading-6 text-white/65">
               檢舉者與業者名稱皆為匿名化顯示，不對應特定真實公司或個人。
               本頁內容為投稿者單方陳述，不代表本站已認定任何一方違法或有過失。
             </p>
@@ -357,22 +357,22 @@ export default async function WarningCasesPage() {
         id="cases"
         className="mx-auto min-w-0 max-w-6xl px-5 py-12 sm:px-8 sm:py-16"
       >
-        <div className="flex flex-col justify-between gap-5 border-b-2 border-stone-950 pb-5 sm:flex-row sm:items-end">
+        <div className="flex flex-col justify-between gap-5 border-b border-border pb-5 sm:flex-row sm:items-end">
           <div>
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">
               最新裝修踩雷案例
             </h2>
           </div>
 
-          <p className="max-w-lg text-sm leading-6 text-stone-500">
+          <p className="max-w-lg text-sm leading-6 text-muted-foreground">
             標題與內容取自案例資料庫；投稿者及被檢舉對象均以匿名名稱呈現。
           </p>
         </div>
 
         {warningCases.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-stone-400 bg-white px-6 py-16 text-center">
+          <div className="mt-8 rounded-[28px] border border-dashed border-border bg-card px-6 py-16 text-center">
             <p className="text-xl font-black">目前尚無公開案例</p>
-            <p className="mt-3 text-sm text-stone-500">
+            <p className="mt-3 text-sm text-muted-foreground">
               新案例完成整理後會顯示於此頁。
             </p>
           </div>
@@ -385,27 +385,27 @@ export default async function WarningCasesPage() {
 
               const cardContent = (
                 <article
-                  className={`group relative min-w-0 h-full overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-[0_10px_30px_rgba(0,0,0,.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,.1)] ${
+                  className={`group relative min-w-0 h-full overflow-hidden rounded-[28px] border border-border/80 bg-card shadow-[0_12px_36px_rgba(40,127,140,.08)] transition duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_20px_50px_rgba(40,127,140,.14)] ${
                     index === 0 ? "lg:col-span-2" : ""
                   }`}
                 >
-                  <div className="border-b border-stone-200 bg-stone-950 px-5 py-3 text-white sm:px-7">
+                  <div className="border-b border-border bg-primary px-5 py-3 text-primary-foreground sm:px-7">
                     <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        <span className="rounded bg-red-600 px-2 py-1 text-[11px] font-black">
+                        <span className="rounded-full bg-[#d95a52] px-2.5 py-1 text-[11px] font-black text-white">
                           匿名檢舉
                         </span>
-                        <span className="text-xs font-bold text-stone-300">
+                        <span className="text-xs font-bold text-white/75">
                           被檢舉對象：{warningCase.reportedTarget}
                         </span>
-                        <span className="text-xs font-bold text-stone-300">
+                        <span className="text-xs font-bold text-white/75">
                           地區：{warningCase.city}{warningCase.district}
                         </span>
                       </div>
 
                       <time
                         dateTime={warningCase.publishedAt || warningCase._createdAt}
-                        className="text-xs text-stone-400"
+                        className="text-xs text-white/60"
                       >
                         {warningCase.displayDate}
                       </time>
@@ -414,7 +414,7 @@ export default async function WarningCasesPage() {
 
                   <div className="p-5 sm:p-7">
                     <h3
-                      className={`mt-3 break-words font-black leading-tight tracking-tight transition [overflow-wrap:anywhere] group-hover:text-red-700 ${
+                      className={`mt-3 break-words font-black leading-tight tracking-tight transition [overflow-wrap:anywhere] group-hover:text-primary ${
                         index === 0
                           ? "text-3xl sm:text-4xl"
                           : "text-2xl"
@@ -423,10 +423,10 @@ export default async function WarningCasesPage() {
                       {warningCase.title}
                     </h3>
 
-                    <div className="mt-5 rounded-xl border border-stone-200 bg-stone-50 p-4 sm:p-5">
+                    <div className="mt-5 rounded-2xl border border-border bg-secondary/55 p-4 sm:p-5">
                       <div className="grid gap-4 text-sm sm:grid-cols-3">
                         <div>
-                          <p className="text-xs font-bold text-stone-400">
+                          <p className="text-xs font-bold text-muted-foreground">
                             檢舉者
                           </p>
                           <p className="mt-1 font-black">
@@ -435,16 +435,16 @@ export default async function WarningCasesPage() {
                         </div>
 
                         <div>
-                          <p className="text-xs font-bold text-stone-400">
+                          <p className="text-xs font-bold text-muted-foreground">
                             被檢舉對象
                           </p>
-                          <p className="mt-1 font-black text-red-800">
+                          <p className="mt-1 font-black text-[#b64f49]">
                             {warningCase.reportedTarget}
                           </p>
                         </div>
 
                         <div>
-                          <p className="text-xs font-bold text-stone-400">
+                          <p className="text-xs font-bold text-muted-foreground">
                             案例地區
                           </p>
                           <p className="mt-1 font-black">
@@ -455,7 +455,7 @@ export default async function WarningCasesPage() {
                     </div>
 
                     <p
-                      className={`mt-5 whitespace-pre-line break-words text-stone-600 [overflow-wrap:anywhere] ${
+                      className={`mt-5 whitespace-pre-line break-words text-muted-foreground [overflow-wrap:anywhere] ${
                         index === 0
                           ? "line-clamp-6 text-base leading-8"
                           : "line-clamp-5 text-sm leading-7 sm:text-base"
@@ -464,13 +464,13 @@ export default async function WarningCasesPage() {
                       {warningCase.describe}
                     </p>
 
-                    <div className="mt-7 flex items-center justify-between border-t border-stone-200 pt-5">
-                      <p className="text-xs text-stone-400">
+                    <div className="mt-7 flex items-center justify-between border-t border-border pt-5">
+                      <p className="text-xs text-muted-foreground">
                         名稱皆經匿名化處理
                       </p>
 
                       {caseHref && (
-                        <span className="text-xs font-black text-red-700">
+                        <span className="text-xs font-black text-primary transition group-hover:text-accent-foreground">
                           閱讀完整案例 →
                         </span>
                       )}
@@ -499,24 +499,24 @@ export default async function WarningCasesPage() {
           </div>
         )}
 
-        <div className="mt-8 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-xs leading-6 text-amber-950">
+        <div className="mt-8 rounded-2xl border border-[#e7c980] bg-[#fff8df] px-5 py-4 text-xs leading-6 text-[#6f5620]">
           <strong>閱讀提醒：</strong>
           投稿內容可能尚未經司法、主管機關或第三方調查確認。匿名公司名稱為系統產生的代稱，
           不應據此影射或辨識任何真實業者。簽約前仍應自行查證、比較合約並保留付款與溝通紀錄。
         </div>
       </section>
 
-      <section id="report-form" className="border-t border-stone-300 bg-white">
+      <section id="report-form" className="border-t border-border bg-card">
         <div className="mx-auto grid min-w-0 max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
           <div>
             <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
               你的經驗，可能讓別人避開同一個坑。
             </h2>
-            <p className="mt-5 text-sm leading-7 text-stone-600 sm:text-base">
+            <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base">
               描述簽約、付款、施工、驗收或售後過程。內容公開前應先移除個資及可辨識資訊。
             </p>
 
-            <div className="mt-7 space-y-3 text-sm font-bold text-stone-700">
+            <div className="mt-7 space-y-3 text-sm font-bold text-secondary-foreground">
               <p>✓ 可使用匿名暱稱</p>
               <p>✓ 不直接公開公司與個人資料</p>
               <p>✓ 內容公開前先進行整理</p>
