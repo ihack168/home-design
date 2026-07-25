@@ -662,20 +662,22 @@ export default async function BlogPage({
               {posts.map((post) => (
                 <article
                   key={post.id}
-                  className="group min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-white shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg"
+                  className="group min-w-0 rounded-[28px] border border-black/[0.06] bg-white p-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.05),0_12px_30px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-black/[0.09] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08),0_20px_48px_rgba(0,0,0,0.08)] sm:rounded-[30px] sm:p-3"
                 >
-                  <PostThumbnail
-                    slug={post.slug}
-                    title={post.title}
-                    thumbnail={post.thumbnail}
-                    videoId={post.videoId}
-                  />
+                  <div className="overflow-hidden rounded-[22px] bg-muted sm:rounded-[24px]">
+                    <PostThumbnail
+                      slug={post.slug}
+                      title={post.title}
+                      thumbnail={post.thumbnail}
+                      videoId={post.videoId}
+                    />
+                  </div>
 
-                  <div className="p-3 sm:p-4">
-                    <h2 className="line-clamp-2 text-sm font-black leading-6 sm:text-base">
+                  <div className="px-1.5 pb-2 pt-3 sm:px-2 sm:pb-2.5 sm:pt-4">
+                    <h2 className="line-clamp-2 text-sm font-black leading-6 tracking-tight sm:text-base">
                       <Link
                         href={`/blog/${post.slug}`}
-                        className="transition-colors group-hover:text-accent"
+                        className="transition-colors duration-300 group-hover:text-accent"
                       >
                         {post.title}
                       </Link>
