@@ -288,8 +288,8 @@ export default async function WarningCasesPage() {
             </div>
 
             <h1 className="mt-6 max-w-4xl break-words text-4xl font-black leading-[1.08] tracking-tight [overflow-wrap:anywhere] sm:text-6xl">
-              檢舉不良業者，
-              <span className="text-[#bff7f6]">讓我們避開風險。</span>
+              檢舉不良業者<br>
+              <span className="text-[#ff3b30]">讓我們避開風險</span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/75 sm:text-lg">
