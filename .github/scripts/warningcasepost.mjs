@@ -321,6 +321,8 @@ async function markWarningCasePublished(row) {
 }
 
 async function main() {
+  console.log('🆕 warningcasepost.mjs 版本：2026-07-31-nextWarningCase-v2');
+
   console.log('==============================');
   console.log('🚧 踩雷案例獨立自動發布開始');
   console.log('==============================');
