@@ -1,14 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { LineConsultButton } from "@/components/line-consult-button";
 
 export default function PropertyManagementPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
 
       <main className="pt-28 md:pt-36">
         {/* Hero */}
