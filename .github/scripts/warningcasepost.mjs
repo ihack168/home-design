@@ -343,7 +343,8 @@ async function main() {
   // 測試期間固定為 1，代表每次執行都會發布。
   // 要恢復 1/4 機率時，改回：
   // const randomNumber = Math.floor(Math.random() * 4) + 1;
-  const randomNumber = 1;
+  // const randomNumber = 1;
+const randomNumber = Math.floor(Math.random() * 4) + 1;
 
   console.log(`🎲 本次隨機數字：${randomNumber}`);
 
