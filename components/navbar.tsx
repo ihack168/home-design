@@ -15,10 +15,10 @@ type NavLink = {
 
 const navLinks: NavLink[] = [
   { label: "首頁", href: "/" },
-  { label: "建案設計", href: "/blog" },
+  { label: "居家設計", href: "/blog" },
   { label: "商業設計", href: "/blog" },
   { label: "套房設計", href: "/blog" },
-  { label: "檢舉不良業者", href: "/warning", danger: true },
+  { label: "檢舉業者", href: "/warning", danger: true },
 ]
 
 function isActivePath(pathname: string, href: string) {
