@@ -570,9 +570,9 @@ export function LineConsultButton({
                 id={modalTitleId}
                 className="mt-7 text-[28px] font-black leading-tight sm:text-4xl"
               >
-                正在為您挑選
+                AI正在找出
                 <span className="mt-1 block text-[#55e891]">
-                  合適的設計公司
+                  適合您的設計公司
                 </span>
               </h3>
 
