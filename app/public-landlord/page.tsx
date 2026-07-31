@@ -130,7 +130,7 @@ export default function PublicLandlordPage() {
         </section>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

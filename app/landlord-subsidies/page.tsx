@@ -140,8 +140,6 @@ export default function LandlordSubsidiesPage() {
           </LineConsultButton>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

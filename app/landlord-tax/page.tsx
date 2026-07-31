@@ -147,8 +147,6 @@ export default function LandlordTaxPage() {
           </LineConsultButton>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

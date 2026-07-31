@@ -136,7 +136,6 @@ export default function PropertyManagementPage() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }
