@@ -17,14 +17,11 @@ const GOOGLE_SCRIPT_BASE_URL =
 const GOOGLE_SCRIPT_URL =
   `${GOOGLE_SCRIPT_BASE_URL}?sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-const RANDOM_WARNING_CASE_URL =
-  `${GOOGLE_SCRIPT_URL}&action=randomExternalArticle`;
+// 依序取得下一筆 Z、AA 有內容，且 AB 尚未 published 的踩雷案例
+const NEXT_WARNING_CASE_URL =
+  `${GOOGLE_SCRIPT_URL}&action=nextWarningCase`;
 
 const REQUEST_TIMEOUT = 15000;
-
-// 現有 GAS 的 randomExternalArticle 是隨機抽取，且沒有先排除 AB=published。
-// 因此最多重抽幾次，避免抽到已發布案例。
-const MAX_FETCH_ATTEMPTS = 30;
 
 function requestJson(url, label) {
   return new Promise((resolve, reject) => {
@@ -162,46 +159,55 @@ function createSlug(title) {
 }
 
 async function fetchUnpublishedWarningCase() {
-  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
-    console.log(`🔎 尋找未發布踩雷案例，第 ${attempt} 次`);
+  console.log('🔎 尋找下一筆未發布踩雷案例');
 
-    const result = await requestJson(
-      RANDOM_WARNING_CASE_URL,
-      'Apps Script'
+  const result = await requestJson(
+    NEXT_WARNING_CASE_URL,
+    'Apps Script'
+  );
+
+  if (!result || result.success === false || result.error) {
+    throw new Error(
+      `Apps Script 取得案例失敗：${result?.error || '未知錯誤'}`
     );
-
-    if (!result || result.success === false || result.error) {
-      throw new Error(
-        `Apps Script 找不到案例：${result?.error || '未知錯誤'}`
-      );
-    }
-
-    const title = String(result.warningCaseTitle || '').trim();
-    const description = String(
-      result.warningCaseDescription || ''
-    ).trim();
-    const status = String(
-      result.warningCaseStatus || ''
-    ).trim().toLowerCase();
-
-    if (!title || !description) {
-      console.log(`⏭️ 第 ${result.row} 列沒有完整的 Z／AA 欄，重新抽取`);
-      continue;
-    }
-
-    if (status === 'published') {
-      console.log(`⏭️ 第 ${result.row} 列 AB 已是 published，重新抽取`);
-      continue;
-    }
-
-    return {
-      row: Number(result.row),
-      title,
-      description,
-    };
   }
 
-  return null;
+  if (result.found === false) {
+    return null;
+  }
+
+  const row = Number(result.row);
+  const title = String(result.warningCaseTitle || '').trim();
+  const description = String(
+    result.warningCaseDescription || ''
+  ).trim();
+  const status = String(
+    result.warningCaseStatus || ''
+  ).trim().toLowerCase();
+
+  if (!Number.isInteger(row) || row < 2) {
+    throw new Error(
+      `Apps Script 回傳無效的 Google Sheet 列號：${result.row}`
+    );
+  }
+
+  if (!title) {
+    throw new Error(`第 ${row} 列 Z 欄沒有踩雷標題`);
+  }
+
+  if (!description) {
+    throw new Error(`第 ${row} 列 AA 欄沒有踩雷內容`);
+  }
+
+  if (status === 'published') {
+    throw new Error(`第 ${row} 列 AB 已是 published，資料狀態異常`);
+  }
+
+  return {
+    row,
+    title,
+    description,
+  };
 }
 
 async function createWarningCasePost(item) {
