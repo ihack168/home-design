@@ -6,8 +6,6 @@ import { createPortal } from "react-dom";
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec";
 
-const LINE_ID = "@line88.tw";
-const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw";
 const STORE_NAME = "匠將室內裝修設計";
 const STORE_LOGO_URL =
   "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png";
@@ -258,7 +256,7 @@ export function LineConsultButton({
       body: payload,
     }).catch((error) => {
       // 不打斷使用者流程，但在瀏覽器主控台保留紀錄。
-      console.error("LINE consult background submit error:", error);
+      console.error("Consult background submit error:", error);
     });
   };
 
@@ -268,7 +266,7 @@ export function LineConsultButton({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-2 backdrop-blur-[3px] sm:px-4 sm:py-8"
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-[3px] ${step === "result" ? "p-0 sm:p-4" : "p-2 sm:px-4 sm:py-8"}`}
       onMouseDown={(event) => {
         if (
           event.target === event.currentTarget &&
@@ -283,7 +281,7 @@ export function LineConsultButton({
         role="dialog"
         aria-modal="true"
         aria-labelledby={modalTitleId}
-        className="relative my-auto max-h-[calc(100dvh-16px)] w-full max-w-xl overflow-hidden rounded-[22px] border border-black/5 bg-[#fbfaf7] shadow-[0_30px_90px_rgba(0,0,0,0.28)] sm:max-h-[calc(100dvh-32px)] sm:rounded-[28px]"
+        className={`relative w-full overflow-hidden border border-black/5 bg-[#fbfaf7] shadow-[0_30px_90px_rgba(0,0,0,0.28)] ${step === "result" ? "h-[100dvh] max-h-[100dvh] max-w-none rounded-none sm:h-auto sm:max-h-[calc(100dvh-32px)] sm:max-w-xl sm:rounded-[28px]" : "my-auto max-h-[calc(100dvh-16px)] max-w-xl rounded-[22px] sm:max-h-[calc(100dvh-32px)] sm:rounded-[28px]"}`}
       >
         {step !== "analyzing" && (
           <button
@@ -644,80 +642,62 @@ export function LineConsultButton({
         )}
 
         {step === "result" && (
-          <div className="bg-[#f6f2eb] p-3 sm:p-5">
-            <div className="mx-auto flex max-h-[calc(100dvh-40px)] max-w-md flex-col overflow-hidden rounded-[24px] border border-black/10 bg-white shadow-[0_20px_55px_rgba(35,28,18,0.14)]">
-              <div className="grid grid-cols-[112px_1fr] gap-3 p-3 sm:grid-cols-[148px_1fr] sm:gap-5 sm:p-5">
-                <div className="relative aspect-square overflow-hidden rounded-[18px] bg-black/5">
+          <div className="flex h-full min-h-0 flex-col bg-[#f3efe7] sm:h-auto sm:min-h-0 sm:p-5">
+            <div className="mx-auto flex h-full min-h-0 w-full max-w-xl flex-col overflow-hidden bg-white sm:h-auto sm:max-h-[calc(100dvh-72px)] sm:rounded-[26px] sm:border sm:border-black/10 sm:shadow-[0_20px_55px_rgba(35,28,18,0.14)]">
+              <div className="flex min-h-0 flex-1 flex-col px-4 pb-3 pt-12 sm:px-6 sm:pb-5 sm:pt-6">
+                <div className="mx-auto aspect-square h-auto w-[min(100%,42dvh)] shrink-0 overflow-hidden rounded-[22px] bg-black/5 shadow-sm sm:w-[min(100%,320px)]">
                   <img
                     src={STORE_FRONT_URL}
                     alt={`${STORE_NAME} 林口店面外觀`}
                     className="h-full w-full object-cover"
                   />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                  <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-black tracking-[0.08em] text-foreground backdrop-blur">
-                    林口展示空間
-                  </span>
                 </div>
 
-                <div className="flex min-w-0 flex-col justify-between py-0.5">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-black tracking-[0.04em] text-amber-400">
-                        ★★★★★
-                      </span>
-                      <span className="rounded-full bg-[#06C755]/10 px-2 py-1 text-[10px] font-black text-[#079447]">
-                        AI 配對推薦
-                      </span>
-                    </div>
-
-                    <h3
-                      id={modalTitleId}
-                      className="mt-2 text-[19px] font-black leading-tight tracking-tight text-foreground sm:text-2xl"
-                    >
-                      {STORE_NAME}
-                    </h3>
-
-                    <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-muted-foreground sm:text-sm">
-                      依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件推薦。
-                    </p>
+                <div className="mx-auto mt-3 w-full max-w-md text-center sm:mt-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="rounded-full bg-[#06C755]/10 px-3 py-1 text-[11px] font-black tracking-[0.08em] text-[#078b44]">
+                      AI 配對推薦
+                    </span>
+                    <span className="text-xs font-black tracking-[0.04em] text-amber-400">
+                      ★★★★★
+                    </span>
                   </div>
 
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-white p-1">
-                      <img
-                        src={STORE_LOGO_URL}
-                        alt={`${STORE_NAME} Logo`}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-black text-foreground sm:text-xs">
-                        {STORE_OFFICE_NAME}
-                      </p>
-                      <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-                        {STORE_ADDRESS}
-                      </p>
-                    </div>
+                  <h3
+                    id={modalTitleId}
+                    className="mt-2 text-[26px] font-black leading-tight tracking-tight text-foreground sm:text-3xl"
+                  >
+                    {STORE_NAME}
+                  </h3>
+
+                  <p className="mt-1 text-sm font-bold text-muted-foreground">
+                    {STORE_OFFICE_NAME}
+                  </p>
+                  <p className="mt-1 truncate px-2 text-xs text-muted-foreground sm:text-sm">
+                    {STORE_ADDRESS}
+                  </p>
+
+                  <div className="mt-3 rounded-2xl border border-black/[0.07] bg-[#faf8f3] px-4 py-3 sm:mt-4">
+                    <p className="text-xs font-bold tracking-[0.12em] text-muted-foreground">
+                      電話諮詢
+                    </p>
+                    <a
+                      href={STORE_PHONE_LINK}
+                      className="mt-1 block text-[30px] font-black leading-none tracking-tight text-foreground transition hover:text-[#078b44] sm:text-4xl"
+                    >
+                      {STORE_PHONE}
+                    </a>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 border-t border-black/[0.07] bg-[#fbfaf7]">
+              <div className="shrink-0 border-t border-black/[0.07] bg-white p-3 pb-[max(12px,env(safe-area-inset-bottom))] sm:p-5">
                 <a
                   href={STORE_PHONE_LINK}
-                  className="flex min-h-12 items-center justify-center gap-2 border-r border-black/[0.07] px-3 text-sm font-black text-foreground transition hover:bg-black/[0.03]"
+                  className="mx-auto flex h-14 w-full max-w-md items-center justify-center gap-3 rounded-2xl bg-[#1f5a42] px-5 text-lg font-black text-white shadow-[0_12px_28px_rgba(31,90,66,0.24)] transition hover:-translate-y-0.5 hover:bg-[#184a36]"
                 >
-                  <span aria-hidden="true">☎</span>
-                  立即來電
-                </a>
-                <a
-                  href={LINE_ADD_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-center gap-2 bg-[#06C755] px-3 text-sm font-black text-white transition hover:bg-[#05b94e]"
-                >
-                  加入 LINE
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true" className="text-xl">☎</span>
+                  撥打 {STORE_PHONE}
                 </a>
               </div>
             </div>
