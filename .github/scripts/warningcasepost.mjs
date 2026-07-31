@@ -85,63 +85,76 @@ function postJsonToAppsScript(payload, label) {
   const data = JSON.stringify(payload);
 
   return new Promise((resolve, reject) => {
-    const sendRequest = (url) => {
-      const req = https.request(
-        url,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Content-Length': Buffer.byteLength(data, 'utf8'),
-            'User-Agent': 'Mozilla/5.0 GitHub-Actions-Warning-Case-AutoPost',
-          },
-          timeout: REQUEST_TIMEOUT,
+    const req = https.request(
+      GOOGLE_SCRIPT_URL,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Length': Buffer.byteLength(data, 'utf8'),
+          'User-Agent': 'Mozilla/5.0 GitHub-Actions-Warning-Case-AutoPost',
         },
-        (res) => {
-          if (
-            res.statusCode >= 300 &&
-            res.statusCode < 400 &&
-            res.headers.location
-          ) {
-            sendRequest(res.headers.location);
+        timeout: REQUEST_TIMEOUT,
+      },
+      (res) => {
+        // Apps Script 的 POST 成功後通常會回傳重新導向網址。
+        // 重新導向後必須改用 GET 取得 doPost 的結果，不能再次 POST。
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          console.log(`➡️ ${label} redirect：${res.headers.location}`);
+
+          requestJson(res.headers.location, `${label} redirect`)
+            .then((result) => {
+              console.log(
+                `📦 ${label} redirect 回傳：${JSON.stringify(result)}`
+              );
+              resolve(result);
+            })
+            .catch(reject);
+
+          return;
+        }
+
+        const chunks = [];
+
+        res.on('data', (chunk) => chunks.push(chunk));
+
+        res.on('end', () => {
+          const text = Buffer.concat(chunks).toString('utf8');
+
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(
+              new Error(`${label} HTTP ${res.statusCode}：${text}`)
+            );
             return;
           }
 
-          const chunks = [];
+          console.log(`📦 ${label} 回傳：${text}`);
 
-          res.on('data', (chunk) => chunks.push(chunk));
-
-          res.on('end', () => {
-            const text = Buffer.concat(chunks).toString('utf8');
-
-            if (res.statusCode < 200 || res.statusCode >= 300) {
-              reject(
-                new Error(`${label} HTTP ${res.statusCode}：${text}`)
-              );
-              return;
-            }
-
-            console.log(`📦 ${label} 回傳：${text}`);
+          try {
+            resolve(JSON.parse(text));
+          } catch {
             resolve(text);
-          });
-        }
+          }
+        });
+      }
+    );
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(
+        new Error(
+          `${label} 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒沒有回應`
+        )
       );
+    });
 
-      req.on('timeout', () => {
-        req.destroy();
-        reject(
-          new Error(
-            `${label} 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒沒有回應`
-          )
-        );
-      });
-
-      req.on('error', reject);
-      req.write(Buffer.from(data, 'utf8'));
-      req.end();
-    };
-
-    sendRequest(GOOGLE_SCRIPT_URL);
+    req.on('error', reject);
+    req.write(Buffer.from(data, 'utf8'));
+    req.end();
   });
 }
 
@@ -321,15 +334,23 @@ async function markWarningCasePublished(row) {
 }
 
 async function main() {
-  console.log('🆕 warningcasepost.mjs 版本：2026-07-31-nextWarningCase-v2');
+  console.log('🆕 warningcasepost.mjs 版本：2026-07-31-nextWarningCase-v3');
 
   console.log('==============================');
   console.log('🚧 踩雷案例獨立自動發布開始');
   console.log('==============================');
 
- const randomNumber = 1;
+  // 測試期間固定為 1，代表每次執行都會發布。
+  // 要恢復 1/4 機率時，改回：
+  // const randomNumber = Math.floor(Math.random() * 4) + 1;
+  const randomNumber = 1;
 
-console.log(`🎲 本次隨機數字：${randomNumber}`);
+  console.log(`🎲 本次隨機數字：${randomNumber}`);
+
+  if (randomNumber !== 1) {
+    console.log('✅ 本次沒有抽中，不發布踩雷案例');
+    return;
+  }
 
   console.log('🎉 抽中 1，開始發布踩雷案例');
 
