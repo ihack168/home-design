@@ -11,6 +11,7 @@ const LINE_ADD_URL = "https://line.me/R/ti/p/~line88.tw";
 const STORE_NAME = "匠將室內裝修設計";
 const STORE_LOGO_URL =
   "https://jiang-jiang.com/wp-content/uploads/2020/09/cropped-logo4.png";
+const STORE_FRONT_URL = "/images/jiang-jiang-storefront-square.png";
 const STORE_OFFICE_NAME = "台北總公司";
 const STORE_ADDRESS = "新北市林口區忠孝路308巷21號1樓";
 const STORE_EMAIL = "jiang53104525@gmail.com";
@@ -643,119 +644,81 @@ export function LineConsultButton({
         )}
 
         {step === "result" && (
-          <div className="bg-white px-6 py-9 sm:px-10 sm:py-11">
-            <div className="mx-auto max-w-md text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#06C755]/10 text-3xl text-[#06A947]">
-                ✓
-              </div>
-              <h3
-                id={modalTitleId}
-                className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
-              >
-                AI分析完成
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件推薦
-              </p>
-
-              <div className="mt-7 rounded-[24px] border border-black/10 bg-[#fbfaf7] p-5 text-left shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-black/10 bg-white p-2 shadow-sm">
-                    <img
-                      src={STORE_LOGO_URL}
-                      alt={`${STORE_NAME} Logo`}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 whitespace-nowrap">
-                      <span
-                        aria-label="AI 配對推薦"
-                        className="text-[13px] font-black tracking-[0.04em] text-amber-400"
-                      >
-                        ★★★★★
-                      </span>
-                      <span className="text-[11px] font-bold tracking-[0.12em] text-[#06A947]">
-                        配對推薦
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xl font-black leading-tight text-foreground">
-                      {STORE_NAME}
-                    </p>
-                    {/*<p className="mt-2 truncate text-sm font-bold text-muted-foreground">
-                      LINE ID：{LINE_ID}
-                    </p>*/}
-                  </div>
+          <div className="bg-[#f6f2eb] p-3 sm:p-5">
+            <div className="mx-auto flex max-h-[calc(100dvh-40px)] max-w-md flex-col overflow-hidden rounded-[24px] border border-black/10 bg-white shadow-[0_20px_55px_rgba(35,28,18,0.14)]">
+              <div className="grid grid-cols-[112px_1fr] gap-3 p-3 sm:grid-cols-[148px_1fr] sm:gap-5 sm:p-5">
+                <div className="relative aspect-square overflow-hidden rounded-[18px] bg-black/5">
+                  <img
+                    src={STORE_FRONT_URL}
+                    alt={`${STORE_NAME} 林口店面外觀`}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                  <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-black tracking-[0.08em] text-foreground backdrop-blur">
+                    林口展示空間
+                  </span>
                 </div>
 
-               {/* <a
+                <div className="flex min-w-0 flex-col justify-between py-0.5">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-black tracking-[0.04em] text-amber-400">
+                        ★★★★★
+                      </span>
+                      <span className="rounded-full bg-[#06C755]/10 px-2 py-1 text-[10px] font-black text-[#079447]">
+                        AI 配對推薦
+                      </span>
+                    </div>
+
+                    <h3
+                      id={modalTitleId}
+                      className="mt-2 text-[19px] font-black leading-tight tracking-tight text-foreground sm:text-2xl"
+                    >
+                      {STORE_NAME}
+                    </h3>
+
+                    <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-muted-foreground sm:text-sm">
+                      依據您位於「{district}」、偏好「{selectedStyleName}」，預算為「{budget}」的條件推薦。
+                    </p>
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-white p-1">
+                      <img
+                        src={STORE_LOGO_URL}
+                        alt={`${STORE_NAME} Logo`}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-black text-foreground sm:text-xs">
+                        {STORE_OFFICE_NAME}
+                      </p>
+                      <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
+                        {STORE_ADDRESS}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 border-t border-black/[0.07] bg-[#fbfaf7]">
+                <a
+                  href={STORE_PHONE_LINK}
+                  className="flex min-h-12 items-center justify-center gap-2 border-r border-black/[0.07] px-3 text-sm font-black text-foreground transition hover:bg-black/[0.03]"
+                >
+                  <span aria-hidden="true">☎</span>
+                  立即來電
+                </a>
+                <a
                   href={LINE_ADD_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#06C755] px-5 py-4 text-base font-black text-white shadow-[0_12px_30px_rgba(6,199,85,0.25)] transition hover:-translate-y-0.5 hover:bg-[#05b94e]"
+                  className="flex min-h-12 items-center justify-center gap-2 bg-[#06C755] px-3 text-sm font-black text-white transition hover:bg-[#05b94e]"
                 >
-                  加入 LINE 開始諮詢
-                  <span className="ml-2" aria-hidden="true">
-                    →
-                  </span>
-                </a>*/}
-
-                <div className="mt-5 border-t border-black/10 pt-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] text-sm"
-                    >
-                      ◉
-                    </span>
-                    <p className="text-sm font-black text-foreground">
-                      {STORE_OFFICE_NAME}
-                    </p>
-                  </div>
-
-                  <div className="mt-3 space-y-2.5 pl-1 text-sm leading-6 text-muted-foreground">
-                    <div className="flex items-start gap-3">
-                      <span
-                        aria-hidden="true"
-                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
-                      >
-                        ●
-                      </span>
-                      <span>{STORE_ADDRESS}</span>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span
-                        aria-hidden="true"
-                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
-                      >
-                        ✉
-                      </span>
-                      <a
-                        href={`mailto:${STORE_EMAIL}`}
-                        className="break-all transition hover:text-[#06A947]"
-                      >
-                        {STORE_EMAIL}
-                      </a>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span
-                        aria-hidden="true"
-                        className="mt-0.5 w-5 shrink-0 text-center text-xs text-[#06A947]"
-                      >
-                        ☎
-                      </span>
-                      <a
-                        href={STORE_PHONE_LINK}
-                        className="font-bold text-foreground transition hover:text-[#06A947]"
-                      >
-                        {STORE_PHONE}
-                      </a>
-                    </div>
-                  </div>
-
-                </div>
+                  加入 LINE
+                  <span aria-hidden="true">→</span>
+                </a>
               </div>
             </div>
           </div>
