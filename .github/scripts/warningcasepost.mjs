@@ -327,14 +327,9 @@ async function main() {
   console.log('🚧 踩雷案例獨立自動發布開始');
   console.log('==============================');
 
-  const randomNumber = Math.floor(Math.random() * 4) + 1;
+ const randomNumber = 1;
 
-  console.log(`🎲 本次隨機數字：${randomNumber}`);
-
-  if (randomNumber !== 1) {
-    console.log('✅ 本次沒有抽中，不發布踩雷案例');
-    return;
-  }
+console.log(`🎲 本次隨機數字：${randomNumber}`);
 
   console.log('🎉 抽中 1，開始發布踩雷案例');
 
