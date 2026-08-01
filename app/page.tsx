@@ -78,6 +78,14 @@ interface TagItem {
   count: number
 }
 
+interface FeaturedCarouselPost {
+  id: string
+  title: string
+  slug: string
+  diningRoomImage?: string
+  masterBedroomImage?: string
+}
+
 function normalizeTag(tag?: string) {
   return String(tag || "").trim() || "全部"
 }
@@ -368,24 +376,23 @@ export default async function BlogPage({
       }
     ),
 
-    client.fetch<RawPost[]>(
+    client.fetch<FeaturedCarouselPost[]>(
       `*[
         _type == "post" &&
         defined(slug.current) &&
-        defined(title)
+        defined(title) &&
+        (
+          defined(diningRoomImage.asset) ||
+          defined(masterBedroomImage.asset)
+        )
       ]
         | order(coalesce(publishedAt, _createdAt) desc)
         [0...5] {
           "id": _id,
           title,
           "slug": slug.current,
-          description,
-          imageUrl,
-          "mainImage": mainImage.asset->url,
-          htmlContent,
-          "videoId": youtubeVideoId,
-          "tags": coalesce(tags, categories[]->title, []),
-          "publishedAt": coalesce(publishedAt, _createdAt)
+          "diningRoomImage": diningRoomImage.asset->url,
+          "masterBedroomImage": masterBedroomImage.asset->url
         }`,
       {},
       {
@@ -433,9 +440,13 @@ export default async function BlogPage({
   })).filter((tag) => tag.count > 0)
 
   const posts = rawPosts.map(processPost)
-  const featuredPosts = featuredRawPosts
-    .map(processPost)
-    .filter((post) => Boolean(post.thumbnail))
+  const featuredPosts = featuredRawPosts.filter(
+    (post) =>
+      Boolean(
+        String(post.diningRoomImage || "").trim() ||
+        String(post.masterBedroomImage || "").trim()
+      )
+  )
   const pageNumbers = getVisiblePageNumbers(page, totalPages)
   const canonicalUrl = buildBlogUrl(selectedTag, page)
 
