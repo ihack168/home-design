@@ -65,16 +65,8 @@ export function HomeFeaturedCarousel({
   posts,
 }: HomeFeaturedCarouselProps) {
   /**
-   * 將每篇文章拆成餐廳與主臥兩張輪播圖片。
-   *
-   * 例如 5 篇文章都有兩張圖片：
-   * 第1篇餐廳
-   * 第1篇主臥
-   * 第2篇餐廳
-   * 第2篇主臥
-   * ...
-   *
-   * 最多共 10 張。
+   * 每篇文章拆成餐廳與主臥兩張輪播圖片。
+   * 缺少的圖片會自動略過。
    */
   const carouselSlides = useMemo<CarouselSlide[]>(() => {
     return posts.flatMap((post) => {
@@ -197,31 +189,52 @@ export function HomeFeaturedCarousel({
                 sizes="100vw"
                 className={`object-cover transition-transform duration-[6500ms] ease-out ${
                   isActive
-                    ? "scale-[1.035]"
+                    ? "scale-[1.025] sm:scale-[1.035]"
                     : "scale-100"
                 }`}
               />
 
-              {/* 輕微暗化，保留原始室內照片質感 */}
-              <div className="absolute inset-0 bg-black/10" />
+              {/* 手機版只做極淡壓暗，盡量保留圖片 */}
+              <div className="absolute inset-0 bg-black/[0.06] sm:bg-black/10" />
 
-              <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+              {/* 手機版只在最底部加短漸層；桌面版維持較完整漸層 */}
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/45 via-black/10 to-transparent sm:h-64 sm:from-black/45 sm:via-black/10" />
 
-              {/* 精品雜誌風資訊卡 */}
-              <div className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-4 pb-8 sm:px-8 sm:pb-12 lg:px-10 lg:pb-14">
+              {/* 手機版：低高度霧面資訊列 */}
+              <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-3 sm:hidden">
                 <Link
                   href={`/blog/${slide.slug}`}
                   tabIndex={isActive ? 0 : -1}
-                  className="group inline-flex max-w-[94%] items-center gap-4 rounded-md border border-white/40 bg-[#eee9df]/90 px-5 py-4 text-[#262520] shadow-[0_16px_45px_rgba(0,0,0,0.18)] backdrop-blur-md transition duration-300 hover:bg-[#f7f3eb] sm:max-w-3xl sm:px-7 sm:py-5"
+                  className="flex min-h-14 items-center gap-3 rounded-2xl border border-white/25 bg-black/30 px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl transition active:scale-[0.99]"
                 >
-                  <span className="block h-11 w-px shrink-0 bg-[#9b8466] sm:h-14" />
+                  <h2 className="min-w-0 flex-1 truncate text-[16px] font-semibold leading-6 tracking-[0.01em]">
+                    {shortTitle}
+                  </h2>
+
+                  <span
+                    aria-hidden="true"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/10 text-base"
+                  >
+                    →
+                  </span>
+                </Link>
+              </div>
+
+              {/* 桌面版：保留精品雜誌風資訊卡 */}
+              <div className="relative z-10 mx-auto hidden h-full max-w-7xl items-end px-8 pb-12 sm:flex lg:px-10 lg:pb-14">
+                <Link
+                  href={`/blog/${slide.slug}`}
+                  tabIndex={isActive ? 0 : -1}
+                  className="group inline-flex max-w-3xl items-center gap-4 rounded-md border border-white/40 bg-[#eee9df]/90 px-7 py-5 text-[#262520] shadow-[0_16px_45px_rgba(0,0,0,0.18)] backdrop-blur-md transition duration-300 hover:bg-[#f7f3eb]"
+                >
+                  <span className="block h-14 w-px shrink-0 bg-[#9b8466]" />
 
                   <span className="min-w-0">
-                    <span className="block text-[10px] font-bold tracking-[0.28em] text-[#8d7658] sm:text-xs">
+                    <span className="block text-xs font-bold tracking-[0.28em] text-[#8d7658]">
                       {slide.roomType} DESIGN
                     </span>
 
-                    <h2 className="mt-1.5 text-xl font-medium leading-snug tracking-[0.03em] sm:text-3xl lg:text-4xl">
+                    <h2 className="mt-1.5 text-3xl font-medium leading-snug tracking-[0.03em] lg:text-4xl">
                       {shortTitle}
                     </h2>
                   </span>
@@ -258,7 +271,8 @@ export function HomeFeaturedCarousel({
               ›
             </button>
 
-            <div className="absolute right-5 top-5 z-30 flex max-w-[calc(100%-40px)] items-center gap-1.5 rounded-full border border-white/25 bg-black/15 px-3 py-2 backdrop-blur-md sm:right-8 sm:top-8 sm:gap-2">
+            {/* 手機版：精簡圓點 */}
+            <div className="absolute right-3 top-3 z-30 flex items-center gap-1 rounded-full border border-white/20 bg-black/15 px-2.5 py-2 backdrop-blur-md sm:hidden">
               {carouselSlides.map((slide, index) => (
                 <button
                   key={slide.id}
@@ -272,14 +286,37 @@ export function HomeFeaturedCarousel({
                   onClick={() => goTo(index)}
                   className={`h-1 rounded-full transition-all duration-300 ${
                     index === activeIndex
-                      ? "w-7 bg-white sm:w-8"
-                      : "w-2.5 bg-white/45 hover:bg-white/75 sm:w-3"
+                      ? "w-5 bg-white"
+                      : "w-1.5 bg-white/45"
                   }`}
                 />
               ))}
             </div>
 
-            <div className="absolute bottom-5 right-5 z-30 rounded-full border border-white/25 bg-black/15 px-3 py-1.5 text-xs font-semibold tracking-widest text-white backdrop-blur-md sm:bottom-8 sm:right-8">
+            {/* 桌面版：完整指示器 */}
+            <div className="absolute right-8 top-8 z-30 hidden items-center gap-2 rounded-full border border-white/25 bg-black/15 px-3 py-2 backdrop-blur-md sm:flex">
+              {carouselSlides.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  aria-label={`顯示第 ${index + 1} 張作品`}
+                  aria-current={
+                    index === activeIndex
+                      ? "true"
+                      : undefined
+                  }
+                  onClick={() => goTo(index)}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    index === activeIndex
+                      ? "w-8 bg-white"
+                      : "w-3 bg-white/45 hover:bg-white/75"
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* 桌面版頁碼 */}
+            <div className="absolute bottom-8 right-8 z-30 hidden rounded-full border border-white/25 bg-black/15 px-3 py-1.5 text-xs font-semibold tracking-widest text-white backdrop-blur-md sm:block">
               {String(activeIndex + 1).padStart(2, "0")}
               <span className="mx-1.5 text-white/50">/</span>
               {String(carouselSlides.length).padStart(
