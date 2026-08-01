@@ -14,7 +14,7 @@ const GOOGLE_SCRIPT_URL =
 
 // GAS 必須提供 action=roomImageBackfillCandidates。
 // 每次最多處理幾篇，第一次建議維持 1，確認正確後再調大。
-const MAX_POSTS_PER_RUN = 1;
+const MAX_POSTS_PER_RUN = 50;
 
 // true：只檢查、不寫入 Sanity。
 // false：實際上傳圖片並補進文章欄位。
