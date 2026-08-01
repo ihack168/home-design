@@ -19,14 +19,8 @@ interface HomeFeaturedCarouselProps {
 
 /**
  * Hero 輪播專用：
- * 移除 Sanity 圖片網址上的 auto=format、w、q 等參數，
+ * 移除 Sanity 圖片網址上的所有轉檔與壓縮參數，
  * 直接載入原始上傳圖片。
- *
- * 例如：
- * https://cdn.sanity.io/images/.../image-1672x941.png?auto=format&w=900&q=82
- *
- * 會變成：
- * https://cdn.sanity.io/images/.../image-1672x941.png
  */
 function getOriginalHeroImageUrl(url: string) {
   const cleanUrl = String(url || "").trim()
@@ -38,6 +32,23 @@ function getOriginalHeroImageUrl(url: string) {
   }
 
   return cleanUrl.split("?")[0]
+}
+
+/**
+ * 只取得文章標題第一個「|」或「｜」左邊的文字。
+ *
+ * 例如：
+ * 台北住宅設計｜30 坪現代風裝潢案例
+ *
+ * 顯示：
+ * 台北住宅設計
+ */
+function getShortHeroTitle(title: string) {
+  const cleanTitle = String(title || "").trim()
+
+  if (!cleanTitle) return ""
+
+  return cleanTitle.split(/[|｜]/)[0].trim()
 }
 
 export function HomeFeaturedCarousel({
@@ -90,6 +101,7 @@ export function HomeFeaturedCarousel({
           const originalHeroImage = getOriginalHeroImageUrl(
             post.thumbnail
           )
+          const shortTitle = getShortHeroTitle(post.title)
 
           return (
             <article
@@ -113,30 +125,20 @@ export function HomeFeaturedCarousel({
                 }`}
               />
 
-              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/5" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/15" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
 
               <div className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
-                <div className="max-w-3xl text-white">
-                  <p className="text-xs font-bold tracking-[0.28em] text-white/75 sm:text-sm">
-                    LATEST PROJECTS
-                  </p>
-
-                  <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                    {post.title}
+                <div className="max-w-4xl text-white">
+                  <h1 className="text-3xl font-black leading-tight tracking-tight drop-shadow-lg sm:text-5xl lg:text-6xl">
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      tabIndex={isActive ? 0 : -1}
+                      className="transition-opacity hover:opacity-80"
+                    >
+                      {shortTitle}
+                    </Link>
                   </h1>
-
-                  <p className="mt-4 line-clamp-2 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
-                    {post.description}
-                  </p>
-
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    tabIndex={isActive ? 0 : -1}
-                    className="mt-7 inline-flex min-h-12 items-center rounded-full border border-white/60 bg-white/10 px-7 text-sm font-black text-white backdrop-blur-md transition hover:bg-white hover:text-black"
-                  >
-                    查看完整作品
-                  </Link>
                 </div>
               </div>
             </article>
