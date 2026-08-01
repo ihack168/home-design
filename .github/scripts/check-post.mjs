@@ -255,8 +255,10 @@ async function postSanityMutation(mutations, label) {
 function extractSlug(officialUrl, fallbackSlug = '') {
   const cleanFallback = String(fallbackSlug || '').trim();
 
+  // auto-post.mjs 會把 encodeURIComponent(shortTitle)
+  // 直接存進 Sanity 的 slug.current，因此不可解碼成中文。
   if (cleanFallback) {
-    return decodeURIComponent(cleanFallback);
+    return cleanFallback;
   }
 
   const cleanUrl = String(officialUrl || '').trim();
@@ -269,10 +271,10 @@ function extractSlug(officialUrl, fallbackSlug = '') {
     const blogIndex = segments.lastIndexOf('blog');
 
     if (blogIndex >= 0 && segments[blogIndex + 1]) {
-      return decodeURIComponent(segments[blogIndex + 1]);
+      return segments[blogIndex + 1];
     }
 
-    return decodeURIComponent(segments.at(-1) || '');
+    return segments.at(-1) || '';
   } catch (error) {
     return '';
   }
