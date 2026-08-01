@@ -197,14 +197,25 @@ async function saveBackfillStatus(row, status) {
     return;
   }
 
-  await postJsonToAppsScript(
-    {
-      action: 'roomImageBackfillResult',
-      row,
-      status,
-    },
+  const params = new URLSearchParams();
+  params.set('sheet', SHEET_NAME);
+  params.set('action', 'roomImageBackfillResult');
+  params.set('row', String(row));
+  params.set('status', status);
+
+  const statusUrl =
+    `${GOOGLE_SCRIPT_BASE_URL}?${params.toString()}`;
+
+  const result = await getJson(
+    statusUrl,
     `回寫 AC 欄補圖狀態：${status}`
   );
+
+  if (!result || result.success !== true) {
+    throw new Error(
+      `回寫 AC 欄補圖狀態失敗：${JSON.stringify(result)}`
+    );
+  }
 }
 
 async function postSanityMutation(mutations, label) {
