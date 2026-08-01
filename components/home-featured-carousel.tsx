@@ -17,7 +17,32 @@ interface HomeFeaturedCarouselProps {
   posts: FeaturedCarouselPost[]
 }
 
-export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
+/**
+ * Hero 輪播專用：
+ * 移除 Sanity 圖片網址上的 auto=format、w、q 等參數，
+ * 直接載入原始上傳圖片。
+ *
+ * 例如：
+ * https://cdn.sanity.io/images/.../image-1672x941.png?auto=format&w=900&q=82
+ *
+ * 會變成：
+ * https://cdn.sanity.io/images/.../image-1672x941.png
+ */
+function getOriginalHeroImageUrl(url: string) {
+  const cleanUrl = String(url || "").trim()
+
+  if (!cleanUrl) return ""
+
+  if (!cleanUrl.includes("cdn.sanity.io/images")) {
+    return cleanUrl
+  }
+
+  return cleanUrl.split("?")[0]
+}
+
+export function HomeFeaturedCarousel({
+  posts,
+}: HomeFeaturedCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const touchStartX = useRef<number | null>(null)
 
@@ -40,7 +65,9 @@ export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
   function handleTouchEnd(event: TouchEvent<HTMLElement>) {
     if (touchStartX.current === null) return
 
-    const distance = event.changedTouches[0].clientX - touchStartX.current
+    const distance =
+      event.changedTouches[0].clientX - touchStartX.current
+
     touchStartX.current = null
 
     if (Math.abs(distance) < 45) return
@@ -60,20 +87,26 @@ export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
       <div className="relative h-[54vh] min-h-[430px] max-h-[720px] sm:h-[66vh] lg:h-[76vh]">
         {posts.map((post, index) => {
           const isActive = index === activeIndex
+          const originalHeroImage = getOriginalHeroImageUrl(
+            post.thumbnail
+          )
 
           return (
             <article
               key={post.id}
               aria-hidden={!isActive}
               className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
-                isActive ? "z-10 opacity-100" : "pointer-events-none opacity-0"
+                isActive
+                  ? "z-10 opacity-100"
+                  : "pointer-events-none opacity-0"
               }`}
             >
               <Image
-                src={post.thumbnail}
+                src={originalHeroImage}
                 alt={post.title}
                 fill
                 priority={index === 0}
+                unoptimized
                 sizes="100vw"
                 className={`object-cover transition-transform duration-[6500ms] ease-out ${
                   isActive ? "scale-105" : "scale-100"
@@ -88,12 +121,15 @@ export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
                   <p className="text-xs font-bold tracking-[0.28em] text-white/75 sm:text-sm">
                     LATEST PROJECTS
                   </p>
+
                   <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
                     {post.title}
                   </h1>
+
                   <p className="mt-4 line-clamp-2 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
                     {post.description}
                   </p>
+
                   <Link
                     href={`/blog/${post.slug}`}
                     tabIndex={isActive ? 0 : -1}
@@ -117,6 +153,7 @@ export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
             >
               ‹
             </button>
+
             <button
               type="button"
               aria-label="下一張作品"
@@ -132,7 +169,9 @@ export function HomeFeaturedCarousel({ posts }: HomeFeaturedCarouselProps) {
                   key={post.id}
                   type="button"
                   aria-label={`顯示第 ${index + 1} 張作品`}
-                  aria-current={index === activeIndex ? "true" : undefined}
+                  aria-current={
+                    index === activeIndex ? "true" : undefined
+                  }
                   onClick={() => goTo(index)}
                   className={`h-1.5 rounded-full transition-all ${
                     index === activeIndex
