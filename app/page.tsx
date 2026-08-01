@@ -94,6 +94,12 @@ function normalizePage(page?: string) {
   return Math.max(1, Number.parseInt(page || "1", 10) || 1)
 }
 
+function getDesignStyleDisplayName(tag: string) {
+  return String(tag || "")
+    .replace(/室內設計$/u, "")
+    .trim()
+}
+
 function optimizeSanityImageUrl(url?: string) {
   if (!url) return ""
 
@@ -646,10 +652,10 @@ export default async function BlogPage({
                           key={tagItem.name}
                           href={buildBlogPath(tagItem.name)}
                           aria-current={isActive ? "page" : undefined}
-                          className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                          className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
                             isActive
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
+                              ? "border-sky-700 bg-sky-700 text-white shadow-sm"
+                              : "border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-400 hover:bg-sky-100"
                           }`}
                         >
                           {tagItem.name}
@@ -674,7 +680,7 @@ export default async function BlogPage({
 
                     return (
                       <Link
-                        key={tagItem.name}
+                        key={getDesignStyleDisplayName(tagItem.name)}
                         href={buildBlogPath(tagItem.name)}
                         aria-current={isActive ? "page" : undefined}
                         className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
@@ -683,7 +689,7 @@ export default async function BlogPage({
                             : "border-border bg-background text-muted-foreground hover:border-accent hover:text-accent"
                         }`}
                       >
-                        {tagItem.name}
+                        {getDesignStyleDisplayName(tagItem.name)}
                         <span className="ml-1.5 opacity-60">
                           {tagItem.count}
                         </span>
