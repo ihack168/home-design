@@ -310,7 +310,7 @@ export function LineConsultButton({
                     id={modalTitleId}
                     className="text-xl font-black tracking-tight text-foreground sm:mt-1 sm:text-[28px]"
                   >
-                    分析適合您的設計公司
+                    讓AI找出適合您的設計公司
                   </h3>
                 </div>
               </div>
