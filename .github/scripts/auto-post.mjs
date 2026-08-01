@@ -222,7 +222,330 @@ function buildFinalHtml(title, htmlContent, webpImageUrl) {
   return finalHtml;
 }
 
-async function createPost(title, htmlContent, tags, webpImageUrl) {
+
+function downloadImageBuffer(url, label, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    const cleanUrl = String(url || '').trim();
+
+    if (!cleanUrl) {
+      resolve(null);
+      return;
+    }
+
+    if (redirectCount > 5) {
+      reject(new Error(`${label} 下載失敗：重新導向次數過多`));
+      return;
+    }
+
+    let parsedUrl;
+
+    try {
+      parsedUrl = new URL(cleanUrl);
+    } catch (error) {
+      reject(new Error(`${label} 圖片網址格式錯誤：${cleanUrl}`));
+      return;
+    }
+
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      reject(new Error(`${label} 圖片網址只允許 http 或 https：${cleanUrl}`));
+      return;
+    }
+
+    const request = https.get(
+      cleanUrl,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 GitHub-Actions-AutoPost',
+          Accept: 'image/*',
+        },
+        timeout: REQUEST_TIMEOUT,
+      },
+      (res) => {
+        console.log(`🖼️ ${label} 下載 HTTP 狀態碼：${res.statusCode}`);
+
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          const redirectUrl = new URL(
+            res.headers.location,
+            cleanUrl
+          ).toString();
+
+          res.resume();
+
+          downloadImageBuffer(
+            redirectUrl,
+            label,
+            redirectCount + 1
+          )
+            .then(resolve)
+            .catch(reject);
+
+          return;
+        }
+
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          const chunks = [];
+
+          res.on('data', (chunk) => {
+            chunks.push(chunk);
+          });
+
+          res.on('end', () => {
+            const responseText = Buffer.concat(chunks).toString('utf8');
+
+            reject(
+              new Error(
+                `${label} 圖片下載失敗，HTTP ${res.statusCode}：${responseText}`
+              )
+            );
+          });
+
+          return;
+        }
+
+        const contentType = String(
+          res.headers['content-type'] || ''
+        )
+          .split(';')[0]
+          .trim()
+          .toLowerCase();
+
+        if (!contentType.startsWith('image/')) {
+          res.resume();
+
+          reject(
+            new Error(
+              `${label} 網址回傳的不是圖片，Content-Type：${contentType || '(空)'}`
+            )
+          );
+          return;
+        }
+
+        const chunks = [];
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+
+          if (buffer.length === 0) {
+            reject(new Error(`${label} 圖片內容是空的`));
+            return;
+          }
+
+          resolve({
+            buffer,
+            contentType,
+            finalUrl: cleanUrl,
+          });
+        });
+      }
+    );
+
+    request.on('timeout', () => {
+      request.destroy();
+
+      reject(
+        new Error(
+          `${label} 圖片下載逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒`
+        )
+      );
+    });
+
+    request.on('error', reject);
+  });
+}
+
+function getImageExtension(contentType, imageUrl) {
+  const contentTypeMap = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'image/tiff': 'tif',
+    'image/svg+xml': 'svg',
+    'image/avif': 'avif',
+  };
+
+  if (contentTypeMap[contentType]) {
+    return contentTypeMap[contentType];
+  }
+
+  try {
+    const pathname = new URL(imageUrl).pathname;
+    const match = pathname.match(/\.([a-zA-Z0-9]{2,5})$/);
+
+    if (match) {
+      return match[1].toLowerCase();
+    }
+  } catch (error) {
+    // 無法解析副檔名時，使用 jpg 作為檔名副檔名。
+  }
+
+  return 'jpg';
+}
+
+function uploadImageBufferToSanity(
+  imageData,
+  filename,
+  label
+) {
+  return new Promise((resolve, reject) => {
+    const encodedFilename = encodeURIComponent(filename);
+
+    const req = https.request(
+      {
+        hostname: `${SANITY_PROJECT_ID}.api.sanity.io`,
+        path:
+          `/v2024-06-24/assets/images/${SANITY_DATASET}` +
+          `?filename=${encodedFilename}`,
+        method: 'POST',
+        headers: {
+          'Content-Type': imageData.contentType,
+          Authorization: `Bearer ${SANITY_TOKEN}`,
+          'Content-Length': imageData.buffer.length,
+        },
+        timeout: REQUEST_TIMEOUT,
+      },
+      (res) => {
+        const chunks = [];
+
+        console.log(
+          `☁️ ${label} 上傳 Sanity HTTP 狀態碼：${res.statusCode}`
+        );
+
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const responseText = Buffer.concat(chunks).toString('utf8');
+
+          console.log(`📦 ${label} 上傳 Sanity 回傳：${responseText}`);
+
+          let parsed;
+
+          try {
+            parsed = JSON.parse(responseText);
+          } catch (error) {
+            reject(
+              new Error(
+                `${label} 上傳回傳 JSON 解析失敗：${responseText}`
+              )
+            );
+            return;
+          }
+
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(
+              new Error(
+                `${label} 上傳 Sanity 失敗，HTTP ${res.statusCode}：${responseText}`
+              )
+            );
+            return;
+          }
+
+          const assetId =
+            parsed?.document?._id ||
+            parsed?._id ||
+            parsed?.asset?._id ||
+            '';
+
+          if (!assetId) {
+            reject(
+              new Error(
+                `${label} 上傳成功但找不到 asset ID：${responseText}`
+              )
+            );
+            return;
+          }
+
+          resolve(assetId);
+        });
+      }
+    );
+
+    req.on('timeout', () => {
+      req.destroy();
+
+      reject(
+        new Error(
+          `${label} 上傳 Sanity 逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒`
+        )
+      );
+    });
+
+    req.on('error', reject);
+    req.write(imageData.buffer);
+    req.end();
+  });
+}
+
+async function uploadRoomImage(
+  imageUrl,
+  roomKey,
+  roomLabel,
+  title
+) {
+  const cleanUrl = String(imageUrl || '').trim();
+
+  if (!cleanUrl) {
+    console.log(`⏭️ ${roomLabel}沒有圖片，略過`);
+    return null;
+  }
+
+  console.log(`⬇️ 準備下載${roomLabel}圖片：${cleanUrl}`);
+
+  const imageData = await downloadImageBuffer(
+    cleanUrl,
+    `${roomLabel}圖片`
+  );
+
+  const extension = getImageExtension(
+    imageData.contentType,
+    imageData.finalUrl
+  );
+
+  const safeTitle = String(title || 'home-design')
+    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9_-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40) || 'home-design';
+
+  const filename =
+    `${safeTitle}-${roomKey}-${Date.now()}.${extension}`;
+
+  const assetId = await uploadImageBufferToSanity(
+    imageData,
+    filename,
+    `${roomLabel}圖片`
+  );
+
+  console.log(`✅ ${roomLabel}圖片上傳完成：${assetId}`);
+
+  return {
+    _type: 'image',
+    asset: {
+      _type: 'reference',
+      _ref: assetId,
+    },
+    alt: `${title}${roomLabel}室內設計`,
+  };
+}
+
+
+async function createPost(
+  title,
+  htmlContent,
+  tags,
+  webpImageUrl,
+  roomImageUrls = {}
+) {
   if (!SANITY_TOKEN) {
     throw new Error('找不到 SANITY_TOKEN，請確認 GitHub Secrets 裡有設定 SANITY_TOKEN');
   }
@@ -245,6 +568,35 @@ async function createPost(title, htmlContent, tags, webpImageUrl) {
 
   const finalHtml = buildFinalHtml(title, htmlContent, webpImageUrl);
 
+  const shouldUploadRoomImages = SHEET_NAME === 'home-design';
+
+  const diningRoomImage = shouldUploadRoomImages
+    ? await uploadRoomImage(
+        roomImageUrls.diningRoomImageUrl,
+        'dining-room',
+        '餐廳',
+        title
+      )
+    : null;
+
+  const masterBedroomImage = shouldUploadRoomImages
+    ? await uploadRoomImage(
+        roomImageUrls.masterBedroomImageUrl,
+        'master-bedroom',
+        '主臥',
+        title
+      )
+    : null;
+
+  const secondBedroomImage = shouldUploadRoomImages
+    ? await uploadRoomImage(
+        roomImageUrls.secondBedroomImageUrl,
+        'second-bedroom',
+        '次臥',
+        title
+      )
+    : null;
+
   if (finalHtml.includes('�')) {
     console.warn('⚠️ 警告：準備寫入 Sanity 的 HTML 已經含有亂碼 �，請檢查 Apps Script 原始回傳');
   } else {
@@ -260,6 +612,21 @@ async function createPost(title, htmlContent, tags, webpImageUrl) {
     },
     htmlContent: finalHtml,
     publishedAt: new Date().toISOString(),
+    ...(diningRoomImage
+      ? {
+          diningRoomImage,
+        }
+      : {}),
+    ...(masterBedroomImage
+      ? {
+          masterBedroomImage,
+        }
+      : {}),
+    ...(secondBedroomImage
+      ? {
+          secondBedroomImage,
+        }
+      : {}),
     ...(tags
       ? {
           tags: tags
@@ -381,9 +748,30 @@ async function main() {
     const tags = String(post.tags || '').trim();
     const webpImageUrl = String(post.webpImage || '').trim();
 
+    const diningRoomImageUrl = String(
+      post.diningRoomImageUrl || ''
+    ).trim();
+
+    const masterBedroomImageUrl = String(
+      post.masterBedroomImageUrl || ''
+    ).trim();
+
+    const secondBedroomImageUrl = String(
+      post.secondBedroomImageUrl || ''
+    ).trim();
+
     console.log(`📌 標題：${title}`);
     console.log(`🏷️ Tags：${tags || '(空)'}`);
     console.log(`🖼️ H欄 webpImage：${webpImageUrl || '(空)'}`);
+    console.log(
+      `🍽️ K欄餐廳圖片：${diningRoomImageUrl || '(空)'}`
+    );
+    console.log(
+      `🛏️ K欄主臥圖片：${masterBedroomImageUrl || '(空)'}`
+    );
+    console.log(
+      `🛌 K欄次臥圖片：${secondBedroomImageUrl || '(空)'}`
+    );
 
     if (!title || !html) {
       console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
@@ -393,7 +781,17 @@ async function main() {
 
     console.log(`🚀 發布：${title}`);
 
-    const createResult = await createPost(title, html, tags, webpImageUrl);
+    const createResult = await createPost(
+      title,
+      html,
+      tags,
+      webpImageUrl,
+      {
+        diningRoomImageUrl,
+        masterBedroomImageUrl,
+        secondBedroomImageUrl,
+      }
+    );
     const sanityResult = createResult.sanityResult;
 
     if (sanityResult.results || sanityResult.mutations) {
