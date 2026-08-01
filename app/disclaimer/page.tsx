@@ -82,7 +82,7 @@ export default function DisclaimerPage() {
                 <strong>網站：</strong>台灣室內設計資訊網
               </p>
               <p className="mt-2">
-                <strong>Email：</strong>（請填入您的 Email）
+                <strong>Email：</strong>（deco77.com@gmail.com）
               </p>
             </div>
           </div>
