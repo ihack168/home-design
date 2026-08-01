@@ -380,13 +380,9 @@ export default async function BlogPage({
       `*[
         _type == "post" &&
         defined(slug.current) &&
-        defined(title) &&
-        (
-          defined(diningRoomImage.asset) ||
-          defined(masterBedroomImage.asset)
-        )
+        defined(title)
       ]
-        | order(coalesce(publishedAt, _createdAt) desc)
+        | order(publishedAt desc)
         [0...5] {
           "id": _id,
           title,
