@@ -351,7 +351,7 @@ export default async function BlogPage({
         defined(title)
         ${tagFilter}
       ]
-        | order(coalesce(publishedAt, _createdAt) desc)
+        | order(publishedAt desc)
         [$start...$end] {
           "id": _id,
           title,
