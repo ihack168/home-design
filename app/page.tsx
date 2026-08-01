@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { HomeFeaturedCarousel } from "@/components/home-featured-carousel"
 import { LineConsultButton } from "@/components/line-consult-button"
 import { PostThumbnail } from "@/components/post-thumbnail"
 import { client } from "@/lib/sanity"
@@ -301,7 +302,7 @@ export default async function BlogPage({
   const start = (page - 1) * POSTS_PER_PAGE
   const end = start + POSTS_PER_PAGE
 
-  const [allTagsRaw, totalPosts, rawPosts] = await Promise.all([
+  const [allTagsRaw, totalPosts, rawPosts, featuredRawPosts] = await Promise.all([
     client.fetch<Array<{ tags?: string[] }>>(
       `*[
         _type == "post" &&
@@ -366,6 +367,33 @@ export default async function BlogPage({
         },
       }
     ),
+
+    client.fetch<RawPost[]>(
+      `*[
+        _type == "post" &&
+        defined(slug.current) &&
+        defined(title)
+      ]
+        | order(coalesce(publishedAt, _createdAt) desc)
+        [0...5] {
+          "id": _id,
+          title,
+          "slug": slug.current,
+          description,
+          imageUrl,
+          "mainImage": mainImage.asset->url,
+          htmlContent,
+          "videoId": youtubeVideoId,
+          "tags": coalesce(tags, categories[]->title, []),
+          "publishedAt": coalesce(publishedAt, _createdAt)
+        }`,
+      {},
+      {
+        next: {
+          revalidate,
+        },
+      }
+    ),
   ])
 
   const totalPages = Math.max(
@@ -405,6 +433,9 @@ export default async function BlogPage({
   })).filter((tag) => tag.count > 0)
 
   const posts = rawPosts.map(processPost)
+  const featuredPosts = featuredRawPosts
+    .map(processPost)
+    .filter((post) => Boolean(post.thumbnail))
   const pageNumbers = getVisiblePageNumbers(page, totalPages)
   const canonicalUrl = buildBlogUrl(selectedTag, page)
 
@@ -539,8 +570,12 @@ export default async function BlogPage({
         }}
       />
 
-      <main className="px-4 pb-16 pt-6 sm:px-6 md:pt-10">
-        <div className="mx-auto max-w-7xl">
+      <main className="pb-16">
+        {selectedTag === "全部" && page === 1 && (
+          <HomeFeaturedCarousel posts={featuredPosts} />
+        )}
+
+        <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 md:pt-10">
           {/* 首頁主視覺與分類整合區 */}
           <section className="rounded-3xl border border-border/70 bg-white px-5 py-6 shadow-sm sm:px-8 sm:py-8">
             <nav
