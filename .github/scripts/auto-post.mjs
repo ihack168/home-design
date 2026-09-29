@@ -15,6 +15,8 @@ const GOOGLE_SCRIPT_URL =
   `${GOOGLE_SCRIPT_BASE_URL}?sheet=${encodeURIComponent(SHEET_NAME)}`;
 
 const REQUEST_TIMEOUT = 30000;
+const APPS_SCRIPT_MAX_RETRIES = 3;
+const APPS_SCRIPT_RETRY_DELAYS = [2000, 5000];
 
 function printSanityDebugInfo() {
   console.log('====================');
@@ -30,7 +32,7 @@ function printSanityDebugInfo() {
   console.log('====================');
 }
 
-function getJsonFromUrl(url, label) {
+function getJsonFromUrlOnce(url, label) {
   return new Promise((resolve, reject) => {
     const req = https.get(
       url,
@@ -46,7 +48,7 @@ function getJsonFromUrl(url, label) {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           console.log(`➡️ ${label} redirect 到：${res.headers.location}`);
 
-          getJsonFromUrl(res.headers.location, `${label} redirect`)
+          getJsonFromUrlOnce(res.headers.location, `${label} redirect`)
             .then(resolve)
             .catch(reject);
 
@@ -63,6 +65,11 @@ function getJsonFromUrl(url, label) {
           const data = Buffer.concat(chunks).toString('utf8');
 
           console.log(`📦 ${label} 原始回傳：${data}`);
+
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(new Error(`${label} HTTP ${res.statusCode}：${data}`));
+            return;
+          }
 
           try {
             resolve(JSON.parse(data));
@@ -82,10 +89,30 @@ function getJsonFromUrl(url, label) {
   });
 }
 
-function postJsonToAppsScript(payload, label) {
+async function getJsonFromUrl(url, label, attempt = 1) {
+  try {
+    return await getJsonFromUrlOnce(url, label);
+  } catch (error) {
+    if (attempt >= APPS_SCRIPT_MAX_RETRIES) {
+      throw new Error(`${label} 最後一次重試仍失敗：${error.message}`);
+    }
+
+    const delay = APPS_SCRIPT_RETRY_DELAYS[attempt - 1] || 5000;
+
+    console.warn(
+      `⚠️ ${label} 第 ${attempt} 次請求失敗：${error.message}，${delay / 1000} 秒後重試（${attempt + 1}/${APPS_SCRIPT_MAX_RETRIES}）`
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    return getJsonFromUrl(url, label, attempt + 1);
+  }
+}
+
+function postJsonToAppsScriptOnce(payload, label) {
   const data = JSON.stringify(payload);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const req = https.request(
       GOOGLE_SCRIPT_URL,
       {
@@ -102,77 +129,135 @@ function postJsonToAppsScript(payload, label) {
 
         console.log(`📝 ${label} Google Sheet HTTP 狀態碼：${res.statusCode}`);
 
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          console.log(`➡️ ${label} redirect 到：${res.headers.location}`);
-
-          const redirectReq = https.request(
-            res.headers.location,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Content-Length': Buffer.byteLength(data, 'utf8'),
-                'User-Agent': 'Mozilla/5.0 GitHub-Actions-AutoPost',
-              },
-              timeout: REQUEST_TIMEOUT,
-            },
-            (res2) => {
-              const redirectChunks = [];
-
-              res2.on('data', (chunk) => {
-                redirectChunks.push(chunk);
-              });
-
-              res2.on('end', () => {
-                const redirectText = Buffer.concat(redirectChunks).toString('utf8');
-                console.log(`📦 ${label} redirect 回傳：${redirectText}`);
-                resolve(redirectText);
-              });
-            }
-          );
-
-          redirectReq.on('timeout', () => {
-            redirectReq.destroy();
-            console.error(`❌ ${label} redirect 請求逾時`);
-            resolve('');
-          });
-
-          redirectReq.on('error', (e) => {
-            console.error(`❌ ${label} redirect 失敗:`, e.message);
-            resolve('');
-          });
-
-          redirectReq.write(Buffer.from(data, 'utf8'));
-          redirectReq.end();
-          return;
-        }
-
         res.on('data', (chunk) => {
           chunks.push(chunk);
         });
 
         res.on('end', () => {
-          const text = Buffer.concat(chunks).toString('utf8');
-          console.log(`📦 ${label} 回傳：${text}`);
-          resolve(text);
+          const responseText = Buffer.concat(chunks).toString('utf8');
+
+          console.log(`📦 ${label} 回傳：${responseText}`);
+
+          if (
+            res.statusCode >= 300 &&
+            res.statusCode < 400 &&
+            res.headers.location
+          ) {
+            console.log(`➡️ ${label} redirect 到：${res.headers.location}`);
+
+            const redirectReq = https.request(
+              res.headers.location,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                  'Content-Length': Buffer.byteLength(data, 'utf8'),
+                  'User-Agent': 'Mozilla/5.0 GitHub-Actions-AutoPost',
+                },
+                timeout: REQUEST_TIMEOUT,
+              },
+              (res2) => {
+                const redirectChunks = [];
+
+                console.log(
+                  `📝 ${label} redirect HTTP 狀態碼：${res2.statusCode}`
+                );
+
+                res2.on('data', (chunk) => {
+                  redirectChunks.push(chunk);
+                });
+
+                res2.on('end', () => {
+                  const redirectText =
+                    Buffer.concat(redirectChunks).toString('utf8');
+
+                  console.log(`📦 ${label} redirect 回傳：${redirectText}`);
+
+                  if (res2.statusCode < 200 || res2.statusCode >= 300) {
+                    reject(
+                      new Error(
+                        `${label} redirect HTTP ${res2.statusCode}：${redirectText}`
+                      )
+                    );
+                    return;
+                  }
+
+                  resolve(redirectText);
+                });
+              }
+            );
+
+            redirectReq.on('timeout', () => {
+              redirectReq.destroy();
+
+              reject(
+                new Error(
+                  `${label} redirect 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒`
+                )
+              );
+            });
+
+            redirectReq.on('error', (e) => {
+              reject(new Error(`${label} redirect 失敗：${e.message}`));
+            });
+
+            redirectReq.write(Buffer.from(data, 'utf8'));
+            redirectReq.end();
+
+            return;
+          }
+
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(
+              new Error(
+                `${label} HTTP ${res.statusCode}：${responseText}`
+              )
+            );
+            return;
+          }
+
+          resolve(responseText);
         });
       }
     );
 
     req.on('timeout', () => {
       req.destroy();
-      console.error(`❌ ${label} Google Sheet 請求逾時`);
-      resolve('');
+
+      reject(
+        new Error(
+          `${label} Google Sheet 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒`
+        )
+      );
     });
 
     req.on('error', (e) => {
-      console.error(`❌ ${label} 失敗:`, e.message);
-      resolve('');
+      reject(new Error(`${label} 失敗：${e.message}`));
     });
 
     req.write(Buffer.from(data, 'utf8'));
     req.end();
   });
+}
+
+async function postJsonToAppsScript(payload, label, attempt = 1) {
+  try {
+    return await postJsonToAppsScriptOnce(payload, label);
+  } catch (error) {
+    if (attempt >= APPS_SCRIPT_MAX_RETRIES) {
+      throw new Error(`${label} 最後一次重試仍失敗：${error.message}`);
+    }
+
+    const delay = APPS_SCRIPT_RETRY_DELAYS[attempt - 1] || 5000;
+
+    console.warn(
+      `⚠️ ${label} 第 ${attempt} 次請求失敗：${error.message}，${delay / 1000} 秒後重試（${attempt + 1}/${APPS_SCRIPT_MAX_RETRIES}）`
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    return postJsonToAppsScript(payload, label, attempt + 1);
+  }
 }
 
 async function fetchNextPost() {
@@ -222,7 +307,6 @@ function buildFinalHtml(title, htmlContent, webpImageUrl) {
   return finalHtml;
 }
 
-
 function downloadImageBuffer(url, label, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     const cleanUrl = String(url || '').trim();
@@ -247,7 +331,11 @@ function downloadImageBuffer(url, label, redirectCount = 0) {
     }
 
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      reject(new Error(`${label} 圖片網址只允許 http 或 https：${cleanUrl}`));
+      reject(
+        new Error(
+          `${label} 圖片網址只允許 http 或 https：${cleanUrl}`
+        )
+      );
       return;
     }
 
@@ -294,7 +382,8 @@ function downloadImageBuffer(url, label, redirectCount = 0) {
           });
 
           res.on('end', () => {
-            const responseText = Buffer.concat(chunks).toString('utf8');
+            const responseText =
+              Buffer.concat(chunks).toString('utf8');
 
             reject(
               new Error(
@@ -321,6 +410,7 @@ function downloadImageBuffer(url, label, redirectCount = 0) {
               `${label} 網址回傳的不是圖片，Content-Type：${contentType || '(空)'}`
             )
           );
+
           return;
         }
 
@@ -424,9 +514,12 @@ function uploadImageBufferToSanity(
         });
 
         res.on('end', () => {
-          const responseText = Buffer.concat(chunks).toString('utf8');
+          const responseText =
+            Buffer.concat(chunks).toString('utf8');
 
-          console.log(`📦 ${label} 上傳 Sanity 回傳：${responseText}`);
+          console.log(
+            `📦 ${label} 上傳 Sanity 回傳：${responseText}`
+          );
 
           let parsed;
 
@@ -538,7 +631,6 @@ async function uploadRoomImage(
   };
 }
 
-
 async function createPost(
   title,
   htmlContent,
@@ -547,11 +639,15 @@ async function createPost(
   roomImageUrls = {}
 ) {
   if (!SANITY_TOKEN) {
-    throw new Error('找不到 SANITY_TOKEN，請確認 GitHub Secrets 裡有設定 SANITY_TOKEN');
+    throw new Error(
+      '找不到 SANITY_TOKEN，請確認 GitHub Secrets 裡有設定 SANITY_TOKEN'
+    );
   }
 
   if (SANITY_TOKEN.includes('Bearer')) {
-    throw new Error('SANITY_TOKEN 裡面不可以包含 Bearer，GitHub Secret 只要貼 token 本體');
+    throw new Error(
+      'SANITY_TOKEN 裡面不可以包含 Bearer，GitHub Secret 只要貼 token 本體'
+    );
   }
 
   const cleanTitle = title
@@ -559,16 +655,27 @@ async function createPost(
     .replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
 
   const shortTitle = cleanTitle.substring(0, 15);
-  const uniqueId = Math.floor(10000000 + Math.random() * 90000000).toString();
-  const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
-  const officialUrl = `${OFFICIAL_BASE_URL}/${finalSlug}`;
+  const uniqueId = Math.floor(
+    10000000 + Math.random() * 90000000
+  ).toString();
+
+  const finalSlug =
+    encodeURIComponent(shortTitle) + `-${uniqueId}`;
+
+  const officialUrl =
+    `${OFFICIAL_BASE_URL}/${finalSlug}`;
 
   console.log(`🔗 本篇 slug：${finalSlug}`);
   console.log(`🔗 本篇官網網址：${officialUrl}`);
 
-  const finalHtml = buildFinalHtml(title, htmlContent, webpImageUrl);
+  const finalHtml = buildFinalHtml(
+    title,
+    htmlContent,
+    webpImageUrl
+  );
 
-  const shouldUploadRoomImages = SHEET_NAME === 'home-design';
+  const shouldUploadRoomImages =
+    SHEET_NAME === 'home-design';
 
   const diningRoomImage = shouldUploadRoomImages
     ? await uploadRoomImage(
@@ -598,9 +705,13 @@ async function createPost(
     : null;
 
   if (finalHtml.includes('�')) {
-    console.warn('⚠️ 警告：準備寫入 Sanity 的 HTML 已經含有亂碼 �，請檢查 Apps Script 原始回傳');
+    console.warn(
+      '⚠️ 警告：準備寫入 Sanity 的 HTML 已經含有亂碼 �，請檢查 Apps Script 原始回傳'
+    );
   } else {
-    console.log('✅ 準備寫入 Sanity 的 HTML 沒有偵測到亂碼 �');
+    console.log(
+      '✅ 準備寫入 Sanity 的 HTML 沒有偵測到亂碼 �'
+    );
   }
 
   const doc = {
@@ -612,21 +723,25 @@ async function createPost(
     },
     htmlContent: finalHtml,
     publishedAt: new Date().toISOString(),
+
     ...(diningRoomImage
       ? {
           diningRoomImage,
         }
       : {}),
+
     ...(masterBedroomImage
       ? {
           masterBedroomImage,
         }
       : {}),
+
     ...(secondBedroomImage
       ? {
           secondBedroomImage,
         }
       : {}),
+
     ...(tags
       ? {
           tags: tags
@@ -649,42 +764,62 @@ async function createPost(
     const req = https.request(
       {
         hostname: `${SANITY_PROJECT_ID}.api.sanity.io`,
-        path: `/v2024-01-01/data/mutate/${SANITY_DATASET}`,
+        path:
+          `/v2024-01-01/data/mutate/${SANITY_DATASET}`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Type':
+            'application/json; charset=utf-8',
           Authorization: `Bearer ${SANITY_TOKEN}`,
-          'Content-Length': Buffer.byteLength(body, 'utf8'),
+          'Content-Length': Buffer.byteLength(
+            body,
+            'utf8'
+          ),
         },
         timeout: REQUEST_TIMEOUT,
       },
       (res) => {
         const chunks = [];
 
-        console.log(`📡 Sanity HTTP 狀態碼：${res.statusCode}`);
+        console.log(
+          `📡 Sanity HTTP 狀態碼：${res.statusCode}`
+        );
 
         res.on('data', (chunk) => {
           chunks.push(chunk);
         });
 
         res.on('end', () => {
-          const data = Buffer.concat(chunks).toString('utf8');
+          const data =
+            Buffer.concat(chunks).toString('utf8');
 
-          console.log(`📦 Sanity 原始回傳：${data}`);
+          console.log(
+            `📦 Sanity 原始回傳：${data}`
+          );
 
           let parsed;
 
           try {
             parsed = JSON.parse(data);
           } catch (error) {
-            reject(new Error(`Sanity 回傳 JSON 解析失敗：${data}`));
+            reject(
+              new Error(
+                `Sanity 回傳 JSON 解析失敗：${data}`
+              )
+            );
             return;
           }
 
           if (res.statusCode === 403) {
-            console.error('❌ Sanity 403：目前這顆 SANITY_TOKEN 沒有 create 權限');
-            console.error('❌ 請確認 GitHub Secret SANITY_TOKEN 貼的是 Sanity 後台新建立的 Editor token');
-            console.error('❌ 如果剛更新 Secret，請重新 Run workflow，不要用正在執行中的舊 workflow');
+            console.error(
+              '❌ Sanity 403：目前這顆 SANITY_TOKEN 沒有 create 權限'
+            );
+            console.error(
+              '❌ 請確認 GitHub Secret SANITY_TOKEN 貼的是 Sanity 後台新建立的 Editor token'
+            );
+            console.error(
+              '❌ 如果剛更新 Secret，請重新 Run workflow，不要用正在執行中的舊 workflow'
+            );
           }
 
           resolve({
@@ -698,10 +833,16 @@ async function createPost(
 
     req.on('timeout', () => {
       req.destroy();
-      reject(new Error(`Sanity 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒沒有回應`));
+
+      reject(
+        new Error(
+          `Sanity 請求逾時，超過 ${REQUEST_TIMEOUT / 1000} 秒沒有回應`
+        )
+      );
     });
 
     req.on('error', reject);
+
     req.write(Buffer.from(body, 'utf8'));
     req.end();
   });
@@ -710,8 +851,13 @@ async function createPost(
 async function main() {
   printSanityDebugInfo();
 
-  console.log(`📥 從 Apps Script 讀取 sheet：${SHEET_NAME}`);
-  console.log(`🔗 Apps Script URL：${GOOGLE_SCRIPT_URL}`);
+  console.log(
+    `📥 從 Apps Script 讀取 sheet：${SHEET_NAME}`
+  );
+
+  console.log(
+    `🔗 Apps Script URL：${GOOGLE_SCRIPT_URL}`
+  );
 
   const firstPost = await fetchNextPost();
 
@@ -721,18 +867,29 @@ async function main() {
     return;
   }
 
-  const postCount = getSafePostCount(firstPost.postCount);
+  const postCount =
+    getSafePostCount(firstPost.postCount);
 
-  console.log(`📝 A6 設定本次發文數量：${firstPost.postCount}`);
-  console.log(`🚀 本次實際預計發 ${postCount} 篇`);
+  console.log(
+    `📝 A6 設定本次發文數量：${firstPost.postCount}`
+  );
+
+  console.log(
+    `🚀 本次實際預計發 ${postCount} 篇`
+  );
 
   for (let i = 0; i < postCount; i++) {
     console.log('');
     console.log('====================');
-    console.log(`🚀 第 ${i + 1} 篇 / 共 ${postCount} 篇`);
+    console.log(
+      `🚀 第 ${i + 1} 篇 / 共 ${postCount} 篇`
+    );
     console.log('====================');
 
-    const post = i === 0 ? firstPost : await fetchNextPost();
+    const post =
+      i === 0
+        ? firstPost
+        : await fetchNextPost();
 
     if (!post || post.error) {
       console.log('✅ 無待處理文章');
@@ -740,41 +897,67 @@ async function main() {
       break;
     }
 
-    console.log(`📄 目前 sheet：${post.sheetName || SHEET_NAME}`);
-    console.log(`📌 目前列號：${post.row}`);
+    console.log(
+      `📄 目前 sheet：${post.sheetName || SHEET_NAME}`
+    );
 
-    const title = String(post.title || '').trim();
-    const html = String(post.html || '').trim();
-    const tags = String(post.tags || '').trim();
-    const webpImageUrl = String(post.webpImage || '').trim();
+    console.log(
+      `📌 目前列號：${post.row}`
+    );
 
-    const diningRoomImageUrl = String(
-      post.diningRoomImageUrl || ''
-    ).trim();
+    const title =
+      String(post.title || '').trim();
 
-    const masterBedroomImageUrl = String(
-      post.masterBedroomImageUrl || ''
-    ).trim();
+    const html =
+      String(post.html || '').trim();
 
-    const secondBedroomImageUrl = String(
-      post.secondBedroomImageUrl || ''
-    ).trim();
+    const tags =
+      String(post.tags || '').trim();
+
+    const webpImageUrl =
+      String(post.webpImage || '').trim();
+
+    const diningRoomImageUrl =
+      String(
+        post.diningRoomImageUrl || ''
+      ).trim();
+
+    const masterBedroomImageUrl =
+      String(
+        post.masterBedroomImageUrl || ''
+      ).trim();
+
+    const secondBedroomImageUrl =
+      String(
+        post.secondBedroomImageUrl || ''
+      ).trim();
 
     console.log(`📌 標題：${title}`);
-    console.log(`🏷️ Tags：${tags || '(空)'}`);
-    console.log(`🖼️ H欄 webpImage：${webpImageUrl || '(空)'}`);
+    console.log(
+      `🏷️ Tags：${tags || '(空)'}`
+    );
+
+    console.log(
+      `🖼️ H欄 webpImage：${webpImageUrl || '(空)'}`
+    );
+
     console.log(
       `🍽️ K欄餐廳圖片：${diningRoomImageUrl || '(空)'}`
     );
+
     console.log(
       `🛏️ K欄主臥圖片：${masterBedroomImageUrl || '(空)'}`
     );
+
     console.log(
       `🛌 K欄次臥圖片：${secondBedroomImageUrl || '(空)'}`
     );
 
     if (!title || !html) {
-      console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
+      console.log(
+        '⚠️ 標題或 HTML 內容是空的，停止發文'
+      );
+
       console.log(post);
       break;
     }
@@ -792,19 +975,52 @@ async function main() {
         secondBedroomImageUrl,
       }
     );
-    const sanityResult = createResult.sanityResult;
 
-    if (sanityResult.results || sanityResult.mutations) {
+    const sanityResult =
+      createResult.sanityResult;
+
+    if (
+      sanityResult.results ||
+      sanityResult.mutations
+    ) {
       console.log('✅ Sanity 成功');
 
-      console.log(`🔗 準備回寫 I 欄網址：${createResult.officialUrl}`);
-      await saveOfficialUrlToSheet(post.row, createResult.officialUrl);
-      console.log('✅ I 欄網址回寫完成');
+      console.log(
+        `🔗 準備回寫 I 欄網址：${createResult.officialUrl}`
+      );
 
-      await markAsPublishedOnSheet(post.row);
-      console.log('✅ G 欄 published 回填完成');
+      const officialUrlResult =
+        await saveOfficialUrlToSheet(
+          post.row,
+          createResult.officialUrl
+        );
+
+      console.log(
+        `📦 I 欄回寫結果：${officialUrlResult}`
+      );
+
+      console.log(
+        '✅ I 欄網址回寫完成'
+      );
+
+      const publishedResult =
+        await markAsPublishedOnSheet(
+          post.row
+        );
+
+      console.log(
+        `📦 G 欄回寫結果：${publishedResult}`
+      );
+
+      console.log(
+        '✅ G 欄 published 回填完成'
+      );
     } else {
-      console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(sanityResult));
+      console.warn(
+        '⚠️ Sanity 回傳異常:',
+        JSON.stringify(sanityResult)
+      );
+
       break;
     }
   }
@@ -812,11 +1028,22 @@ async function main() {
 
 main()
   .then(() => {
-    console.log('✅ 全部流程完成，準備結束');
+    console.log(
+      '✅ 全部流程完成，準備結束'
+    );
+
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ 主流程失敗 message:', error.message);
-    console.error('❌ 主流程失敗 stack:', error.stack);
+    console.error(
+      '❌ 主流程失敗 message:',
+      error.message
+    );
+
+    console.error(
+      '❌ 主流程失敗 stack:',
+      error.stack
+    );
+
     process.exit(1);
   });
