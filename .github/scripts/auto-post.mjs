@@ -14,7 +14,7 @@ const GOOGLE_SCRIPT_BASE_URL =
 const GOOGLE_SCRIPT_URL =
   `${GOOGLE_SCRIPT_BASE_URL}?sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-const REQUEST_TIMEOUT = 15000;
+const REQUEST_TIMEOUT = 30000;
 
 function printSanityDebugInfo() {
   console.log('====================');
