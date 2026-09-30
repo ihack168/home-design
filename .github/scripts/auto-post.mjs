@@ -265,22 +265,47 @@ async function fetchNextPost() {
 }
 
 async function saveOfficialUrlToSheet(rowNumber, officialUrl) {
-  return postJsonToAppsScript(
-    {
-      row: rowNumber,
-      officialUrl: officialUrl,
-    },
+  // Apps Script Web App 會將 POST 302 轉址至 googleusercontent。
+  // 轉址後重送 POST 會得到 405，因此此回寫固定改用 GET。
+  const url = new URL(GOOGLE_SCRIPT_BASE_URL);
+  url.searchParams.set('sheet', SHEET_NAME);
+  url.searchParams.set('action', 'saveOfficialUrl');
+  url.searchParams.set('row', String(rowNumber));
+  url.searchParams.set('officialUrl', String(officialUrl));
+
+  const result = await getJsonFromUrl(
+    url.toString(),
     '回寫 I 欄 officialUrl'
   );
+
+  if (!result || result.success !== true) {
+    throw new Error(
+      `回寫 I 欄 officialUrl 失敗：${JSON.stringify(result)}`
+    );
+  }
+
+  return result;
 }
 
 async function markAsPublishedOnSheet(rowNumber) {
-  return postJsonToAppsScript(
-    {
-      row: rowNumber,
-    },
+  // 同上：G欄 published 與 A2 指標一起由 GAS 的 GET action 寫入。
+  const url = new URL(GOOGLE_SCRIPT_BASE_URL);
+  url.searchParams.set('sheet', SHEET_NAME);
+  url.searchParams.set('action', 'markPublished');
+  url.searchParams.set('row', String(rowNumber));
+
+  const result = await getJsonFromUrl(
+    url.toString(),
     '回填 published'
   );
+
+  if (!result || result.success !== true) {
+    throw new Error(
+      `回填 published 失敗：${JSON.stringify(result)}`
+    );
+  }
+
+  return result;
 }
 
 function getSafePostCount(value) {
